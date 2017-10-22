@@ -1,8 +1,6 @@
-# Strscan
+# StringScanner
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/strscan`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+StringScanner provides for lexical scanning operations on a String.
 
 ## Installation
 
@@ -22,7 +20,28 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```
+s = StringScanner.new('This is an example string')
+s.eos?               # -> false
+
+p s.scan(/\w+/)      # -> "This"
+p s.scan(/\w+/)      # -> nil
+p s.scan(/\s+/)      # -> " "
+p s.scan(/\s+/)      # -> nil
+p s.scan(/\w+/)      # -> "is"
+s.eos?               # -> false
+
+p s.scan(/\s+/)      # -> " "
+p s.scan(/\w+/)      # -> "an"
+p s.scan(/\s+/)      # -> " "
+p s.scan(/\w+/)      # -> "example"
+p s.scan(/\s+/)      # -> " "
+p s.scan(/\w+/)      # -> "string"
+s.eos?               # -> true
+
+p s.scan(/\s+/)      # -> nil
+p s.scan(/\w+/)      # -> nil
+```
 
 ## Development
 
@@ -32,7 +51,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/hsbt/strscan.
+Bug reports and pull requests are welcome on GitHub at https://github.com/ruby/strscan.
 
 
 ## License
