@@ -1,5 +1,7 @@
 # StringScanner
 
+[![Build Status](https://travis-ci.org/ruby/strscan.svg?branch=master)](https://travis-ci.org/ruby/strscan)
+
 StringScanner provides for lexical scanning operations on a String.
 
 ## Installation
