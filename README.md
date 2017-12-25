@@ -22,7 +22,7 @@ Or install it yourself as:
 
 ## Usage
 
-```
+```ruby
 s = StringScanner.new('This is an example string')
 s.eos?               # -> false
 
