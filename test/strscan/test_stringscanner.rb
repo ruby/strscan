@@ -282,6 +282,22 @@ class TestStringScanner < Test::Unit::TestCase
     assert_equal "", s.scan(//)
   end
 
+  def test_scan_string
+    s = StringScanner.new('stra strb strc')
+    assert_equal 'str', s.scan('str')
+    assert_equal 'str', s[0]
+    assert_equal 3, s.pos
+    assert_equal false, s.tainted?
+    assert_equal 'a ', s.scan('a ')
+
+    str = 'stra strb strc'.dup
+    str.taint
+    s = StringScanner.new(str, false)
+    matched = s.scan('str')
+    assert_equal 'str', matched
+    assert_equal true, matched.tainted?
+  end
+
   def test_skip
     s = StringScanner.new('stra strb strc', true)
     assert_equal 4, s.skip(/\w+/)
@@ -367,8 +383,10 @@ class TestStringScanner < Test::Unit::TestCase
     assert_equal false, s.matched.tainted?
     s.scan(/\s+/)
     assert_equal ' ', s.matched
+    s.scan('st')
+    assert_equal 'st', s.matched
     s.scan(/\w+/)
-    assert_equal 'strb', s.matched
+    assert_equal 'rb', s.matched
     s.scan(/\s+/)
     assert_equal ' ', s.matched
     s.scan(/\w+/)
@@ -483,7 +501,7 @@ class TestStringScanner < Test::Unit::TestCase
     s.skip(/\s/)
     assert_equal 'a', s.pre_match
     assert_equal false, s.pre_match.tainted?
-    s.scan(/\w/)
+    s.scan('b')
     assert_equal 'a ', s.pre_match
     s.scan_until(/c/)
     assert_equal 'a b ', s.pre_match
@@ -513,7 +531,7 @@ class TestStringScanner < Test::Unit::TestCase
     assert_equal ' b c d e', s.post_match
     s.skip(/\s/)
     assert_equal 'b c d e', s.post_match
-    s.scan(/\w/)
+    s.scan('b')
     assert_equal ' c d e', s.post_match
     s.scan_until(/c/)
     assert_equal ' d e', s.post_match
@@ -589,6 +607,20 @@ class TestStringScanner < Test::Unit::TestCase
     assert_equal(Encoding::EUC_JP, ss.scan(/./e).encoding)
   end
 
+  def test_encoding_string
+    str = "\xA1\xA2".dup.force_encoding("euc-jp")
+    ss = StringScanner.new(str)
+    assert_equal(str.dup, ss.scan(str.dup))
+  end
+
+  def test_invalid_encoding_string
+    str = "\xA1\xA2".dup.force_encoding("euc-jp")
+    ss = StringScanner.new(str)
+    assert_raise(Encoding::CompatibilityError) do
+      ss.scan(str.encode("UTF-8"))
+    end
+  end
+
   def test_generic_regexp
     ss = StringScanner.new("\xA1\xA2".dup.force_encoding("euc-jp"))
     t = ss.scan(/./)
@@ -641,6 +673,13 @@ class TestStringScanner < Test::Unit::TestCase
     assert_equal(2, s.exist?(/s/))
     assert_equal(4, s.pos)
     assert_equal(nil, s.exist?(/e/))
+  end
+
+  def test_exist_p_string
+    s = StringScanner.new("test string")
+    assert_raise(TypeError) do
+      s.exist?(" ")
+    end
   end
 
   def test_skip_until
