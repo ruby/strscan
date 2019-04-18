@@ -11,3 +11,10 @@ require 'rake/extensiontask'
 Rake::ExtensionTask.new("strscan")
 
 task :default => [:compile, :test]
+
+desc "Run benchmark"
+task :benchmark do
+  ruby("-S",
+       "benchmark-driver",
+       "benchmark/scan.yaml")
+end

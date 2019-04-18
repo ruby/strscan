@@ -16,4 +16,5 @@ Gem::Specification.new do |s|
   s.license = "BSD-2-Clause"
 
   s.add_development_dependency "rake-compiler"
+  s.add_development_dependency "benchmark-driver"
 end

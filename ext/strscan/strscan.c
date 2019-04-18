@@ -447,15 +447,18 @@ strscan_set_pos(VALUE self, VALUE v)
 }
 
 static VALUE
-strscan_do_scan(VALUE self, VALUE regex, int succptr, int getstr, int headonly)
+strscan_do_scan(VALUE self, VALUE pattern, int succptr, int getstr, int headonly)
 {
-    regex_t *rb_reg_prepare_re(VALUE re, VALUE str);
     struct strscanner *p;
-    regex_t *re;
-    long ret;
-    int tmpreg;
 
-    Check_Type(regex, T_REGEXP);
+    if (headonly) {
+        if (!RB_TYPE_P(pattern, T_REGEXP)) {
+            StringValue(pattern);
+        }
+    }
+    else {
+        Check_Type(pattern, T_REGEXP);
+    }
     GET_SCANNER(self, p);
 
     CLEAR_MATCH_STATUS(p);
@@ -463,37 +466,55 @@ strscan_do_scan(VALUE self, VALUE regex, int succptr, int getstr, int headonly)
         return Qnil;
     }
 
-    p->regex = regex;
-    re = rb_reg_prepare_re(regex, p->str);
-    tmpreg = re != RREGEXP_PTR(regex);
-    if (!tmpreg) RREGEXP(regex)->usecnt++;
+    if (RB_TYPE_P(pattern, T_REGEXP)) {
+        regex_t *rb_reg_prepare_re(VALUE re, VALUE str);
+        regex_t *re;
+        long ret;
+        int tmpreg;
 
-    if (headonly) {
-        ret = onig_match(re, (UChar* )CURPTR(p),
-                         (UChar* )(CURPTR(p) + S_RESTLEN(p)),
-                         (UChar* )CURPTR(p), &(p->regs), ONIG_OPTION_NONE);
-    }
-    else {
-        ret = onig_search(re,
-                          (UChar* )CURPTR(p), (UChar* )(CURPTR(p) + S_RESTLEN(p)),
-                          (UChar* )CURPTR(p), (UChar* )(CURPTR(p) + S_RESTLEN(p)),
-                          &(p->regs), ONIG_OPTION_NONE);
-    }
-    if (!tmpreg) RREGEXP(regex)->usecnt--;
-    if (tmpreg) {
-        if (RREGEXP(regex)->usecnt) {
-            onig_free(re);
+        p->regex = pattern;
+        re = rb_reg_prepare_re(pattern, p->str);
+        tmpreg = re != RREGEXP_PTR(pattern);
+        if (!tmpreg) RREGEXP(pattern)->usecnt++;
+
+        if (headonly) {
+            ret = onig_match(re, (UChar* )CURPTR(p),
+                             (UChar* )(CURPTR(p) + S_RESTLEN(p)),
+                             (UChar* )CURPTR(p), &(p->regs), ONIG_OPTION_NONE);
         }
         else {
-            onig_free(RREGEXP_PTR(regex));
-            RREGEXP_PTR(regex) = re;
+            ret = onig_search(re,
+                              (UChar* )CURPTR(p), (UChar* )(CURPTR(p) + S_RESTLEN(p)),
+                              (UChar* )CURPTR(p), (UChar* )(CURPTR(p) + S_RESTLEN(p)),
+                              &(p->regs), ONIG_OPTION_NONE);
+        }
+        if (!tmpreg) RREGEXP(pattern)->usecnt--;
+        if (tmpreg) {
+            if (RREGEXP(pattern)->usecnt) {
+                onig_free(re);
+            }
+            else {
+                onig_free(RREGEXP_PTR(pattern));
+                RREGEXP_PTR(pattern) = re;
+            }
+        }
+
+        if (ret == -2) rb_raise(ScanError, "regexp buffer overflow");
+        if (ret < 0) {
+            /* not matched */
+            return Qnil;
         }
     }
-
-    if (ret == -2) rb_raise(ScanError, "regexp buffer overflow");
-    if (ret < 0) {
-        /* not matched */
-        return Qnil;
+    else {
+        rb_enc_check(p->str, pattern);
+        if (S_RESTLEN(p) < RSTRING_LEN(pattern)) {
+            return Qnil;
+        }
+        if (memcmp(CURPTR(p), RSTRING_PTR(pattern), RSTRING_LEN(pattern)) != 0) {
+            return Qnil;
+        }
+        onig_region_clear(&(p->regs));
+        onig_region_set(&(p->regs), 0, 0, RSTRING_LEN(pattern));
     }
 
     MATCHED(p);
@@ -520,7 +541,8 @@ strscan_do_scan(VALUE self, VALUE regex, int succptr, int getstr, int headonly)
  *   p s.scan(/\w+/)   # -> "test"
  *   p s.scan(/\w+/)   # -> nil
  *   p s.scan(/\s+/)   # -> " "
- *   p s.scan(/\w+/)   # -> "string"
+ *   p s.scan("str")   # -> "str"
+ *   p s.scan(/\w+/)   # -> "ing"
  *   p s.scan(/./)     # -> nil
  *
  */
@@ -539,6 +561,7 @@ strscan_scan(VALUE self, VALUE re)
  *   s = StringScanner.new('test string')
  *   p s.match?(/\w+/)   # -> 4
  *   p s.match?(/\w+/)   # -> 4
+ *   p s.match?("test")  # -> 4
  *   p s.match?(/\s+/)   # -> nil
  */
 static VALUE
@@ -560,7 +583,8 @@ strscan_match_p(VALUE self, VALUE re)
  *   p s.skip(/\w+/)   # -> 4
  *   p s.skip(/\w+/)   # -> nil
  *   p s.skip(/\s+/)   # -> 1
- *   p s.skip(/\w+/)   # -> 6
+ *   p s.skip("st")    # -> 2
+ *   p s.skip(/\w+/)   # -> 4
  *   p s.skip(/./)     # -> nil
  *
  */
