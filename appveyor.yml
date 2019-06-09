@@ -21,7 +21,7 @@ install:
   - ruby -v
   - bundle install
 
-build:
+build_script:
   - bundle exec compile
 
 test_script:
