@@ -478,13 +478,13 @@ strscan_do_scan(VALUE self, VALUE pattern, int succptr, int getstr, int headonly
         if (!tmpreg) RREGEXP(pattern)->usecnt++;
 
         if (headonly) {
-            ret = onig_match(re, (UChar* )CURPTR(p),
+            ret = onig_match(re, (UChar* )S_PBEG(p),
                              (UChar* )(CURPTR(p) + S_RESTLEN(p)),
                              (UChar* )CURPTR(p), &(p->regs), ONIG_OPTION_NONE);
         }
         else {
             ret = onig_search(re,
-                              (UChar* )CURPTR(p), (UChar* )(CURPTR(p) + S_RESTLEN(p)),
+                              (UChar* )S_PBEG(p), (UChar* )(CURPTR(p) + S_RESTLEN(p)),
                               (UChar* )CURPTR(p), (UChar* )(CURPTR(p) + S_RESTLEN(p)),
                               &(p->regs), ONIG_OPTION_NONE);
         }
