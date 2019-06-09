@@ -22,7 +22,7 @@ install:
   - bundle install
 
 build_script:
-  - bundle exec compile
+  - bundle exec rake compile
 
 test_script:
-  - bundle exec rake
+  - bundle exec rake test
