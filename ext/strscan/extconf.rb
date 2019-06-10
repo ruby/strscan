@@ -1,4 +1,4 @@
 # frozen_string_literal: true
 require 'mkmf'
-$INCFLAGS << " -I$(top_srcdir)"
+$INCFLAGS << " -I$(top_srcdir) -fPCI"
 create_makefile 'strscan'
