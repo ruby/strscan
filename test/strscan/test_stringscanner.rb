@@ -320,8 +320,8 @@ class TestStringScanner < Test::Unit::TestCase
     assert_equal 0, s.skip(//)
 
     s = StringScanner.new("a\nb")
-    assert_equal 2, ss.skip(/a\n/)
-    assert_nil      ss.skip(/\Ab/)
+    assert_equal 2, s.skip(/a\n/)
+    assert_nil      s.skip(/\Ab/)
   end
 
   def test_getch
