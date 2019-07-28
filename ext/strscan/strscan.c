@@ -478,13 +478,13 @@ strscan_do_scan(VALUE self, VALUE pattern, int succptr, int getstr, int headonly
         if (!tmpreg) RREGEXP(pattern)->usecnt++;
 
         if (headonly) {
-            ret = onig_match(re, (UChar* )CURPTR(p),
+            ret = onig_match(re, (UChar* )S_PBEG(p),
                              (UChar* )(CURPTR(p) + S_RESTLEN(p)),
                              (UChar* )CURPTR(p), &(p->regs), ONIG_OPTION_NONE);
         }
         else {
             ret = onig_search(re,
-                              (UChar* )CURPTR(p), (UChar* )(CURPTR(p) + S_RESTLEN(p)),
+                              (UChar* )S_PBEG(p), (UChar* )(CURPTR(p) + S_RESTLEN(p)),
                               (UChar* )CURPTR(p), (UChar* )(CURPTR(p) + S_RESTLEN(p)),
                               &(p->regs), ONIG_OPTION_NONE);
         }
@@ -514,19 +514,23 @@ strscan_do_scan(VALUE self, VALUE pattern, int succptr, int getstr, int headonly
             return Qnil;
         }
         onig_region_clear(&(p->regs));
-        onig_region_set(&(p->regs), 0, 0, RSTRING_LEN(pattern));
+        onig_region_set(&(p->regs), 0, p->curr, p->curr + RSTRING_LEN(pattern));
     }
 
     MATCHED(p);
     p->prev = p->curr;
+
     if (succptr) {
-        p->curr += p->regs.end[0];
+        p->curr = p->regs.end[0];
     }
-    if (getstr) {
-        return extract_beg_len(p, p->prev, p->regs.end[0]);
-    }
-    else {
-        return INT2FIX(p->regs.end[0]);
+    {
+      long length = p->regs.end[0] - p->prev;
+      if (getstr) {
+        return extract_beg_len(p, p->prev, length);
+      }
+      else {
+        return INT2FIX(length);
+      }
     }
 }
 
@@ -728,7 +732,7 @@ static void
 adjust_registers_to_matched(struct strscanner *p)
 {
     onig_region_clear(&(p->regs));
-    onig_region_set(&(p->regs), 0, 0, (int)(p->curr - p->prev));
+    onig_region_set(&(p->regs), 0, (int)p->prev, (int)p->curr);
 }
 
 /*
@@ -762,8 +766,7 @@ strscan_getch(VALUE self)
     p->curr += len;
     MATCHED(p);
     adjust_registers_to_matched(p);
-    return extract_range(p, p->prev + p->regs.beg[0],
-                            p->prev + p->regs.end[0]);
+    return extract_range(p, p->regs.beg[0], p->regs.end[0]);
 }
 
 /*
@@ -796,8 +799,7 @@ strscan_get_byte(VALUE self)
     p->curr++;
     MATCHED(p);
     adjust_registers_to_matched(p);
-    return extract_range(p, p->prev + p->regs.beg[0],
-                            p->prev + p->regs.end[0]);
+    return extract_range(p, p->regs.beg[0], p->regs.end[0]);
 }
 
 /*
@@ -975,8 +977,7 @@ strscan_matched(VALUE self)
 
     GET_SCANNER(self, p);
     if (! MATCHED_P(p)) return Qnil;
-    return extract_range(p, p->prev + p->regs.beg[0],
-                            p->prev + p->regs.end[0]);
+    return extract_range(p, p->regs.beg[0], p->regs.end[0]);
 }
 
 /*
@@ -1072,8 +1073,7 @@ strscan_aref(VALUE self, VALUE idx)
     if (i >= p->regs.num_regs) return Qnil;
     if (p->regs.beg[i] == -1)  return Qnil;
 
-    return extract_range(p, p->prev + p->regs.beg[i],
-                            p->prev + p->regs.end[i]);
+    return extract_range(p, p->regs.beg[i], p->regs.end[i]);
 }
 
 /*
@@ -1178,7 +1178,7 @@ strscan_pre_match(VALUE self)
 
     GET_SCANNER(self, p);
     if (! MATCHED_P(p)) return Qnil;
-    return extract_range(p, 0, p->prev + p->regs.beg[0]);
+    return extract_range(p, 0, p->regs.beg[0]);
 }
 
 /*
@@ -1197,7 +1197,7 @@ strscan_post_match(VALUE self)
 
     GET_SCANNER(self, p);
     if (! MATCHED_P(p)) return Qnil;
-    return extract_range(p, p->prev + p->regs.end[0], S_LEN(p));
+    return extract_range(p, p->regs.end[0], S_LEN(p));
 }
 
 /*

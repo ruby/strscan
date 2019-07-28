@@ -320,6 +320,13 @@ class TestStringScanner < Test::Unit::TestCase
     assert_equal 0, s.skip(//)
   end
 
+  def test_skip_with_anchor
+    s = StringScanner.new("a\nb")
+    assert_equal 2, s.skip(/a\n/)
+    assert_nil      s.skip(/\Ab/)
+    assert_equal 1, s.skip(/^b/)
+  end
+
   def test_getch
     s = StringScanner.new('abcde')
     assert_equal 'a', s.getch
