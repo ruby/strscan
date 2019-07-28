@@ -450,7 +450,6 @@ static VALUE
 strscan_do_scan(VALUE self, VALUE pattern, int succptr, int getstr, int headonly)
 {
     struct strscanner *p;
-    long moved;
 
     if (headonly) {
         if (!RB_TYPE_P(pattern, T_REGEXP)) {
@@ -520,16 +519,18 @@ strscan_do_scan(VALUE self, VALUE pattern, int succptr, int getstr, int headonly
 
     MATCHED(p);
     p->prev = p->curr;
-    moved = p->regs.end[0] - p->prev;
 
     if (succptr) {
         p->curr = p->regs.end[0];
     }
-    if (getstr) {
-        return extract_beg_len(p, p->prev, moved);
-    }
-    else {
-        return INT2FIX(moved);
+    {
+      long length = p->regs.end[0] - p->prev;
+      if (getstr) {
+        return extract_beg_len(p, p->prev, length);
+      }
+      else {
+        return INT2FIX(length);
+      }
     }
 }
 
