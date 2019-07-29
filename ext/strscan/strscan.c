@@ -524,13 +524,13 @@ strscan_do_scan(VALUE self, VALUE pattern, int succptr, int getstr, int headonly
         p->curr = p->regs.end[0];
     }
     {
-      long length = p->regs.end[0] - p->prev;
-      if (getstr) {
-        return extract_beg_len(p, p->prev, length);
-      }
-      else {
-        return INT2FIX(length);
-      }
+        long length = p->regs.end[0] - p->prev;
+        if (getstr) {
+            return extract_beg_len(p, p->prev, length);
+        }
+        else {
+            return INT2FIX(length);
+        }
     }
 }
 
