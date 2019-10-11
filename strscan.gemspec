@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 Gem::Specification.new do |s|
   s.name = "strscan"
-  s.version = '1.0.0'
+  s.version = '1.0.1'
   s.summary = "Provides lexical scanning operations on a String."
   s.description = "Provides lexical scanning operations on a String."
 
