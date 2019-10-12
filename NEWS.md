@@ -1,6 +1,6 @@
 # News
 
-## 1.0.1 - 2019-10-12
+## 1.0.2 - 2019-10-13
 
 ### Improvements
 
@@ -13,15 +13,20 @@
   * Added tests for anchors.
     [GitHub#9][Patch by Jeanine Adkisson]
 
-### Fixes
+  * Added support for fixed anchor mode. In this mode, `\A` matches to
+    the beginning of source string instead of the current
+    position. `^` matches to the begging of line instead of the
+    current position.
 
-  * Fixed a bug that `\A` and `^` are always matched. Now, `\A` is
-    matched to the beginning of string and `^` is matched to the
-    beginning of the line as usual.
+    You can use fixed anchor mode by passing `fixed_anchor: true`
+    option to `StringScanner.new` such as `StringScanner.new(string,
+    fixed_anchor: true)`.
 
-    Note that this fix causes backward incompatibility.
+    `StringScanner#fixed_anchor?` is also added to get whether fixed
+    anchor mode is used or not.
 
     [GitHub#6][Patch by Michael Camilleri]
+    [GitHub#10]
 
 ### Thanks
 
