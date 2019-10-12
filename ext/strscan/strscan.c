@@ -13,6 +13,8 @@
 #include "ruby/encoding.h"
 #include "regint.h"
 
+#include <stdbool.h>
+
 #define STRSCAN_VERSION "1.0.2"
 
 /* =======================================================================
@@ -41,6 +43,9 @@ struct strscanner
 
     /* regexp used for last scan */
     VALUE regex;
+
+    /* anchor mode */
+    bool fixed_anchor_p;
 };
 
 #define MATCHED_P(s)          ((s)->flags & FLAG_MATCHED)
@@ -208,19 +213,41 @@ strscan_s_allocate(VALUE klass)
 }
 
 /*
- * call-seq: StringScanner.new(string, dup = false)
+ * call-seq:
+ *    StringScanner.new(string, fixed_anchor: false)
+ *    StringScanner.new(string, dup = false)
  *
  * Creates a new StringScanner object to scan over the given +string+.
+ *
+ * If +fixed_anchor+ is +true+, +\A+ always matches the beginning of
+ * the string. Otherwise, +\A+ always matches the current position.
+ *
  * +dup+ argument is obsolete and not used now.
  */
 static VALUE
 strscan_initialize(int argc, VALUE *argv, VALUE self)
 {
     struct strscanner *p;
-    VALUE str, need_dup;
+    VALUE str, options;
 
     p = check_strscan(self);
-    rb_scan_args(argc, argv, "11", &str, &need_dup);
+    rb_scan_args(argc, argv, "11", &str, &options);
+    options = rb_check_hash_type(options);
+    if (!NIL_P(options)) {
+        VALUE fixed_anchor;
+        ID keyword_ids[1];
+        keyword_ids[0] = rb_intern("fixed_anchor");
+        rb_get_kwargs(options, keyword_ids, 0, 1, &fixed_anchor);
+        if (fixed_anchor == Qundef) {
+            p->fixed_anchor_p = false;
+        }
+        else {
+            p->fixed_anchor_p = RTEST(fixed_anchor);
+        }
+    }
+    else {
+        p->fixed_anchor_p = false;
+    }
     StringValue(str);
     p->str = str;
 
@@ -446,6 +473,66 @@ strscan_set_pos(VALUE self, VALUE v)
     return INT2NUM(i);
 }
 
+static inline UChar *
+match_target(struct strscanner *p)
+{
+    if (p->fixed_anchor_p) {
+        return (UChar *)S_PBEG(p);
+    }
+    else
+    {
+        return (UChar *)CURPTR(p);
+    }
+}
+
+static inline void
+set_registers(struct strscanner *p, size_t length)
+{
+    onig_region_clear(&(p->regs));
+    if (p->fixed_anchor_p) {
+        onig_region_set(&(p->regs), 0, p->curr, p->curr + length);
+    }
+    else
+    {
+        onig_region_set(&(p->regs), 0, 0, length);
+    }
+}
+
+static inline void
+succ(struct strscanner *p)
+{
+    if (p->fixed_anchor_p) {
+        p->curr = p->regs.end[0];
+    }
+    else
+    {
+        p->curr += p->regs.end[0];
+    }
+}
+
+static inline long
+last_match_length(struct strscanner *p)
+{
+    if (p->fixed_anchor_p) {
+        return p->regs.end[0] - p->prev;
+    }
+    else
+    {
+        return p->regs.end[0];
+    }
+}
+
+static inline long
+adjust_register_position(struct strscanner *p, long position)
+{
+    if (p->fixed_anchor_p) {
+        return position;
+    }
+    else {
+        return p->prev + position;
+    }
+}
+
 static VALUE
 strscan_do_scan(VALUE self, VALUE pattern, int succptr, int getstr, int headonly)
 {
@@ -478,15 +565,21 @@ strscan_do_scan(VALUE self, VALUE pattern, int succptr, int getstr, int headonly
         if (!tmpreg) RREGEXP(pattern)->usecnt++;
 
         if (headonly) {
-            ret = onig_match(re, (UChar* )S_PBEG(p),
+            ret = onig_match(re,
+                             match_target(p),
                              (UChar* )(CURPTR(p) + S_RESTLEN(p)),
-                             (UChar* )CURPTR(p), &(p->regs), ONIG_OPTION_NONE);
+                             (UChar* )CURPTR(p),
+                             &(p->regs),
+                             ONIG_OPTION_NONE);
         }
         else {
             ret = onig_search(re,
-                              (UChar* )S_PBEG(p), (UChar* )(CURPTR(p) + S_RESTLEN(p)),
-                              (UChar* )CURPTR(p), (UChar* )(CURPTR(p) + S_RESTLEN(p)),
-                              &(p->regs), ONIG_OPTION_NONE);
+                              match_target(p),
+                              (UChar* )(CURPTR(p) + S_RESTLEN(p)),
+                              (UChar* )CURPTR(p),
+                              (UChar* )(CURPTR(p) + S_RESTLEN(p)),
+                              &(p->regs),
+                              ONIG_OPTION_NONE);
         }
         if (!tmpreg) RREGEXP(pattern)->usecnt--;
         if (tmpreg) {
@@ -513,18 +606,17 @@ strscan_do_scan(VALUE self, VALUE pattern, int succptr, int getstr, int headonly
         if (memcmp(CURPTR(p), RSTRING_PTR(pattern), RSTRING_LEN(pattern)) != 0) {
             return Qnil;
         }
-        onig_region_clear(&(p->regs));
-        onig_region_set(&(p->regs), 0, p->curr, p->curr + RSTRING_LEN(pattern));
+        set_registers(p, RSTRING_LEN(pattern));
     }
 
     MATCHED(p);
     p->prev = p->curr;
 
     if (succptr) {
-        p->curr = p->regs.end[0];
+        succ(p);
     }
     {
-        long length = p->regs.end[0] - p->prev;
+        const long length = last_match_length(p);
         if (getstr) {
             return extract_beg_len(p, p->prev, length);
         }
@@ -732,7 +824,12 @@ static void
 adjust_registers_to_matched(struct strscanner *p)
 {
     onig_region_clear(&(p->regs));
-    onig_region_set(&(p->regs), 0, (int)p->prev, (int)p->curr);
+    if (p->fixed_anchor_p) {
+        onig_region_set(&(p->regs), 0, (int)p->prev, (int)p->curr);
+    }
+    else {
+        onig_region_set(&(p->regs), 0, 0, (int)(p->curr - p->prev));
+    }
 }
 
 /*
@@ -766,7 +863,9 @@ strscan_getch(VALUE self)
     p->curr += len;
     MATCHED(p);
     adjust_registers_to_matched(p);
-    return extract_range(p, p->regs.beg[0], p->regs.end[0]);
+    return extract_range(p,
+                         adjust_register_position(p, p->regs.beg[0]),
+                         adjust_register_position(p, p->regs.end[0]));
 }
 
 /*
@@ -799,7 +898,9 @@ strscan_get_byte(VALUE self)
     p->curr++;
     MATCHED(p);
     adjust_registers_to_matched(p);
-    return extract_range(p, p->regs.beg[0], p->regs.end[0]);
+    return extract_range(p,
+                         adjust_register_position(p, p->regs.beg[0]),
+                         adjust_register_position(p, p->regs.end[0]));
 }
 
 /*
@@ -977,7 +1078,9 @@ strscan_matched(VALUE self)
 
     GET_SCANNER(self, p);
     if (! MATCHED_P(p)) return Qnil;
-    return extract_range(p, p->regs.beg[0], p->regs.end[0]);
+    return extract_range(p,
+                         adjust_register_position(p, p->regs.beg[0]),
+                         adjust_register_position(p, p->regs.end[0]));
 }
 
 /*
@@ -1073,7 +1176,9 @@ strscan_aref(VALUE self, VALUE idx)
     if (i >= p->regs.num_regs) return Qnil;
     if (p->regs.beg[i] == -1)  return Qnil;
 
-    return extract_range(p, p->regs.beg[i], p->regs.end[i]);
+    return extract_range(p,
+                         adjust_register_position(p, p->regs.beg[i]),
+                         adjust_register_position(p, p->regs.end[i]));
 }
 
 /*
@@ -1122,8 +1227,9 @@ strscan_captures(VALUE self)
     new_ary  = rb_ary_new2(num_regs);
 
     for (i = 1; i < num_regs; i++) {
-        VALUE str = extract_range(p, p->prev + p->regs.beg[i],
-                                     p->prev + p->regs.end[i]);
+        VALUE str = extract_range(p,
+                                  adjust_register_position(p, p->regs.beg[i]),
+                                  adjust_register_position(p, p->regs.end[i]));
         rb_ary_push(new_ary, str);
     }
 
@@ -1178,7 +1284,9 @@ strscan_pre_match(VALUE self)
 
     GET_SCANNER(self, p);
     if (! MATCHED_P(p)) return Qnil;
-    return extract_range(p, 0, p->regs.beg[0]);
+    return extract_range(p,
+                         0,
+                         adjust_register_position(p, p->regs.beg[0]));
 }
 
 /*
@@ -1197,7 +1305,9 @@ strscan_post_match(VALUE self)
 
     GET_SCANNER(self, p);
     if (! MATCHED_P(p)) return Qnil;
-    return extract_range(p, p->regs.end[0], S_LEN(p));
+    return extract_range(p,
+                         adjust_register_position(p, p->regs.end[0]),
+                         S_LEN(p));
 }
 
 /*
@@ -1324,6 +1434,23 @@ inspect2(struct strscanner *p)
 	str = rb_str_new(CURPTR(p), len);
     }
     return rb_str_dump(str);
+}
+
+/*
+ * call-seq:
+ *    scanner.fixed_anchor? -> true or false
+ *
+ * Whether +scanner+ uses fixed anchor mode or not.
+ *
+ * If fixed anchor mode is used, +\A+ always matches the beginning of
+ * the string. Otherwise, +\A+ always matches the current position.
+ */
+static VALUE
+strscan_fixed_anchor_p(VALUE self)
+{
+    struct strscanner *p;
+    p = check_strscan(self);
+    return p->fixed_anchor_p ? Qtrue : Qfalse;
 }
 
 /* =======================================================================
@@ -1512,4 +1639,6 @@ Init_strscan(void)
     rb_define_method(StringScanner, "restsize",    strscan_restsize,    0);
 
     rb_define_method(StringScanner, "inspect",     strscan_inspect,     0);
+
+    rb_define_method(StringScanner, "fixed_anchor?", strscan_fixed_anchor_p, 0);
 }
