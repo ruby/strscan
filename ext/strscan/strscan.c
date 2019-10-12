@@ -13,7 +13,7 @@
 #include "ruby/encoding.h"
 #include "regint.h"
 
-#define STRSCAN_VERSION "0.7.0"
+#define STRSCAN_VERSION "1.0.2"
 
 /* =======================================================================
                          Data Type Definitions
