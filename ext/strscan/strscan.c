@@ -15,7 +15,7 @@
 
 #include <stdbool.h>
 
-#define STRSCAN_VERSION "1.0.2"
+#define STRSCAN_VERSION "1.0.3"
 
 /* =======================================================================
                          Data Type Definitions
