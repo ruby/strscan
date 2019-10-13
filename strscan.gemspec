@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.description = "Provides lexical scanning operations on a String."
 
   s.require_path = %w{lib}
-  s.files = %w{ext/strscan/extconf.rb ext/strscan/strscan.c ext/strscan/regenc.h ext/strscan/regint.h}
+  s.files = %w{ext/strscan/extconf.rb ext/strscan/strscan.c}
   s.extensions = %w{ext/strscan/extconf.rb}
   s.required_ruby_version = ">= 2.4.0"
 
