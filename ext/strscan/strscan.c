@@ -11,7 +11,10 @@
 #include "ruby/ruby.h"
 #include "ruby/re.h"
 #include "ruby/encoding.h"
-#include "regint.h"
+
+#ifdef HAVE_ONIG_REGION_MEMSIZE
+extern size_t onig_region_memsize(const struct re_registers *regs);
+#endif
 
 #include <stdbool.h>
 
@@ -191,7 +194,11 @@ static size_t
 strscan_memsize(const void *ptr)
 {
     const struct strscanner *p = ptr;
-    return sizeof(*p) - sizeof(p->regs) + onig_region_memsize(&p->regs);
+    size_t size = sizeof(*p) - sizeof(p->regs);
+#ifdef HAVE_ONIG_REGION_MEMSIZE
+    size += onig_region_memsize(&p->regs);
+#endif
+    return size;
 }
 
 static const rb_data_type_t strscanner_type = {
