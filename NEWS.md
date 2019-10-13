@@ -1,5 +1,21 @@
 # News
 
+## 1.0.3 - 2019-10-14
+
+### Improvements
+
+  * Stopped depending on `regint.h`.
+
+### Fixes
+
+  * Fixed a bug that a build flag is ignored when this is installed by
+    `gem install`.
+    [GitHub#7][Reported by Michael Camilleri]
+
+### Thanks
+
+  * Michael Camilleri
+
 ## 1.0.2 - 2019-10-13
 
 ### Improvements
