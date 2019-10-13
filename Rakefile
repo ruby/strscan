@@ -1,16 +1,15 @@
 require "bundler/gem_tasks"
 require "rake/testtask"
 
-Rake::TestTask.new(:test) do |t|
-  t.libs << "test" << "test/lib"
-  t.libs << "lib"
-  t.test_files = FileList['test/**/test_*.rb']
-end
+task :default => [:compile, :test]
 
 require 'rake/extensiontask'
 Rake::ExtensionTask.new("strscan")
 
-task :default => [:compile, :test]
+desc "Run test"
+task :test do
+  ruby("run-test.rb")
+end
 
 desc "Run benchmark"
 task :benchmark do
