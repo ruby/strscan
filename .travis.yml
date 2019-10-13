@@ -14,6 +14,7 @@ matrix:
     - name: "gem"
       rvm: 2.6
       install:
+        - gem install rake-compiler
         - rake install
       script:
         - mkdir -p tmp
