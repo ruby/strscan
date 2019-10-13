@@ -12,6 +12,10 @@
 #include "ruby/re.h"
 #include "ruby/encoding.h"
 
+#ifdef RUBY_EXTCONF_H
+#  include RUBY_EXTCONF_H
+#endif
+
 #ifdef HAVE_ONIG_REGION_MEMSIZE
 extern size_t onig_region_memsize(const struct re_registers *regs);
 #endif
