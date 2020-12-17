@@ -1568,6 +1568,10 @@ strscan_fixed_anchor_p(VALUE self)
 void
 Init_strscan(void)
 {
+#ifdef HAVE_RB_EXT_RACTOR_SAFE
+    rb_ext_ractor_safe(true);
+#endif
+
 #undef rb_intern
     ID id_scanerr = rb_intern("ScanError");
     VALUE tmp;
