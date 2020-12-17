@@ -8,6 +8,7 @@ Rake::ExtensionTask.new("strscan")
 
 desc "Run test"
 task :test do
+  ENV["RUBYOPT"] = "-Ilib"
   ruby("run-test.rb")
 end
 
