@@ -8,7 +8,7 @@ Rake::ExtensionTask.new("strscan")
 
 desc "Run test"
 task :test do
-  ENV["RUBYOPT"] = "-Ilib:test/lib -rbundler/setup -rhelper"
+  ENV["RUBYOPT"] = "-Ilib -Itest/lib -rbundler/setup -rhelper"
   ruby("run-test.rb")
 end
 
