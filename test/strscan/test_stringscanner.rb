@@ -206,6 +206,19 @@ class TestStringScanner < Test::Unit::TestCase
     assert_equal 11, s.charpos
   end
 
+  def test_charpos_avoid_segfault
+    string = +'ruby'
+    scnanner = create_string_scanner(string)
+    pre = Module.new do
+      def byteslice(*args)
+      end
+    end
+    string.singleton_class.prepend(pre)
+    assert_raise(TypeError) do
+      scnanner.charpos
+    end
+  end
+
   def test_concat
     s = create_string_scanner('a'.dup)
     s.scan(/a/)
