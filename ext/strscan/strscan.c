@@ -450,6 +450,7 @@ strscan_get_charpos(VALUE self)
     GET_SCANNER(self, p);
 
     substr = rb_funcall(p->str, id_byteslice, 2, INT2FIX(0), LONG2NUM(p->curr));
+    Check_Type(substr, T_STRING);
 
     return rb_str_length(substr);
 }
