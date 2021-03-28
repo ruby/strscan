@@ -23,13 +23,13 @@ jobs:
         - 2.6
         - 2.5
         - 2.4
-        - debug
+        - head
         include:
         - { os: windows-latest , ruby: mingw }
         - { os: windows-latest , ruby: mswin }
         exclude:
         - { os: windows-latest , ruby: 3.0 }
-        - { os: windows-latest , ruby: debug }
+        - { os: windows-latest , ruby: head }
 
     steps:
       - uses: actions/checkout@v2
