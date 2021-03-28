@@ -214,7 +214,7 @@ class TestStringScanner < Test::Unit::TestCase
       end
     end
     string.singleton_class.prepend(pre)
-    assert_raise(TypeError) do
+    assert_nothing_raised do
       scanner.charpos
     end
   end
