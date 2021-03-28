@@ -47,5 +47,5 @@ jobs:
 
       - run: rake build
 
-      - run: gem install pkg/*.gem
+      - run: gem install --verbose --backtrace pkg/*.gem
 
