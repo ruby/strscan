@@ -208,14 +208,14 @@ class TestStringScanner < Test::Unit::TestCase
 
   def test_charpos_avoid_segfault
     string = +'ruby'
-    scnanner = create_string_scanner(string)
+    scanner = create_string_scanner(string)
     pre = Module.new do
       def byteslice(*args)
       end
     end
     string.singleton_class.prepend(pre)
     assert_raise(TypeError) do
-      scnanner.charpos
+      scanner.charpos
     end
   end
 
