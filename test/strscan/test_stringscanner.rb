@@ -206,15 +206,21 @@ class TestStringScanner < Test::Unit::TestCase
     assert_equal 11, s.charpos
   end
 
-  def test_charpos_not_use_byteslice
-    string = +'ruby'
+  def test_charpos_not_use_string_methods
+    string = +'abcädeföghi'
     scanner = create_string_scanner(string)
-    pre = Module.new do
-      def byteslice(*args)
+
+    class << string
+      EnvUtil.suppress_warning do
+        undef_method(*instance_methods)
       end
     end
-    string.singleton_class.prepend(pre)
-    assert_equal(0, scanner.charpos)
+
+    assert_equal 0, scanner.charpos
+    assert_equal "abcä", scanner.scan_until(/ä/)
+    assert_equal 4, scanner.charpos
+    assert_equal "defö", scanner.scan_until(/ö/)
+    assert_equal 8, scanner.charpos
   end
 
   def test_concat
