@@ -214,9 +214,7 @@ class TestStringScanner < Test::Unit::TestCase
       end
     end
     string.singleton_class.prepend(pre)
-    assert_nothing_raised do
-      scanner.charpos
-    end
+    assert_equal(0, scanner.charpos)
   end
 
   def test_concat
