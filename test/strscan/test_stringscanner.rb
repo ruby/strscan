@@ -206,7 +206,7 @@ class TestStringScanner < Test::Unit::TestCase
     assert_equal 11, s.charpos
   end
 
-  def test_charpos_avoid_segfault
+  def test_charpos_not_use_byteslice
     string = +'ruby'
     scanner = create_string_scanner(string)
     pre = Module.new do
