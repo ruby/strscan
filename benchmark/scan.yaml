@@ -3,7 +3,9 @@ prelude: |-
   require "strscan"
   scanner = StringScanner.new("test string")
 benchmark:
-  regexp: |
+  regexp_pattern: |
     scanner.scan(/\w/)
+  regexp_literal: |
+    scanner.scan(/test/)
   string: |
     scanner.scan("test")
