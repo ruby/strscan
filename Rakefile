@@ -15,8 +15,18 @@ namespace :version do
   end
 end
 
-require 'rake/extensiontask'
-Rake::ExtensionTask.new("strscan")
+if RUBY_ENGINE == "jruby"
+  require 'rake/javaextensiontask'
+  Rake::JavaExtensionTask.new("strscan") do |ext|
+    require 'maven/ruby/maven'
+    ext.source_version = '1.8'
+    ext.target_version = '1.8'
+    ext.ext_dir = 'ext/java'
+  end
+else
+  require 'rake/extensiontask'
+  Rake::ExtensionTask.new("strscan")
+end
 
 desc "Run test"
 task :test do
