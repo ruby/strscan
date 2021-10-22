@@ -1,5 +1,17 @@
 # News
 
+## 3.0.1 - 2021-10-23
+
+### Fixes
+
+  * Fixed a segmentation of `StringScanner#charpos` when
+    `String#byteslice` returns non string value.
+    [Bug #17756][GitHub#20][Patch by Kenichi Kamiya]
+
+### Thanks
+
+  * Kenichi Kamiya
+
 ## 1.0.3 - 2019-10-14
 
 ### Improvements
