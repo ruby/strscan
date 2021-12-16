@@ -49,7 +49,6 @@ jobs:
       # "gem install pkg/*.gem" fails.
       - run: rake version:bump
         if: >-
-          matrix.ruby == '3.0' ||
           matrix.ruby == 'debug' ||
           matrix.ruby == 'mingw' ||
           matrix.ruby == 'mswin'
