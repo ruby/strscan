@@ -48,4 +48,4 @@ jobs:
       - run: rake build
 
       - run: gem install --verbose --backtrace pkg/*.gem
-
+        if: ${{ matrix.ruby == '2.4' || matrix.ruby == '2.5' || matrix.ruby == '2.6' || matrix.ruby == '2.7' }}
