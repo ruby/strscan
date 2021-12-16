@@ -45,7 +45,14 @@ jobs:
 
       - run: rake test
 
+      # If strscan in Ruby's master has the same version of this strscan,
+      # "gem install pkg/*.gem" fails.
+      - run: rake version:bump
+        if: >-
+          matrix.ruby == 'debug' ||
+          matrix.ruby == 'mingw' ||
+          matrix.ruby == 'mswin'
+
       - run: rake build
 
       - run: gem install --verbose --backtrace pkg/*.gem
-

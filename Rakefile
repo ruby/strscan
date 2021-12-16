@@ -3,6 +3,18 @@ require "rake/testtask"
 
 task :default => [:compile, :test]
 
+namespace :version do
+  desc "Bump version"
+  task :bump do
+    strscan_c_path = "ext/strscan/strscan.c"
+    strscan_c = File.read(strscan_c_path).gsub(/STRSCAN_VERSION "(.+?)"/) do
+      version = $1
+      "STRSCAN_VERSION \"#{version.succ}\""
+    end
+    File.write(strscan_c_path, strscan_c)
+  end
+end
+
 require 'rake/extensiontask'
 Rake::ExtensionTask.new("strscan")
 
