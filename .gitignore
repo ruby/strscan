@@ -4,7 +4,8 @@
 /_yardoc/
 /coverage/
 /doc/
-/lib/
+/lib/*
+!/lib/strmatch.rb
 /pkg/
 /spec/reports/
 /tmp/
