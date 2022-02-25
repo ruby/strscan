@@ -435,11 +435,11 @@ strscan_get_pos(VALUE self)
  *
  * In short, it's a 0-based index into the string.
  *
- *   s = StringScanner.new("abcädeföghi")
- *   s.charpos           # -> 0
- *   s.scan_until(/ä/)   # -> "abcä"
- *   s.pos               # -> 5
- *   s.charpos           # -> 4
+ *   s = StringScanner.new("abc\u00e4def\u00f6ghi")
+ *   s.charpos                # -> 0
+ *   s.scan_until(/\u00e4/)   # -> "abc\u00E4"
+ *   s.pos                    # -> 5
+ *   s.charpos                # -> 4
  */
 static VALUE
 strscan_get_charpos(VALUE self)
