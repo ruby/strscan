@@ -1,6 +1,6 @@
 # StringScanner
 
-![CI](https://github.com/ruby/strscan/workflows/CI/badge.svg?branch=master&event=push)
+[![CI](https://github.com/ruby/strscan/actions/workflows/ci.yml/badge.svg)](https://github.com/ruby/strscan/actions/workflows/ci.yml)
 
 StringScanner provides for lexical scanning operations on a String.
 
