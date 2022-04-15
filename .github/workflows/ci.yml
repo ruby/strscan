@@ -25,6 +25,7 @@ jobs:
         - 2.5
         - 2.4
         - debug
+        - jruby-head
         include:
         - { os: windows-latest , ruby: mingw }
         - { os: windows-latest , ruby: mswin }
