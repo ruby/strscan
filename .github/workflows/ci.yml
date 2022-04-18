@@ -30,7 +30,6 @@ jobs:
           - { os: windows-latest , ruby: mingw }
           - { os: windows-latest , ruby: mswin }
         exclude:
-          - { os: windows-latest , ruby: '3.0' }
           - { os: windows-latest , ruby: debug }
 
     steps:
