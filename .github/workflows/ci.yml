@@ -39,12 +39,9 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
-
-      - run: bundle install
+          bundler-cache: true
 
       - run: rake compile
-
-      - run: rake test
 
       # If strscan in Ruby's master has the same version of this strscan,
       # "gem install pkg/*.gem" fails.
@@ -55,5 +52,24 @@ jobs:
           matrix.ruby == 'mswin'
 
       - run: rake build
+
+      - uses: actions/upload-artifact@v3
+        if: >-
+          matrix.os == 'ubuntu-20.04' &&
+            (matrix.ruby == '3.1' || matrix.ruby == 'jruby-head')
+        with:
+          name: gem-${{ matrix.os }}-${{ matrix.ruby }}
+          path: pkg/
+
+      - uses: softprops/action-gh-release@v1
+        if: >-
+          startsWith(github.ref, 'refs/tags/') &&
+            matrix.os == 'ubuntu-20.04' &&
+            (matrix.ruby == '3.1' || matrix.ruby == 'jruby-head')
+        with:
+          files: |
+            pkg/*.gem
+
+      - run: rake test
 
       - run: gem install --verbose --backtrace pkg/*.gem
