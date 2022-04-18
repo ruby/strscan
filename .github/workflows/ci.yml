@@ -41,17 +41,17 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
 
-      - run: rake compile
+      - run: bundle exec rake compile
 
       # If strscan in Ruby's master has the same version of this strscan,
       # "gem install pkg/*.gem" fails.
-      - run: rake version:bump
+      - run: bundle exec rake version:bump
         if: >-
           matrix.ruby == 'debug' ||
           matrix.ruby == 'mingw' ||
           matrix.ruby == 'mswin'
 
-      - run: rake build
+      - run: bundle exec rake build
 
       - uses: actions/upload-artifact@v3
         if: >-
@@ -70,6 +70,6 @@ jobs:
           files: |
             pkg/*.gem
 
-      - run: rake test
+      - run: bundle exec rake test
 
       - run: gem install --verbose --backtrace pkg/*.gem
