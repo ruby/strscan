@@ -1,5 +1,16 @@
 # News
 
+## 3.0.2.pre1 - 2022-04-19
+
+### Improvements
+
+  * Added support for JRuby.
+    [GitHub#25][Patch by Charles Oliver Nutter]
+
+### Thanks
+
+  * Charles Oliver Nutter
+
 ## 3.0.1 - 2021-10-23
 
 ### Fixes
