@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
     s.files = %w{lib/strscan.jar lib/strscan.rb}
     s.platform = "java"
   else
-    s.files = %w{ext/strscan/extconf.rb ext/strscan/strscan.c}
+    s.files = %w{ext/strscan/extconf.rb ext/strscan/strscan.c lib/strscan.rb}
     s.extensions = %w{ext/strscan/extconf.rb}
   end
   s.required_ruby_version = ">= 2.4.0"

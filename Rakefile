@@ -23,9 +23,11 @@ if RUBY_ENGINE == "jruby"
     ext.target_version = '1.8'
     ext.ext_dir = 'ext/java'
   end
-else
+elsif RUBY_ENGINE == "ruby"
   require 'rake/extensiontask'
   Rake::ExtensionTask.new("strscan")
+else
+  task :compile
 end
 
 desc "Run test"

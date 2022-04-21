@@ -26,11 +26,15 @@ jobs:
           - '3.1'
           - debug
           - jruby-head
+          - truffleruby
+          - truffleruby-head
         include:
           - { os: windows-latest , ruby: mingw }
           - { os: windows-latest , ruby: mswin }
         exclude:
           - { os: windows-latest , ruby: debug }
+          - { os: windows-latest , ruby: truffleruby }
+          - { os: windows-latest , ruby: truffleruby-head }
 
     steps:
       - uses: actions/checkout@v2
