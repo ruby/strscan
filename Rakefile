@@ -30,7 +30,7 @@ end
 
 desc "Run test"
 task :test do
-  ENV["RUBYOPT"] = "-Ilib -Itest/lib -rbundler/setup -rhelper"
+  ENV["RUBYOPT"] = "-rbundler/setup"
   ruby("run-test.rb")
 end
 
