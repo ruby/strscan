@@ -75,3 +75,7 @@ jobs:
       - run: bundle exec rake test
 
       - run: gem install --verbose --backtrace pkg/*.gem
+
+      - name: Run tests on the installed gem
+        run: ruby run-test.rb
+        if: matrix.ruby != '2.4' # strscan is a default gem from 2.5

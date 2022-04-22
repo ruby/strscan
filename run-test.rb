@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
-$LOAD_PATH.unshift("#{__dir__}/lib")
+require 'strscan'
+puts "Loaded strscan from:", *$".grep(/\/strscan\./)
 
 require_relative 'test/lib/helper'
 
