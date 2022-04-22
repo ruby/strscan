@@ -23,6 +23,8 @@ Or install it yourself as:
 ## Usage
 
 ```ruby
+require 'strscan'
+
 s = StringScanner.new('This is an example string')
 s.eos?               # -> false
 
