@@ -32,7 +32,8 @@ end
 
 desc "Run test"
 task :test do
-  ENV["RUBYOPT"] = "-Ilib -rbundler/setup"
+  require_path = RUBY_ENGINE == 'jruby' ? "lib/jruby" : "lib"
+  ENV["RUBYOPT"] = "-I#{require_path} -rbundler/setup"
   ruby("run-test.rb")
 end
 
