@@ -23,14 +23,17 @@ if RUBY_ENGINE == "jruby"
     ext.target_version = '1.8'
     ext.ext_dir = 'ext/java'
   end
-else
+elsif RUBY_ENGINE == "ruby"
   require 'rake/extensiontask'
   Rake::ExtensionTask.new("strscan")
+else
+  task :compile
 end
 
 desc "Run test"
 task :test do
-  ENV["RUBYOPT"] = "-Ilib -Itest/lib -rbundler/setup -rhelper"
+  require_path = RUBY_ENGINE == 'jruby' ? "lib/jruby" : "lib"
+  ENV["RUBYOPT"] = "-I#{require_path} -rbundler/setup"
   ruby("run-test.rb")
 end
 

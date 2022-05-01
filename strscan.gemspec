@@ -16,14 +16,13 @@ Gem::Specification.new do |s|
   s.summary = "Provides lexical scanning operations on a String."
   s.description = "Provides lexical scanning operations on a String."
 
-  s.require_path = %w{lib}
-
   jruby = true if Gem::Platform.new('java') =~ s.platform or RUBY_ENGINE == 'jruby'
-  
   if jruby
-    s.files = %w{lib/strscan.jar lib/strscan.rb}
+    s.require_paths = %w{lib/jruby lib}
+    s.files = %w{lib/strscan.jar lib/jruby/strscan.rb}
     s.platform = "java"
   else
+    s.require_paths = %w{lib}
     s.files = %w{ext/strscan/extconf.rb ext/strscan/strscan.c}
     s.extensions = %w{ext/strscan/extconf.rb}
   end

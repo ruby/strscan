@@ -1,8 +1,10 @@
 #!/usr/bin/env ruby
 
-$LOAD_PATH.unshift("test")
-$LOAD_PATH.unshift("test/lib")
-$LOAD_PATH.unshift("lib")
+require 'strscan'
+puts "Loaded strscan from #{$".grep(/\/strscan\./).join(', ')}"
+puts "Gem from #{Gem.loaded_specs["strscan"]&.full_gem_path}"
+
+require_relative 'test/lib/helper'
 
 Dir.glob("test/strscan/**/*test_*.rb") do |test_rb|
   require File.expand_path(test_rb)
