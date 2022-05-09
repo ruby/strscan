@@ -1,5 +1,21 @@
 # News
 
+## 3.0.2 - 2022-05-09
+
+### Improvements
+
+  * Improved documentation.
+    [GitHub#32][Patch by David Crosby]
+
+  * Added support for TruffleRuby.
+    [GitHub#35][Patch by Benoit Daloze]
+
+### Thanks
+
+  * David Crosby
+
+  * Benoit Daloze
+
 ## 3.0.2.pre1 - 2022-04-19
 
 ### Improvements
