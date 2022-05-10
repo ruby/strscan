@@ -1,5 +1,16 @@
 # News
 
+## 3.0.3 - 2022-05-11
+
+### Improvements
+
+  * Improved JRuby's release process integration.
+    [GitHub#39][Patch by Charles Oliver Nutter]
+
+### Thanks
+
+  * Charles Oliver Nutter
+
 ## 3.0.2 - 2022-05-09
 
 ### Improvements
