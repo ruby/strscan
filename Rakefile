@@ -21,7 +21,7 @@ if RUBY_ENGINE == "jruby"
     require 'maven/ruby/maven'
     ext.source_version = '1.8'
     ext.target_version = '1.8'
-    ext.ext_dir = 'ext/java'
+    ext.ext_dir = 'ext/jruby'
   end
 elsif RUBY_ENGINE == "ruby"
   require 'rake/extensiontask'
@@ -32,8 +32,8 @@ end
 
 desc "Run test"
 task :test do
-  require_path = RUBY_ENGINE == 'jruby' ? "lib/jruby" : "lib"
-  ENV["RUBYOPT"] = "-I#{require_path} -rbundler/setup"
+  extra_require_path = RUBY_ENGINE == 'jruby' ? "ext/jruby/lib" : "lib"
+  ENV["RUBYOPT"] = "-I#{extra_require_path} -rbundler/setup"
   ruby("run-test.rb")
 end
 
