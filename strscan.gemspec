@@ -17,8 +17,8 @@ Gem::Specification.new do |s|
   s.description = "Provides lexical scanning operations on a String."
 
   if RUBY_ENGINE == 'jruby'
-    s.require_paths = %w{lib/jruby lib}
-    s.files = %w{lib/strscan.jar lib/jruby/strscan.rb}
+    s.require_paths = %w{ext/jruby/lib lib}
+    s.files = %w{lib/strscan.jar ext/jruby/lib/strscan.rb}
     s.platform = "java"
   else
     s.require_paths = %w{lib}
