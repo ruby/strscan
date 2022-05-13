@@ -18,11 +18,11 @@ Gem::Specification.new do |s|
 
   if RUBY_ENGINE == 'jruby'
     s.require_paths = %w{ext/jruby/lib lib}
-    s.files = %w{lib/strscan.jar ext/jruby/lib/strscan.rb}
+    s.files = %w{lib/strscan.jar ext/jruby/lib/strscan.rb LICENSE.txt COPYING}
     s.platform = "java"
   else
     s.require_paths = %w{lib}
-    s.files = %w{ext/strscan/extconf.rb ext/strscan/strscan.c}
+    s.files = %w{ext/strscan/extconf.rb ext/strscan/strscan.c LICENSE.txt COPYING}
     s.extensions = %w{ext/strscan/extconf.rb}
   end
   s.required_ruby_version = ">= 2.4.0"
