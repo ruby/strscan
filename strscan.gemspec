@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
     "COPYING",
     "LICENSE.txt",
   ]
-  if RUBY_ENGINE == "ruby"
+  if RUBY_ENGINE == "jruby"
     s.require_paths = %w{ext/jruby/lib lib}
     files << "ext/jruby/lib/strscan.rb"
     files << "lib/strscan.jar"
