@@ -763,6 +763,13 @@ class TestStringScanner < Test::Unit::TestCase
     assert_equal(false, StringScanner.new("a", fixed_anchor: nil).fixed_anchor?)
     assert_equal(false, StringScanner.new("a", fixed_anchor: false).fixed_anchor?)
   end
+
+  def test_named_captures
+    s = "foobarbaz"
+    re = /(?<f>foo)(?<r>bar)(?<z>baz)/
+    m = re.match s
+    assert_equal({"f"=>"foo", "r"=>"bar", "z"=>"baz"}, m.named_captures)
+  end
 end
 
 class TestStringScannerFixedAnchor < TestStringScanner
