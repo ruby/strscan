@@ -767,8 +767,9 @@ class TestStringScanner < Test::Unit::TestCase
   def test_named_captures
     s = "foobarbaz"
     re = /(?<f>foo)(?<r>bar)(?<z>baz)/
-    m = re.match s
-    assert_equal({"f"=>"foo", "r"=>"bar", "z"=>"baz"}, m.named_captures)
+    scan = StringScanner.new(s)
+    scan.match? re
+    assert_equal({"f"=>"foo", "r"=>"bar", "z"=>"baz"}, scan.named_captures)
   end
 end
 
