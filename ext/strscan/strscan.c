@@ -1458,6 +1458,17 @@ strscan_fixed_anchor_p(VALUE self)
     return p->fixed_anchor_p ? Qtrue : Qfalse;
 }
 
+/*
+ * call-seq:
+ *   scanner.named_captures -> hash
+ *
+ *
+ */
+static VALUE
+strscan_named_captures(VALUE self)
+{
+}
+
 /* =======================================================================
                               Ruby Interface
    ======================================================================= */
@@ -1652,4 +1663,6 @@ Init_strscan(void)
     rb_define_method(StringScanner, "inspect",     strscan_inspect,     0);
 
     rb_define_method(StringScanner, "fixed_anchor?", strscan_fixed_anchor_p, 0);
+
+    rb_define_method(StringScanner, "named_captures", strscan_named_captures, 0);
 }
