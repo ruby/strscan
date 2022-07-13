@@ -764,7 +764,7 @@ class TestStringScanner < Test::Unit::TestCase
     assert_equal(false, StringScanner.new("a", fixed_anchor: false).fixed_anchor?)
   end
 
-  def test_scan_AREF_repeatedly
+  def test_scan_aref_repeatedly
     s = StringScanner.new('test string')
     assert_equal "test",   s.scan(/\w(\w)(\w*)/)
     assert_equal "test",   s[0]
