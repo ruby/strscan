@@ -1467,6 +1467,7 @@ strscan_fixed_anchor_p(VALUE self)
 static VALUE
 strscan_named_captures(VALUE self)
 {
+  return RUBY_Qnil;
 }
 
 /* =======================================================================
