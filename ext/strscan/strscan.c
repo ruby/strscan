@@ -1467,7 +1467,15 @@ strscan_fixed_anchor_p(VALUE self)
 static VALUE
 strscan_named_captures(VALUE self)
 {
-  return RUBY_Qnil;
+    struct strscanner *p;
+    VALUE pattern;
+    GET_SCANNER(self, p);
+    int i = 0;
+    int z = 0;
+    VALUE captures = rb_hash_new();
+    onig_foreach_name(RREGEXP(RMATCH(RREGEXP_PTR(pattern))->regexp)->ptr, i, z);
+
+    return captures;
 }
 
 /* =======================================================================
