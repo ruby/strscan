@@ -309,8 +309,7 @@ public class RubyStringScanner extends RubyObject {
 
             Region matchRegion = matcher.getRegion();
             if (matchRegion == null) {
-                regs.beg[0] = matcher.getBegin();
-                regs.end[0] = matcher.getEnd();
+                regs = new Region(matcher.getBegin(), matcher.getEnd());
             } else {
                 regs = matchRegion;
             }

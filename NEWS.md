@@ -1,5 +1,26 @@
 # News
 
+## 3.0.4 - 2022-07-24
+
+### Improvements
+
+  * Added missing license files to gem.
+    [GitHub#41](https://github.com/ruby/strscan/pull/41)
+    [Patch by Martin Sander]
+
+### Fixes
+
+  * Fixed a `StringScanner#scan` bug that may not set match result on
+    JRuby.
+    [GitHub#45](https://github.com/ruby/strscan/pull/45)
+    [Patch by Kiichi Hiromasa]
+
+### Thanks
+
+  * Martin Sander
+
+  * Kiichi Hiromasa
+
 ## 3.0.3 - 2022-05-11
 
 ### Improvements
