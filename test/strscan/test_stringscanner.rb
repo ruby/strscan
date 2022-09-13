@@ -764,6 +764,26 @@ class TestStringScanner < Test::Unit::TestCase
     assert_equal(false, StringScanner.new("a", fixed_anchor: false).fixed_anchor?)
   end
 
+  def test_scan_aref_repeatedly
+    s = StringScanner.new('test string')
+    assert_equal "test",   s.scan(/\w(\w)(\w*)/)
+    assert_equal "test",   s[0]
+    assert_equal "e",      s[1]
+    assert_equal "st",     s[2]
+    assert_nil             s.scan(/\w+/)
+    assert_nil             s[0]
+    assert_nil             s[1]
+    assert_nil             s[2]
+    assert_equal " ",      s.scan(/\s+/)
+    assert_equal " ",      s[0]
+    assert_nil             s[1]
+    assert_nil             s[2]
+    assert_equal "string", s.scan(/\w(\w)(\w*)/)
+    assert_equal "string", s[0]
+    assert_equal "t",      s[1]
+    assert_equal "ring",   s[2]
+  end
+  
   def test_named_captures
     s = "foobarbaz"
     re = /(?<f>foo)(?<r>bar)(?<z>baz)/
