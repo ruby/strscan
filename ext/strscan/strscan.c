@@ -1487,7 +1487,13 @@ named_captures_iter(const OnigUChar *name,
  * call-seq:
  *   scanner.named_captures -> hash
  *
+ * Returns a hash of string variables matching the regular expression.
  *
+ *   s = 'foobarbaz'
+ *   re = /(?<f>foo)(?<r>bar)(?<z>baz)/
+ *   scan = StringScanner.new(s)
+ *   scan.match? re
+ *   scan.named_captures -> {"f"=>"foo", "r"=>"bar", "z"=>"baz"}
  */
 static VALUE
 strscan_named_captures(VALUE self)
