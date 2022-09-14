@@ -1493,7 +1493,7 @@ named_captures_iter(const OnigUChar *name,
  *   re = /(?<f>foo)(?<r>bar)(?<z>baz)/
  *   scan = StringScanner.new(s)
  *   scan.match? re
- *   scan.named_captures -> {"f"=>"foo", "r"=>"bar", "z"=>"baz"}
+ *   scan.named_captures # -> {"f"=>"foo", "r"=>"bar", "z"=>"baz"}
  */
 static VALUE
 strscan_named_captures(VALUE self)
