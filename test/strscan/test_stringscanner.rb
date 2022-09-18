@@ -783,6 +783,13 @@ class TestStringScanner < Test::Unit::TestCase
     assert_equal "t",      s[1]
     assert_equal "ring",   s[2]
   end
+
+  def test_named_captures
+    omit("not implemented on JRuby and TruffleRuby") if ["jruby", "truffleruby"].include?(RUBY_ENGINE)
+    scan = StringScanner.new("foobarbaz")
+    assert_equal(9, scan.match?(/(?<f>foo)(?<r>bar)(?<z>baz)/))
+    assert_equal({"f" => "foo", "r" => "bar", "z" => "baz"}, scan.named_captures)
+  end
 end
 
 class TestStringScannerFixedAnchor < TestStringScanner

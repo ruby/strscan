@@ -1458,6 +1458,54 @@ strscan_fixed_anchor_p(VALUE self)
     return p->fixed_anchor_p ? Qtrue : Qfalse;
 }
 
+typedef struct {
+    VALUE self;
+    VALUE captures;
+} named_captures_data;
+
+static int
+named_captures_iter(const OnigUChar *name,
+                    const OnigUChar *name_end,
+                    int back_num,
+                    int *back_refs,
+                    OnigRegex regex,
+                    void *arg)
+{
+    named_captures_data *data = arg;
+
+    VALUE key = rb_str_new((const char *)name, name_end - name);
+    VALUE value = RUBY_Qnil;
+    int i;
+    for (i = 0; i < back_num; i++) {
+        value = strscan_aref(data->self, INT2NUM(back_refs[i]));
+    }
+    rb_hash_aset(data->captures, key, value);
+    return 0;
+}
+
+/*
+ * call-seq:
+ *   scanner.named_captures -> hash
+ *
+ * Returns a hash of string variables matching the regular expression.
+ *
+ *   scan = StringScanner.new('foobarbaz')
+ *   scan.match?(/(?<f>foo)(?<r>bar)(?<z>baz)/)
+ *   scan.named_captures # -> {"f"=>"foo", "r"=>"bar", "z"=>"baz"}
+ */
+static VALUE
+strscan_named_captures(VALUE self)
+{
+    struct strscanner *p;
+    GET_SCANNER(self, p);
+    named_captures_data data;
+    data.self = self;
+    data.captures = rb_hash_new();
+    onig_foreach_name(RREGEXP_PTR(p->regex), named_captures_iter, &data);
+
+    return data.captures;
+}
+
 /* =======================================================================
                               Ruby Interface
    ======================================================================= */
@@ -1652,4 +1700,6 @@ Init_strscan(void)
     rb_define_method(StringScanner, "inspect",     strscan_inspect,     0);
 
     rb_define_method(StringScanner, "fixed_anchor?", strscan_fixed_anchor_p, 0);
+
+    rb_define_method(StringScanner, "named_captures", strscan_named_captures, 0);
 }
