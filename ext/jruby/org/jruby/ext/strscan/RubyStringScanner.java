@@ -29,6 +29,7 @@ package org.jruby.ext.strscan;
 
 import org.jcodings.Encoding;
 import org.joni.Matcher;
+import org.joni.NameEntry;
 import org.joni.Option;
 import org.joni.Regex;
 import org.joni.Region;
@@ -37,6 +38,7 @@ import org.jruby.RubyArray;
 import org.jruby.RubyBoolean;
 import org.jruby.RubyClass;
 import org.jruby.RubyFixnum;
+import org.jruby.RubyHash;
 import org.jruby.RubyMatchData;
 import org.jruby.RubyNumeric;
 import org.jruby.RubyObject;
@@ -55,6 +57,8 @@ import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.util.ByteList;
 import org.jruby.util.StringSupport;
+
+import java.util.Iterator;
 
 import static org.jruby.runtime.Visibility.PRIVATE;
 
@@ -626,6 +630,11 @@ public class RubyStringScanner extends RubyObject {
         Ruby runtime = context.runtime;
 
         int i = RubyMatchData.backrefNumber(runtime, pattern, regs, idx);
+
+        return extractRegion(context, i);
+    }
+
+    private IRubyObject extractRegion(ThreadContext context, int i) {
         int numRegs = regs.numRegs;
 
         if (i < 0) i += numRegs;
@@ -703,6 +712,30 @@ public class RubyStringScanner extends RubyObject {
     @JRubyMethod(name = "fixed_anchor?")
     public IRubyObject fixed_anchor_p(ThreadContext context) {
         return RubyBoolean.newBoolean(context, fixedAnchor);
+    }
+
+    @JRubyMethod(name = "named_captures")
+    public IRubyObject named_captured(ThreadContext context) {
+        Ruby runtime = context.runtime;
+        IRubyObject nil = context.nil;
+
+        RubyHash captures = RubyHash.newHash(runtime);
+
+        Iterator<NameEntry> nameEntryIterator = pattern.namedBackrefIterator();
+
+        while (nameEntryIterator.hasNext()) {
+            NameEntry nameEntry = nameEntryIterator.next();
+            IRubyObject value = nil;
+
+            for (int i : nameEntry.getBackRefs()) {
+                value = extractRegion(context, i);
+            }
+
+            int nameP = nameEntry.nameP;
+            captures.op_aset(context, RubyString.newStringShared(runtime, nameEntry.name, nameP, nameEntry.nameEnd - nameP), value);
+        }
+
+        return captures;
     }
 
     private IRubyObject inspect(String msg) {
