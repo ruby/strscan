@@ -1,5 +1,21 @@
 # News
 
+## 3.0.5 - 2022-12-08
+
+### Improvements
+
+  * Added `StringScanner#named_captures`
+    [GitHub#44](https://github.com/ruby/strscan/pull/44)
+    [GitHub#43](https://github.com/ruby/strscan/issues/43)
+    [Patch by Eriko Sugiyama]
+    [Reported by Akim Demaille]
+
+### Thanks
+
+  * Eriko Sugiyama
+
+  * Akim Demaille
+
 ## 3.0.4 - 2022-07-24
 
 ### Improvements
