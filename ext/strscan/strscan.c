@@ -110,6 +110,7 @@ static VALUE strscan_check_until _((VALUE self, VALUE re));
 static VALUE strscan_search_full _((VALUE self, VALUE re,
                                     VALUE succp, VALUE getp));
 static void adjust_registers_to_matched _((struct strscanner *p));
+static VALUE strscan_curr_char _((VALUE self));
 static VALUE strscan_getch _((VALUE self));
 static VALUE strscan_get_byte _((VALUE self));
 static VALUE strscan_getbyte _((VALUE self));
@@ -836,6 +837,34 @@ adjust_registers_to_matched(struct strscanner *p)
     else {
         onig_region_set(&(p->regs), 0, 0, (int)(p->curr - p->prev));
     }
+}
+
+/*
+ * call-seq: curr_char
+ *
+ * Extracts the current character without advancing the scan pointer.
+ * This method is multibyte character sensitive.
+ *
+ *   s = StringScanner.new('test')
+ *   s.current_char     # => "t"
+ *   s.current_char     # => "t"
+ *   s.pos              # => 0
+ *
+ */
+static VALUE
+strscan_curr_char(VALUE self)
+{
+    struct strscanner *p;
+    long len;
+
+    GET_SCANNER(self, p);
+    CLEAR_MATCH_STATUS(p);
+    if (EOS_P(p))
+        return Qnil;
+
+    len = rb_enc_mbclen(CURPTR(p), S_PEND(p), rb_enc_get(p->str));
+    len = minl(len, S_RESTLEN(p));
+    return extract_beg_len(p, p->curr, len);
 }
 
 /*
@@ -1579,6 +1608,7 @@ strscan_named_captures(VALUE self)
  *
  * - #check
  * - #check_until
+ * - #curr_char
  * - #exist?
  * - #match?
  * - #peek
@@ -1669,6 +1699,8 @@ Init_strscan(void)
     rb_define_method(StringScanner, "exist?",      strscan_exist_p,     1);
     rb_define_method(StringScanner, "check_until", strscan_check_until, 1);
     rb_define_method(StringScanner, "search_full", strscan_search_full, 3);
+
+    rb_define_method(StringScanner, "curr_char",   strscan_curr_char,   0);
 
     rb_define_method(StringScanner, "getch",       strscan_getch,       0);
     rb_define_method(StringScanner, "get_byte",    strscan_get_byte,    0);
