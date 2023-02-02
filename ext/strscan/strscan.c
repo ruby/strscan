@@ -867,6 +867,49 @@ strscan_curr_char(VALUE self)
 }
 
 /*
+ * Advances to the the next character and returns it.
+ * This method is multibyte character sensitive.
+ *
+ *   s = StringScanner.new('abc')
+ *   s.curr_char       # => "a"
+ *   s.next_char       # => "b"
+ *   s.next_char       # => "c"
+ *   s.curr_char       # => "c"
+ *   s.next_char       # => nil
+ *
+ *   s = StringScanner.new("a\244\242".force_encoding("euc-jp"))
+ *   s.next_char       # => "a"
+ *   s.next_char       # => "\x{A4A2}"   # Japanese hira-kana "A" in EUC-JP
+ *   s.next_char       # => nil
+ */
+static VALUE
+strscan_next_char(VALUE self)
+{
+    struct strscanner *p;
+    long len;
+
+    GET_SCANNER(self, p);
+    CLEAR_MATCH_STATUS(p);
+    if (EOS_P(p))
+        return Qnil;
+
+    len = rb_enc_mbclen(CURPTR(p), S_PEND(p), rb_enc_get(p->str));
+    len = minl(len, S_RESTLEN(p));
+    p->prev = p->curr;
+    p->curr += len;
+    MATCHED(p);
+    adjust_registers_to_matched(p);
+
+    CLEAR_MATCH_STATUS(p);
+    if (EOS_P(p))
+        return Qnil;
+
+    len = rb_enc_mbclen(CURPTR(p), S_PEND(p), rb_enc_get(p->str));
+    len = minl(len, S_RESTLEN(p));
+    return extract_beg_len(p, p->curr, len);
+}
+
+/*
  * Scans one character and returns it.
  * This method is multibyte character sensitive.
  *
@@ -1700,6 +1743,7 @@ Init_strscan(void)
     rb_define_method(StringScanner, "search_full", strscan_search_full, 3);
 
     rb_define_method(StringScanner, "curr_char",   strscan_curr_char,   0);
+    rb_define_method(StringScanner, "next_char",   strscan_next_char,   0);
 
     rb_define_method(StringScanner, "getch",       strscan_getch,       0);
     rb_define_method(StringScanner, "get_byte",    strscan_get_byte,    0);
