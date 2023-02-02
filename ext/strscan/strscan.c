@@ -622,16 +622,24 @@ strscan_do_scan(VALUE self, VALUE pattern, int succptr, int getstr, int headonly
     p->prev = p->curr;
 
     if (succptr) {
-        succ(p);
-        if (succptr == 2) p->curr = p->regs.beg[0];
+        if (succptr == 2) {
+            if (p->fixed_anchor_p) {
+                p->curr = p->regs.beg[0] - p->prev;
+            }
+            else
+            {
+                p->curr += p->regs.beg[0];
+            }
+        }
+        else {
+            succ(p);
+        }
     }
     {
         const long length = last_match_length(p);
         if (getstr) {
             if (getstr == 2) {
-                return extract_range(p,
-                                     0,
-                                     adjust_register_position(p, p->regs.beg[0]));
+                return extract_beg_len(p, p->prev, length - (p->regs.end[0] - p->regs.beg[0]));
             }
             return extract_beg_len(p, p->prev, length);
         }
