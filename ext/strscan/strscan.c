@@ -111,6 +111,7 @@ static VALUE strscan_search_full _((VALUE self, VALUE re,
                                     VALUE succp, VALUE getp));
 static void adjust_registers_to_matched _((struct strscanner *p));
 static VALUE strscan_curr_char _((VALUE self));
+static VALUE strscan_next_char _((VALUE self));
 static VALUE strscan_getch _((VALUE self));
 static VALUE strscan_get_byte _((VALUE self));
 static VALUE strscan_getbyte _((VALUE self));
@@ -840,14 +841,12 @@ adjust_registers_to_matched(struct strscanner *p)
 }
 
 /*
- * call-seq: curr_char
- *
  * Extracts the current character without advancing the scan pointer.
  * This method is multibyte character sensitive.
  *
- *   s = StringScanner.new('test')
- *   s.current_char     # => "t"
- *   s.current_char     # => "t"
+ *   s = StringScanner.new('abc')
+ *   s.current_char     # => "a"
+ *   s.current_char     # => "a"
  *   s.pos              # => 0
  *
  */
