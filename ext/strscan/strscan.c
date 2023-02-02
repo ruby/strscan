@@ -104,6 +104,7 @@ static VALUE strscan_skip _((VALUE self, VALUE re));
 static VALUE strscan_check _((VALUE self, VALUE re));
 static VALUE strscan_scan_full _((VALUE self, VALUE re,
                                   VALUE succp, VALUE getp));
+static VALUE strscan_scan_upto _((VALUE self, VALUE re));
 static VALUE strscan_scan_until _((VALUE self, VALUE re));
 static VALUE strscan_skip_until _((VALUE self, VALUE re));
 static VALUE strscan_check_until _((VALUE self, VALUE re));
@@ -622,10 +623,16 @@ strscan_do_scan(VALUE self, VALUE pattern, int succptr, int getstr, int headonly
 
     if (succptr) {
         succ(p);
+        if (succptr == 2) p->curr = p->regs.beg[0];
     }
     {
         const long length = last_match_length(p);
         if (getstr) {
+            if (getstr == 2) {
+                return extract_range(p,
+                                     0,
+                                     adjust_register_position(p, p->regs.beg[0]));
+            }
             return extract_beg_len(p, p->prev, length);
         }
         else {
@@ -733,6 +740,26 @@ static VALUE
 strscan_scan_full(VALUE self, VALUE re, VALUE s, VALUE f)
 {
     return strscan_do_scan(self, re, RTEST(s), RTEST(f), 1);
+}
+
+/*
+ * call-seq: scan_upto(pattern)
+ *
+ * Scans the string _up to_ the matching +pattern+.  Returns the substring up
+ * to but not including the start of the match, advancing the scan pointer to
+ * the start of the match. If there is no match, +nil+ is returned.
+ *
+ *   s = StringScanner.new("Fri Dec 12 1975 14:39")
+ *   s.scan_upto(/12 1975/)   # -> "Fri Dec "
+ *   s.pre_match              # -> "Fri Dec "
+ *   s.curr_char              # -> "1"
+ *   s.next_char              # -> "2"
+ *   s.scan_upto(/XYZ/)       # -> nil
+ */
+static VALUE
+strscan_scan_upto(VALUE self, VALUE re)
+{
+    return strscan_do_scan(self, re, 2, 2, 0);
 }
 
 /*
@@ -1736,6 +1763,7 @@ Init_strscan(void)
     rb_define_method(StringScanner, "check",       strscan_check,       1);
     rb_define_method(StringScanner, "scan_full",   strscan_scan_full,   3);
 
+    rb_define_method(StringScanner, "scan_upto",   strscan_scan_upto,   1);
     rb_define_method(StringScanner, "scan_until",  strscan_scan_until,  1);
     rb_define_method(StringScanner, "skip_until",  strscan_skip_until,  1);
     rb_define_method(StringScanner, "exist?",      strscan_exist_p,     1);
