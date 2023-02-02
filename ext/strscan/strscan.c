@@ -1668,7 +1668,9 @@ strscan_named_captures(VALUE self)
  *
  * - #getch
  * - #get_byte
+ * - #next_char
  * - #scan
+ * - #scan_upto
  * - #scan_until
  * - #skip
  * - #skip_until
