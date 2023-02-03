@@ -519,6 +519,18 @@ succ(struct strscanner *p)
     }
 }
 
+static inline void
+succ_upto(struct strscanner *p)
+{
+    if (p->fixed_anchor_p) {
+        p->curr = p->regs.beg[0];
+    }
+    else
+    {
+        p->curr += p->regs.beg[0];
+    }
+}
+
 static inline long
 last_match_length(struct strscanner *p)
 {
@@ -528,6 +540,18 @@ last_match_length(struct strscanner *p)
     else
     {
         return p->regs.end[0];
+    }
+}
+
+static inline long
+last_match_length_upto(struct strscanner *p)
+{
+    if (p->fixed_anchor_p) {
+        return p->regs.beg[0] - p->prev;
+    }
+    else
+    {
+        return p->regs.beg[0];
     }
 }
 
@@ -622,25 +646,11 @@ strscan_do_scan(VALUE self, VALUE pattern, int succptr, int getstr, int headonly
     p->prev = p->curr;
 
     if (succptr) {
-        if (succptr == 2) {
-            if (p->fixed_anchor_p) {
-                p->curr = p->regs.beg[0] - p->prev;
-            }
-            else
-            {
-                p->curr += p->regs.beg[0];
-            }
-        }
-        else {
-            succ(p);
-        }
+        (succptr == 2) ? succ_upto(p) : succ(p);
     }
     {
-        const long length = last_match_length(p);
+        const long length = (getstr == 2) ? last_match_length_upto(p) : last_match_length(p);
         if (getstr) {
-            if (getstr == 2) {
-                return extract_beg_len(p, p->prev, length - (p->regs.end[0] - p->regs.beg[0]));
-            }
             return extract_beg_len(p, p->prev, length);
         }
         else {
@@ -758,10 +768,14 @@ strscan_scan_full(VALUE self, VALUE re, VALUE s, VALUE f)
  * the start of the match. If there is no match, +nil+ is returned.
  *
  *   s = StringScanner.new("Fri Dec 12 1975 14:39")
- *   s.scan_upto(/12 1975/)   # -> "Fri Dec "
+ *   s.curr_char              # -> "F"
+ *   s.next_char              # -> "r"
+ *   s.next_char              # -> "i"
+ *   s.curr_char              # -> "i"
+ *   s.next_char              # -> " "
+ *   s.scan_upto(/12 1975/)   # -> " Dec "
  *   s.pre_match              # -> "Fri Dec "
- *   s.curr_char              # -> "1"
- *   s.next_char              # -> "2"
+ *   s.string[s.pos..]        # -> "12 1975 14:39"
  *   s.scan_upto(/XYZ/)       # -> nil
  */
 static VALUE
