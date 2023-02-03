@@ -336,6 +336,26 @@ class TestStringScanner < Test::Unit::TestCase
     assert_equal 1, s.skip(/^c/)
   end
 
+  def test_currchar
+    s = create_string_scanner('abcde')
+    assert_equal 'a', s.currchar
+    assert_equal 'a', s.currchar
+  end
+
+  def test_nextchar
+    s = create_string_scanner('abc')
+    assert_equal 'a', s.currchar
+    assert_equal 'b', s.nextchar
+    assert_equal 'c', s.nextchar
+    assert_equal 'c', s.currchar
+    assert_equal nil, s.nextchar
+
+    s = create_string_scanner("a\244\242".dup.force_encoding("euc-jp"))
+    assert_equal 'a', s.currchar
+    assert_equal "\244\242".dup.force_encoding("euc-jp"), s.nextchar
+    assert_equal nil, s.nextchar
+  end
+
   def test_getch
     s = create_string_scanner('abcde')
     assert_equal 'a', s.getch

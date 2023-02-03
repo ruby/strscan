@@ -110,6 +110,8 @@ static VALUE strscan_check_until _((VALUE self, VALUE re));
 static VALUE strscan_search_full _((VALUE self, VALUE re,
                                     VALUE succp, VALUE getp));
 static void adjust_registers_to_matched _((struct strscanner *p));
+static VALUE strscan_currchar _((VALUE self));
+static VALUE strscan_nextchar _((VALUE self));
 static VALUE strscan_getch _((VALUE self));
 static VALUE strscan_get_byte _((VALUE self));
 static VALUE strscan_getbyte _((VALUE self));
@@ -836,6 +838,75 @@ adjust_registers_to_matched(struct strscanner *p)
     else {
         onig_region_set(&(p->regs), 0, 0, (int)(p->curr - p->prev));
     }
+}
+
+/*
+ * Extracts the current character without advancing the scan pointer.
+ * This method is multibyte character sensitive.
+ *
+ *   s.currchar        # => "a"
+ *   s = StringScanner.new('abc')
+ *   s.currchar        # => "a"
+ *   s.pos             # => 0
+ *
+ */
+static VALUE
+strscan_currchar(VALUE self)
+{
+    struct strscanner *p;
+    long len;
+
+    GET_SCANNER(self, p);
+    CLEAR_MATCH_STATUS(p);
+    if (EOS_P(p))
+        return Qnil;
+
+    len = rb_enc_mbclen(CURPTR(p), S_PEND(p), rb_enc_get(p->str));
+    len = minl(len, S_RESTLEN(p));
+    return extract_beg_len(p, p->curr, len);
+}
+
+/*
+ * Advances to the the next character and returns it.
+ * This method is multibyte character sensitive.
+ *
+ *   s.currchar        # => "a"
+ *   s = StringScanner.new('abc')
+ *   s.nextchar        # => "b"
+ *   s.currchar        # => "c"
+ *   s.nextchar        # => "c"
+ *   s.nextchar        # => nil
+ *
+ *   s = StringScanner.new("a\244\242".force_encoding("euc-jp"))
+ *   s.nextchar        # => "a"
+ *   s.nextchar        # => "\x{A4A2}"   # Japanese hira-kana "A" in EUC-JP
+ *   s.nextchar        # => nil
+ */
+static VALUE
+strscan_nextchar(VALUE self)
+{
+    struct strscanner *p;
+    long len;
+
+    GET_SCANNER(self, p);
+    CLEAR_MATCH_STATUS(p);
+    if (EOS_P(p))
+        return Qnil;
+
+    len = rb_enc_mbclen(CURPTR(p), S_PEND(p), rb_enc_get(p->str));
+    len = minl(len, S_RESTLEN(p));
+    p->prev = p->curr;
+    p->curr += len;
+    MATCHED(p);
+    adjust_registers_to_matched(p);
+
+    CLEAR_MATCH_STATUS(p);
+    if (EOS_P(p))
+        return Qnil;
+
+    len = rb_enc_mbclen(CURPTR(p), S_PEND(p), rb_enc_get(p->str));
+    len = minl(len, S_RESTLEN(p));
+    return extract_beg_len(p, p->curr, len);
 }
 
 /*
@@ -1574,6 +1645,7 @@ strscan_named_captures(VALUE self)
  * - #scan_until
  * - #skip
  * - #skip_until
+ * - #nextchar
  *
  * === Looking Ahead
  *
@@ -1582,6 +1654,7 @@ strscan_named_captures(VALUE self)
  * - #exist?
  * - #match?
  * - #peek
+ * - #currchar
  *
  * === Finding Where we Are
  *
@@ -1675,6 +1748,9 @@ Init_strscan(void)
     rb_define_method(StringScanner, "getbyte",     strscan_getbyte,     0);
     rb_define_method(StringScanner, "peek",        strscan_peek,        1);
     rb_define_method(StringScanner, "peep",        strscan_peep,        1);
+
+    rb_define_method(StringScanner, "currchar",    strscan_currchar,    0);
+    rb_define_method(StringScanner, "nextchar",    strscan_nextchar,    0);
 
     rb_define_method(StringScanner, "unscan",      strscan_unscan,      0);
 
