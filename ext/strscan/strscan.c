@@ -104,7 +104,6 @@ static VALUE strscan_skip _((VALUE self, VALUE re));
 static VALUE strscan_check _((VALUE self, VALUE re));
 static VALUE strscan_scan_full _((VALUE self, VALUE re,
                                   VALUE succp, VALUE getp));
-static VALUE strscan_scan_upto _((VALUE self, VALUE re));
 static VALUE strscan_scan_until _((VALUE self, VALUE re));
 static VALUE strscan_skip_until _((VALUE self, VALUE re));
 static VALUE strscan_check_until _((VALUE self, VALUE re));
@@ -519,18 +518,6 @@ succ(struct strscanner *p)
     }
 }
 
-static inline void
-succ_upto(struct strscanner *p)
-{
-    if (p->fixed_anchor_p) {
-        p->curr = p->regs.beg[0];
-    }
-    else
-    {
-        p->curr += p->regs.beg[0];
-    }
-}
-
 static inline long
 last_match_length(struct strscanner *p)
 {
@@ -540,18 +527,6 @@ last_match_length(struct strscanner *p)
     else
     {
         return p->regs.end[0];
-    }
-}
-
-static inline long
-last_match_length_upto(struct strscanner *p)
-{
-    if (p->fixed_anchor_p) {
-        return p->regs.beg[0] - p->prev;
-    }
-    else
-    {
-        return p->regs.beg[0];
     }
 }
 
@@ -646,10 +621,10 @@ strscan_do_scan(VALUE self, VALUE pattern, int succptr, int getstr, int headonly
     p->prev = p->curr;
 
     if (succptr) {
-        (succptr == 2) ? succ_upto(p) : succ(p);
+        succ(p);
     }
     {
-        const long length = (getstr == 2) ? last_match_length_upto(p) : last_match_length(p);
+        const long length = last_match_length(p);
         if (getstr) {
             return extract_beg_len(p, p->prev, length);
         }
@@ -758,30 +733,6 @@ static VALUE
 strscan_scan_full(VALUE self, VALUE re, VALUE s, VALUE f)
 {
     return strscan_do_scan(self, re, RTEST(s), RTEST(f), 1);
-}
-
-/*
- * call-seq: scan_upto(pattern)
- *
- * Scans the string _up to_ the matching +pattern+.  Returns the substring up
- * to but not including the start of the match, advancing the scan pointer to
- * the start of the match. If there is no match, +nil+ is returned.
- *
- *   s = StringScanner.new("Fri Dec 12 1975 14:39")
- *   s.curr_char              # -> "F"
- *   s.next_char              # -> "r"
- *   s.next_char              # -> "i"
- *   s.curr_char              # -> "i"
- *   s.next_char              # -> " "
- *   s.scan_upto(/12 1975/)   # -> " Dec "
- *   s.pre_match              # -> "Fri Dec "
- *   s.string[s.pos..]        # -> "12 1975 14:39"
- *   s.scan_upto(/XYZ/)       # -> nil
- */
-static VALUE
-strscan_scan_upto(VALUE self, VALUE re)
-{
-    return strscan_do_scan(self, re, 2, 2, 0);
 }
 
 /*
@@ -1692,7 +1643,6 @@ strscan_named_captures(VALUE self)
  * - #get_byte
  * - #next_char
  * - #scan
- * - #scan_upto
  * - #scan_until
  * - #skip
  * - #skip_until
@@ -1787,7 +1737,6 @@ Init_strscan(void)
     rb_define_method(StringScanner, "check",       strscan_check,       1);
     rb_define_method(StringScanner, "scan_full",   strscan_scan_full,   3);
 
-    rb_define_method(StringScanner, "scan_upto",   strscan_scan_upto,   1);
     rb_define_method(StringScanner, "scan_until",  strscan_scan_until,  1);
     rb_define_method(StringScanner, "skip_until",  strscan_skip_until,  1);
     rb_define_method(StringScanner, "exist?",      strscan_exist_p,     1);

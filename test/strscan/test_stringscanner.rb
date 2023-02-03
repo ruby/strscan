@@ -336,20 +336,6 @@ class TestStringScanner < Test::Unit::TestCase
     assert_equal 1, s.skip(/^c/)
   end
 
-  def test_scan_upto
-    s = create_string_scanner("Fri Dec 12 1975 14:39")
-    assert_equal "F",        s.curr_char
-    assert_equal "r",        s.next_char
-    assert_equal "i",        s.next_char
-    assert_equal "i",        s.curr_char
-    assert_equal " ",        s.next_char
-    assert_equal " Dec ",    s.scan_upto(/12 1975/)
-    assert_equal "Fri Dec ", s.pre_match
-    assert_equal '1',        s.curr_char
-    assert_equal '2',        s.next_char
-    assert_equal nil,        s.scan_upto(/XYZ/)
-  end
-
   def test_curr_char
     s = create_string_scanner('abcde')
     assert_equal 'a', s.curr_char
