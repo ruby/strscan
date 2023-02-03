@@ -336,26 +336,6 @@ class TestStringScanner < Test::Unit::TestCase
     assert_equal 1, s.skip(/^c/)
   end
 
-  def test_curr_char
-    s = create_string_scanner('abcde')
-    assert_equal 'a', s.curr_char
-    assert_equal 'a', s.curr_char
-  end
-
-  def test_next_char
-    s = create_string_scanner('abc')
-    assert_equal 'a', s.curr_char
-    assert_equal 'b', s.next_char
-    assert_equal 'c', s.next_char
-    assert_equal 'c', s.curr_char
-    assert_equal nil, s.next_char
-
-    s = create_string_scanner("a\244\242".dup.force_encoding("euc-jp"))
-    assert_equal 'a', s.curr_char
-    assert_equal "\244\242".dup.force_encoding("euc-jp"), s.next_char
-    assert_equal nil, s.next_char
-  end
-
   def test_getch
     s = create_string_scanner('abcde')
     assert_equal 'a', s.getch
@@ -373,6 +353,20 @@ class TestStringScanner < Test::Unit::TestCase
     s.scan(/te/)
     s.string.replace ''
     assert_equal nil, s.getch
+  end
+
+  def test_nextch
+    s = create_string_scanner('abc')
+    assert_equal 'a', s.peekch
+    assert_equal 'b', s.nextch
+    assert_equal 'c', s.nextch
+    assert_equal 'c', s.peekch
+    assert_equal nil, s.nextch
+
+    s = create_string_scanner("a\244\242".dup.force_encoding("euc-jp"))
+    assert_equal 'a', s.peekch
+    assert_equal "\244\242".dup.force_encoding("euc-jp"), s.nextch
+    assert_equal nil, s.nextch
   end
 
   def test_get_byte
@@ -698,6 +692,12 @@ class TestStringScanner < Test::Unit::TestCase
     assert_equal(" string", s.peek(10))
     s.scan(/ string/)
     assert_equal("", s.peek(10))
+  end
+
+  def test_peekch
+    s = create_string_scanner('abcde')
+    assert_equal 'a', s.peekch
+    assert_equal 'a', s.peekch
   end
 
   def test_unscan

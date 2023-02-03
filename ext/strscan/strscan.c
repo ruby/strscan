@@ -110,12 +110,12 @@ static VALUE strscan_check_until _((VALUE self, VALUE re));
 static VALUE strscan_search_full _((VALUE self, VALUE re,
                                     VALUE succp, VALUE getp));
 static void adjust_registers_to_matched _((struct strscanner *p));
-static VALUE strscan_curr_char _((VALUE self));
-static VALUE strscan_next_char _((VALUE self));
 static VALUE strscan_getch _((VALUE self));
+static VALUE strscan_nextch _((VALUE self));
 static VALUE strscan_get_byte _((VALUE self));
 static VALUE strscan_getbyte _((VALUE self));
 static VALUE strscan_peek _((VALUE self, VALUE len));
+static VALUE strscan_peekch _((VALUE self));
 static VALUE strscan_peep _((VALUE self, VALUE len));
 static VALUE strscan_unscan _((VALUE self));
 static VALUE strscan_bol_p _((VALUE self));
@@ -841,75 +841,6 @@ adjust_registers_to_matched(struct strscanner *p)
 }
 
 /*
- * Extracts the current character without advancing the scan pointer.
- * This method is multibyte character sensitive.
- *
- *   s = StringScanner.new('abc')
- *   s.current_char     # => "a"
- *   s.current_char     # => "a"
- *   s.pos              # => 0
- *
- */
-static VALUE
-strscan_curr_char(VALUE self)
-{
-    struct strscanner *p;
-    long len;
-
-    GET_SCANNER(self, p);
-    CLEAR_MATCH_STATUS(p);
-    if (EOS_P(p))
-        return Qnil;
-
-    len = rb_enc_mbclen(CURPTR(p), S_PEND(p), rb_enc_get(p->str));
-    len = minl(len, S_RESTLEN(p));
-    return extract_beg_len(p, p->curr, len);
-}
-
-/*
- * Advances to the the next character and returns it.
- * This method is multibyte character sensitive.
- *
- *   s = StringScanner.new('abc')
- *   s.curr_char       # => "a"
- *   s.next_char       # => "b"
- *   s.next_char       # => "c"
- *   s.curr_char       # => "c"
- *   s.next_char       # => nil
- *
- *   s = StringScanner.new("a\244\242".force_encoding("euc-jp"))
- *   s.next_char       # => "a"
- *   s.next_char       # => "\x{A4A2}"   # Japanese hira-kana "A" in EUC-JP
- *   s.next_char       # => nil
- */
-static VALUE
-strscan_next_char(VALUE self)
-{
-    struct strscanner *p;
-    long len;
-
-    GET_SCANNER(self, p);
-    CLEAR_MATCH_STATUS(p);
-    if (EOS_P(p))
-        return Qnil;
-
-    len = rb_enc_mbclen(CURPTR(p), S_PEND(p), rb_enc_get(p->str));
-    len = minl(len, S_RESTLEN(p));
-    p->prev = p->curr;
-    p->curr += len;
-    MATCHED(p);
-    adjust_registers_to_matched(p);
-
-    CLEAR_MATCH_STATUS(p);
-    if (EOS_P(p))
-        return Qnil;
-
-    len = rb_enc_mbclen(CURPTR(p), S_PEND(p), rb_enc_get(p->str));
-    len = minl(len, S_RESTLEN(p));
-    return extract_beg_len(p, p->curr, len);
-}
-
-/*
  * Scans one character and returns it.
  * This method is multibyte character sensitive.
  *
@@ -942,6 +873,49 @@ strscan_getch(VALUE self)
     return extract_range(p,
                          adjust_register_position(p, p->regs.beg[0]),
                          adjust_register_position(p, p->regs.end[0]));
+}
+
+/*
+ * Advances to the the next character and returns it.
+ * This method is multibyte character sensitive.
+ *
+ *   s = StringScanner.new('abc')
+ *   s.peekch          # => "a"
+ *   s.nextch          # => "b"
+ *   s.nextch          # => "c"
+ *   s.peekch          # => "c"
+ *   s.nextch          # => nil
+ *
+ *   s = StringScanner.new("a\244\242".force_encoding("euc-jp"))
+ *   s.nextch          # => "a"
+ *   s.nextch          # => "\x{A4A2}"   # Japanese hira-kana "A" in EUC-JP
+ *   s.nextch          # => nil
+ */
+static VALUE
+strscan_nextch(VALUE self)
+{
+    struct strscanner *p;
+    long len;
+
+    GET_SCANNER(self, p);
+    CLEAR_MATCH_STATUS(p);
+    if (EOS_P(p))
+        return Qnil;
+
+    len = rb_enc_mbclen(CURPTR(p), S_PEND(p), rb_enc_get(p->str));
+    len = minl(len, S_RESTLEN(p));
+    p->prev = p->curr;
+    p->curr += len;
+    MATCHED(p);
+    adjust_registers_to_matched(p);
+
+    CLEAR_MATCH_STATUS(p);
+    if (EOS_P(p))
+        return Qnil;
+
+    len = rb_enc_mbclen(CURPTR(p), S_PEND(p), rb_enc_get(p->str));
+    len = minl(len, S_RESTLEN(p));
+    return extract_beg_len(p, p->curr, len);
 }
 
 /*
@@ -1012,6 +986,32 @@ strscan_peek(VALUE self, VALUE vlen)
     if (EOS_P(p))
         return str_new(p, "", 0);
 
+    len = minl(len, S_RESTLEN(p));
+    return extract_beg_len(p, p->curr, len);
+}
+
+/*
+ * Extracts the current character without advancing the scan pointer.
+ * This method is multibyte character sensitive.
+ *
+ *   s = StringScanner.new('abc')
+ *   s.peekch          # => "a"
+ *   s.peekch          # => "a"
+ *   s.pos             # => 0
+ *
+ */
+static VALUE
+strscan_peekch(VALUE self)
+{
+    struct strscanner *p;
+    long len;
+
+    GET_SCANNER(self, p);
+    CLEAR_MATCH_STATUS(p);
+    if (EOS_P(p))
+        return Qnil;
+
+    len = rb_enc_mbclen(CURPTR(p), S_PEND(p), rb_enc_get(p->str));
     len = minl(len, S_RESTLEN(p));
     return extract_beg_len(p, p->curr, len);
 }
@@ -1640,8 +1640,8 @@ strscan_named_captures(VALUE self)
  * === Advancing the Scan Pointer
  *
  * - #getch
+ * - #nextch
  * - #get_byte
- * - #next_char
  * - #scan
  * - #scan_until
  * - #skip
@@ -1651,10 +1651,10 @@ strscan_named_captures(VALUE self)
  *
  * - #check
  * - #check_until
- * - #curr_char
  * - #exist?
  * - #match?
  * - #peek
+ * - #peekch
  *
  * === Finding Where we Are
  *
@@ -1743,13 +1743,12 @@ Init_strscan(void)
     rb_define_method(StringScanner, "check_until", strscan_check_until, 1);
     rb_define_method(StringScanner, "search_full", strscan_search_full, 3);
 
-    rb_define_method(StringScanner, "curr_char",   strscan_curr_char,   0);
-    rb_define_method(StringScanner, "next_char",   strscan_next_char,   0);
-
     rb_define_method(StringScanner, "getch",       strscan_getch,       0);
+    rb_define_method(StringScanner, "nextch",      strscan_nextch,      0);
     rb_define_method(StringScanner, "get_byte",    strscan_get_byte,    0);
     rb_define_method(StringScanner, "getbyte",     strscan_getbyte,     0);
     rb_define_method(StringScanner, "peek",        strscan_peek,        1);
+    rb_define_method(StringScanner, "peekch",      strscan_peekch,      0);
     rb_define_method(StringScanner, "peep",        strscan_peep,        1);
 
     rb_define_method(StringScanner, "unscan",      strscan_unscan,      0);
