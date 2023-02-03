@@ -900,7 +900,6 @@ strscan_nextchar(VALUE self)
     MATCHED(p);
     adjust_registers_to_matched(p);
 
-    CLEAR_MATCH_STATUS(p);
     if (EOS_P(p))
         return Qnil;
 
