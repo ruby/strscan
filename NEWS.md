@@ -1,5 +1,20 @@
 # News
 
+## 3.0.6 - 2023-02-08
+
+### Improvements
+
+  * doc: Improved `StringScanner#rest?`.
+    [GH-49]
+    [Patch by OKURA Masafumi]
+
+  * jruby: Added support for joni 2.2.
+    [GH-55]
+
+### Thanks
+
+  * OKURA Masafumi
+
 ## 3.0.5 - 2022-12-08
 
 ### Improvements
