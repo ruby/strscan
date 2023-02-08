@@ -126,31 +126,37 @@ public class RubyStringScanner extends RubyObject {
 
     private static class OldRegionAdapter implements RegionAdapter {
         @Override
+        @SuppressWarnings("deprecation")
         public Region newRegion(int beg, int end) {
             return new Region(beg, end);
         }
 
         @Override
+        @SuppressWarnings("deprecation")
         public int getBeg(Region region, int index) {
             return region.beg[index];
         }
 
         @Override
+        @SuppressWarnings("deprecation")
         public int getEnd(Region region, int index) {
             return region.end[index];
         }
 
         @Override
+        @SuppressWarnings("deprecation")
         public int setBeg(Region region, int index, int value) {
             return region.beg[index] = value;
         }
 
         @Override
+        @SuppressWarnings("deprecation")
         public int setEnd(Region region, int index, int value) {
             return region.end[index] = value;
         }
 
         @Override
+        @SuppressWarnings("deprecation")
         public int getNumRegs(Region region) {
             return region.numRegs;
         }
