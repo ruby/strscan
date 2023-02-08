@@ -63,14 +63,23 @@ jobs:
           name: gem-${{ matrix.os }}-${{ matrix.ruby }}
           path: pkg/
 
-      - uses: softprops/action-gh-release@v1
+      - name: Release
         if: >-
           startsWith(github.ref, 'refs/tags/') &&
             matrix.os == 'ubuntu-latest' &&
             (matrix.ruby == '3.1' || matrix.ruby == 'jruby-head')
-        with:
-          files: |
-            pkg/*.gem
+        run: |
+          ruby \
+            -e 'print("## strscan "); \
+                puts(ARGF.read.split(/^## /)[1].gsub(/ {.+?}/, ""))' \
+            NEWS.md > release-note.md
+          gh release create \
+            ${GITHUB_REF_NAME} \
+            --discussion-category Announcements \
+            --notes-file release-node.md || :
+          gh release upload ${GITHUB_REF_NAME} pkg/*.gem
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - run: bundle exec rake test
 
