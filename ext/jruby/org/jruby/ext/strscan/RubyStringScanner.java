@@ -27,7 +27,6 @@
 
 package org.jruby.ext.strscan;
 
-import jnr.a64asm.REG;
 import org.jcodings.Encoding;
 import org.joni.Matcher;
 import org.joni.NameEntry;
@@ -53,7 +52,6 @@ import org.jruby.ast.util.ArgsUtil;
 import org.jruby.common.IRubyWarnings.ID;
 import org.jruby.exceptions.RaiseException;
 import org.jruby.runtime.Block;
-import org.jruby.runtime.Helpers;
 import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
 import org.jruby.util.ByteList;
