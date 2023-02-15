@@ -4,7 +4,9 @@
 /_yardoc/
 /coverage/
 /doc/
-/lib/*.{jar,so,dylib}
+/lib/*.jar
+/lib/*.so
+/lib/*.dylib
 /pkg/
 /spec/reports/
 /tmp/
