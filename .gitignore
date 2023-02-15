@@ -4,7 +4,10 @@
 /_yardoc/
 /coverage/
 /doc/
-/lib/*.{jar,so,dylib}
+/lib/*.jar
+/lib/*.so
+/lib/*.dylib
+/lib/*.bundle
 /pkg/
 /spec/reports/
 /tmp/
