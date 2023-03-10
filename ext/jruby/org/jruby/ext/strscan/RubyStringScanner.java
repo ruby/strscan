@@ -829,6 +829,8 @@ public class RubyStringScanner extends RubyObject {
 
         RubyHash captures = RubyHash.newHash(runtime);
 
+        if (pattern == null) return captures;
+
         Iterator<NameEntry> nameEntryIterator = pattern.namedBackrefIterator();
 
         while (nameEntryIterator.hasNext()) {
