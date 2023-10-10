@@ -921,6 +921,34 @@ public class RubyStringScanner extends RubyObject {
         return newAry;
     }
 
+    @JRubyMethod(name = "values_at")
+    public IRubyObject values_at(ThreadContext context) {
+        if (!isMatched()) return context.nil;
+
+        return RubyArray.newEmptyArray(context.runtime);
+    }
+
+    @JRubyMethod(name = "values_at")
+    public IRubyObject values_at(ThreadContext context, IRubyObject index) {
+        if (!isMatched()) return context.nil;
+
+        return RubyArray.newArray(context.runtime, op_aref(context, index));
+    }
+
+    @JRubyMethod(name = "values_at")
+    public IRubyObject values_at(ThreadContext context, IRubyObject index1, IRubyObject index2) {
+        if (!isMatched()) return context.nil;
+
+        return RubyArray.newArray(context.runtime, op_aref(context, index1), op_aref(context, index2));
+    }
+
+    @JRubyMethod(name = "values_at")
+    public IRubyObject values_at(ThreadContext context, IRubyObject index1, IRubyObject index2, IRubyObject index3) {
+        if (!isMatched()) return context.nil;
+
+        return RubyArray.newArray(context.runtime, op_aref(context, index1), op_aref(context, index2), op_aref(context, index3));
+    }
+
     @Deprecated
     public IRubyObject initialize(IRubyObject[] args, Block unusedBlock) {
         str = args[0].convertToString();
