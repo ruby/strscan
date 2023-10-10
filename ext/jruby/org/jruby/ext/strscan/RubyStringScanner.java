@@ -612,8 +612,9 @@ public class RubyStringScanner extends RubyObject {
         }
 
         ByteList value = str.getByteList();
-        if (curr >= value.getRealSize()) return RubyString.newEmptyString(context.runtime);
-        if (curr + len > value.getRealSize()) len = value.getRealSize() - curr;
+        int realSize = value.getRealSize();
+        if (curr >= realSize) return RubyString.newEmptyString(context.runtime);
+        if (curr + len > realSize) len = realSize - curr;
 
         return extractBegLen(context.runtime, curr, len);
     }
@@ -766,12 +767,13 @@ public class RubyStringScanner extends RubyObject {
         Ruby runtime = context.runtime;
 
         ByteList value = str.getByteList();
+        int realSize = value.getRealSize();
 
-        if (curr >= value.getRealSize()) {
+        if (curr >= realSize) {
             return RubyString.newEmptyString(runtime);
         }
 
-        return extractRange(runtime, curr, value.getRealSize());
+        return extractRange(runtime, curr, realSize);
     }
 
     @JRubyMethod(name = "rest_size")
@@ -780,10 +782,11 @@ public class RubyStringScanner extends RubyObject {
         Ruby runtime = context.runtime;
 
         ByteList value = str.getByteList();
+        int realSize = value.getRealSize();
 
-        if (curr >= value.getRealSize()) return RubyFixnum.zero(runtime);
+        if (curr >= realSize) return RubyFixnum.zero(runtime);
 
-        return RubyFixnum.newFixnum(runtime, value.getRealSize() - curr);
+        return RubyFixnum.newFixnum(runtime, realSize - curr);
     }
 
     @JRubyMethod(name = "restsize")
@@ -799,9 +802,15 @@ public class RubyStringScanner extends RubyObject {
     @Override
     public IRubyObject inspect() {
         if (str == null) return inspect("(uninitialized)");
-        if (curr >= str.getByteList().getRealSize()) return inspect("fin");
-        if (curr == 0) return inspect(curr + "/" + str.getByteList().getRealSize() + " @ " + inspect2());
-        return inspect(curr + "/" + str.getByteList().getRealSize() + " " + inspect1() + " @ " + inspect2());
+
+        ByteList byteList = str.getByteList();
+        int realSize = byteList.getRealSize();
+
+        if (curr >= realSize) return inspect("fin");
+
+        if (curr == 0) return inspect(curr + "/" + realSize + " @ " + inspect2());
+
+        return inspect(curr + "/" + realSize + " " + inspect1() + " @ " + inspect2());
     }
 
     @JRubyMethod(name = "fixed_anchor?")
@@ -855,8 +864,14 @@ public class RubyStringScanner extends RubyObject {
 
     private IRubyObject inspect2() {
         final Ruby runtime = getRuntime();
-        if (curr >= str.getByteList().getRealSize()) return RubyString.newEmptyString(runtime);
-        int len = str.getByteList().getRealSize() - curr;
+
+        ByteList byteList = str.getByteList();
+        int realSize = byteList.getRealSize();
+
+        if (curr >= realSize) return RubyString.newEmptyString(runtime);
+
+        int len = realSize - curr;
+
         if (len > INSPECT_LENGTH) {
             return ((RubyString) str.substr(runtime, curr, INSPECT_LENGTH)).cat(DOT_BYTES).inspect();
         }
