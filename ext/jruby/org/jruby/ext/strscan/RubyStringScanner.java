@@ -351,20 +351,6 @@ public class RubyStringScanner extends RubyObject {
         return str.makeSharedString(runtime, beg, len);
     }
 
-    final ThreadLocal<Matcher> currentMatcher = new ThreadLocal<>();
-    final RubyThread.Task<RubyStringScanner, Integer> task = new RubyThread.Task<RubyStringScanner, Integer>() {
-        @Override
-        public Integer run(ThreadContext context, RubyStringScanner rubyStringScanner) throws InterruptedException {
-            ByteList value = str.getByteList();
-            return currentMatcher.get().matchInterruptible(value.begin() + curr, value.begin() + value.realSize(), Option.NONE);
-        }
-
-        @Override
-        public void wakeup(RubyThread thread, RubyStringScanner rubyStringScanner) {
-            thread.getNativeThread().interrupt();
-        }
-    };
-
     // MRI: strscan_do_scan
     private IRubyObject scan(ThreadContext context, IRubyObject regex, boolean succptr, boolean getstr, boolean headonly) {
         final Ruby runtime = context.runtime;
