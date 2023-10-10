@@ -716,7 +716,7 @@ public class RubyStringScanner extends RubyObject {
         if (runtime.isVerbose()) {
             runtime.getWarnings().warning(ID.DEPRECATED_METHOD, "StringScanner#matchedsize is obsolete; use #matched_size instead");
         }
-        return matched_size();
+        return matched_size(context);
     }
 
     @JRubyMethod(name = "[]")
@@ -947,67 +947,6 @@ public class RubyStringScanner extends RubyObject {
         if (!isMatched()) return context.nil;
 
         return RubyArray.newArray(context.runtime, op_aref(context, index1), op_aref(context, index2), op_aref(context, index3));
-    }
-
-    @Deprecated
-    public IRubyObject initialize(IRubyObject[] args, Block unusedBlock) {
-        str = args[0].convertToString();
-        return this;
-    }
-
-    @Deprecated
-    public IRubyObject initialize_copy(IRubyObject other) {
-        return initialize_copy(getRuntime().getCurrentContext(), other);
-    }
-
-    @Deprecated
-    public IRubyObject concat(IRubyObject obj) {
-        return concat(getRuntime().getCurrentContext(), obj);
-    }
-
-    @Deprecated
-    public RubyFixnum pos() {
-        return pos(getRuntime().getCurrentContext());
-    }
-
-    @Deprecated
-    public IRubyObject set_pos(IRubyObject pos) {
-        return set_pos(getRuntime().getCurrentContext(), pos);
-    }
-
-    @Deprecated
-    public IRubyObject getch19(ThreadContext context) {
-        return getch(context);
-    }
-
-    @Deprecated
-    public IRubyObject reset() {
-        return reset(getRuntime().getCurrentContext());
-    }
-
-    @Deprecated
-    public IRubyObject unscan() {
-        return unscan(getRuntime().getCurrentContext());
-    }
-
-    @Deprecated
-    public IRubyObject matched_size() {
-        return matched_size(getRuntime().getCurrentContext());
-    }
-
-    @Deprecated
-    public IRubyObject bol_p() {
-        return bol_p(getRuntime().getCurrentContext());
-    }
-
-    @Deprecated
-    public RubyFixnum rest_size() {
-        return rest_size(getRuntime().getCurrentContext());
-    }
-
-    @Deprecated
-    public IRubyObject getchCommon(ThreadContext context, boolean is1_9) {
-        return getchCommon(context);
     }
 
     /**
