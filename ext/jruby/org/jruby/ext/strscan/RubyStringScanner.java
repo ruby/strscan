@@ -61,7 +61,9 @@ import java.util.Iterator;
 import static org.jruby.runtime.Visibility.PRIVATE;
 
 /**
- * @author kscott
+ * JRuby implementation of the strscan library from Ruby.
+ *
+ * Original implementation by Kelly Nawrocke. Currently a loose port of the C implementation from CRuby.
  */
 @JRubyClass(name = "StringScanner")
 public class RubyStringScanner extends RubyObject {
