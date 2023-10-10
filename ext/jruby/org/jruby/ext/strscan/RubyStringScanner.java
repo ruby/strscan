@@ -855,10 +855,13 @@ public class RubyStringScanner extends RubyObject {
 
     private IRubyObject inspect1() {
         final Ruby runtime = getRuntime();
+
         if (curr == 0) return RubyString.newEmptyString(runtime);
+
         if (curr > INSPECT_LENGTH) {
             return RubyString.newStringNoCopy(runtime, DOT_BYTES).append(str.substr(runtime, curr - INSPECT_LENGTH, INSPECT_LENGTH)).inspect();
         }
+
         return str.substr(runtime, 0, curr).inspect();
     }
 
@@ -875,6 +878,7 @@ public class RubyStringScanner extends RubyObject {
         if (len > INSPECT_LENGTH) {
             return ((RubyString) str.substr(runtime, curr, INSPECT_LENGTH)).cat(DOT_BYTES).inspect();
         }
+
         return str.substr(runtime, curr, len).inspect();
     }
 
