@@ -74,7 +74,7 @@ public class RubyStringScanner extends RubyObject {
 
     private Region regs;
     private Regex pattern;
-    private int scannerFlags;
+    private boolean matched;
     private boolean fixedAnchor;
 
     private static final int MATCHED_STR_SCN_F = 1 << 11;
@@ -196,15 +196,15 @@ public class RubyStringScanner extends RubyObject {
     }
 
     private void clearMatched() {
-        scannerFlags &= ~MATCHED_STR_SCN_F;
+        matched = false;
     }
 
     private void setMatched() {
-        scannerFlags |= MATCHED_STR_SCN_F;
+        matched = true;
     }
 
     private boolean isMatched() {
-        return (scannerFlags & MATCHED_STR_SCN_F) != 0;
+        return matched;
     }
 
     private void check(ThreadContext context) {
@@ -245,7 +245,7 @@ public class RubyStringScanner extends RubyObject {
         str = otherScanner.str;
         curr = otherScanner.curr;
         prev = otherScanner.prev;
-        scannerFlags = otherScanner.scannerFlags;
+        matched = otherScanner.matched;
 
         regs = otherScanner.regs.clone();
         pattern = otherScanner.pattern;
