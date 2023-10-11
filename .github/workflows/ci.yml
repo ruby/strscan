@@ -24,6 +24,8 @@ jobs:
           - '3.1'
           - '3.2'
           - debug
+          # We need to update 'jruby-XXX' in "if:" too when we update
+          # this.
           - jruby-9.4.1.0
           - truffleruby
           - truffleruby-head
@@ -59,7 +61,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         if: >-
           matrix.os == 'ubuntu-latest' &&
-            (matrix.ruby == '3.1' || matrix.ruby == 'jruby-head')
+            (matrix.ruby == '3.1' || matrix.ruby == 'jruby-9.4.1.0')
         with:
           name: gem-${{ matrix.os }}-${{ matrix.ruby }}
           path: pkg/
@@ -68,7 +70,7 @@ jobs:
         if: >-
           startsWith(github.ref, 'refs/tags/') &&
             matrix.os == 'ubuntu-latest' &&
-            (matrix.ruby == '3.1' || matrix.ruby == 'jruby-head')
+            (matrix.ruby == '3.1' || matrix.ruby == 'jruby-9.4.1.0')
         run: |
           ruby \
             -e 'print("## strscan "); \
