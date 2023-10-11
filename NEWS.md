@@ -1,5 +1,23 @@
 # News
 
+## 3.0.7 - 2023-10-11
+
+### Improvements
+
+  * jruby: Added support for fixed anchor.
+    * GH-57
+
+### Fixes
+
+  * Fixed a crash bug of `StringScanner#named_capture` on not matched
+    status.
+    * GH-61
+    * Patch by OKURA Masafumi
+
+### Thanks
+
+  * OKURA Masafumi
+
 ## 3.0.6 - 2023-02-08
 
 ### Improvements
