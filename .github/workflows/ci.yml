@@ -77,7 +77,7 @@ jobs:
           gh release create \
             ${GITHUB_REF_NAME} \
             --discussion-category Announcements \
-            --notes-file release-node.md || :
+            --notes-file release-note.md || :
           gh release upload ${GITHUB_REF_NAME} pkg/*.gem
         env:
           GH_TOKEN: ${{ github.token }}
