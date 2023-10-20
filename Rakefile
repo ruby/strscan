@@ -44,13 +44,6 @@ task :benchmark do
        "benchmark/scan.yaml")
 end
 
-task :sync_tool do
-  require 'fileutils'
-  FileUtils.cp "../ruby/tool/lib/core_assertions.rb", "./test/lib"
-  FileUtils.cp "../ruby/tool/lib/envutil.rb", "./test/lib"
-  FileUtils.cp "../ruby/tool/lib/find_executable.rb", "./test/lib"
-end
-
 release_task = Rake.application["release"]
 release_task.prerequisites.delete("build")
 release_task.prerequisites.delete("release:rubygem_push")
