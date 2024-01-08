@@ -12,7 +12,7 @@ jobs:
 
   host:
     needs: ruby-versions
-    name: build (${{ matrix.ruby }} / ${{ matrix.os }})
+    name: ${{ matrix.os }} ${{ matrix.ruby }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
