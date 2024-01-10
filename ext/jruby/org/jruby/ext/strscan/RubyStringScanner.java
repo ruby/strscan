@@ -106,13 +106,9 @@ public class RubyStringScanner extends RubyObject {
     private static final RegionAdapter REGION_ADAPTER;
     static {
         RegionAdapter adapter;
-        try {
-            Region.class.getMethod("newRegion", int.class, int.class);
-            // ok, proceed with factory-based adapter
-            adapter = new FactoryRegionAdapter();
-        } catch (NoSuchMethodException | SecurityException ex) {
-            adapter = new OldRegionAdapter();
-        }
+
+        adapter = new FactoryRegionAdapter();
+
         REGION_ADAPTER = adapter;
     }
 
@@ -123,44 +119,6 @@ public class RubyStringScanner extends RubyObject {
         int setBeg(Region region, int index, int value);
         int setEnd(Region region, int index, int value);
         int getNumRegs(Region region);
-    }
-
-    private static class OldRegionAdapter implements RegionAdapter {
-        @Override
-        @SuppressWarnings("deprecation")
-        public Region newRegion(int beg, int end) {
-            return new Region(beg, end);
-        }
-
-        @Override
-        @SuppressWarnings("deprecation")
-        public int getBeg(Region region, int index) {
-            return region.beg[index];
-        }
-
-        @Override
-        @SuppressWarnings("deprecation")
-        public int getEnd(Region region, int index) {
-            return region.end[index];
-        }
-
-        @Override
-        @SuppressWarnings("deprecation")
-        public int setBeg(Region region, int index, int value) {
-            return region.beg[index] = value;
-        }
-
-        @Override
-        @SuppressWarnings("deprecation")
-        public int setEnd(Region region, int index, int value) {
-            return region.end[index] = value;
-        }
-
-        @Override
-        @SuppressWarnings("deprecation")
-        public int getNumRegs(Region region) {
-            return region.numRegs;
-        }
     }
 
     private static class FactoryRegionAdapter implements RegionAdapter {
