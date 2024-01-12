@@ -901,9 +901,14 @@ public class RubyStringScanner extends RubyObject {
         newAry = RubyArray.newArray(runtime, numRegs);
 
         for (i = 1; i < numRegs; i++) {
-            IRubyObject str = extractRange(runtime,
+            IRubyObject str;
+            if (REGION_ADAPTER.getBeg(regs, i) == -1) {
+                str = context.nil;
+            } else {
+                str = extractRange(runtime,
                     adjustRegisterPosition(REGION_ADAPTER.getBeg(regs, i)),
                     adjustRegisterPosition(REGION_ADAPTER.getEnd(regs, i)));
+            }
             newAry.push(str);
         }
 
