@@ -808,9 +808,14 @@ public class RubyStringScanner extends RubyObject {
         newAry = RubyArray.newArray(runtime, numRegs);
 
         for (i = 1; i < numRegs; i++) {
-            IRubyObject str = extractRange(runtime,
+            IRubyObject str;
+            if (regs.getBeg(i) == -1) {
+                str = context.nil;
+            } else {
+                str = extractRange(runtime,
                     adjustRegisterPosition(regs.getBeg(i)),
                     adjustRegisterPosition(regs.getEnd(i)));
+            }
             newAry.push(str);
         }
 
