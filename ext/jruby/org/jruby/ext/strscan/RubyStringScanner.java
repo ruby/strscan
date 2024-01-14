@@ -770,7 +770,7 @@ public class RubyStringScanner extends RubyObject {
         int realSize = value.getRealSize();
 
         if (curr >= realSize) {
-            return RubyString.newEmptyString(runtime);
+            return RubyString.newEmptyString(runtime, str.getEncoding());
         }
 
         return extractRange(runtime, curr, realSize);
