@@ -67,13 +67,14 @@ import static org.jruby.runtime.Visibility.PRIVATE;
  */
 @JRubyClass(name = "StringScanner")
 public class RubyStringScanner extends RubyObject {
+    private static final long serialVersionUID = -3722138049229128675L;
 
     private RubyString str;
     private int curr = 0;
     private int prev = -1;
 
-    private Region regs;
-    private Regex pattern;
+    private transient Region regs;
+    private transient Regex pattern;
     private boolean matched;
     private boolean fixedAnchor;
 
@@ -798,7 +799,7 @@ public class RubyStringScanner extends RubyObject {
     @JRubyMethod(name = "captures")
     public IRubyObject captures(ThreadContext context) {
         int i, numRegs;
-        RubyArray newAry;
+        RubyArray<?> newAry;
 
         if (!isMatched()) return context.nil;
 
@@ -825,7 +826,7 @@ public class RubyStringScanner extends RubyObject {
     @JRubyMethod(name = "values_at", rest = true)
     public IRubyObject values_at(ThreadContext context, IRubyObject[] args) {
         int i;
-        RubyArray newAry;
+        RubyArray<?> newAry;
 
         if (!isMatched()) return context.nil;
 
