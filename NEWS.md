@@ -1,5 +1,19 @@
 # News
 
+## 3.0.8 - 2024-01-13
+
+### Improvements
+
+  * `StringScanner#captures`: Changed to return `nil` not `""` for
+    unmached capture. Because `StringScanner#[]` and `MatchData#[]`
+    does so.
+    * GH-72
+    * Patched by NAITOH Jun
+
+### Thanks
+
+  * NAITOH Jun
+
 ## 3.0.7 - 2023-10-11
 
 ### Improvements
