@@ -240,12 +240,13 @@ public class RubyStringScanner extends RubyObject {
     }
 
     private IRubyObject extractRange(Ruby runtime, int beg, int end) {
-        int size = str.getByteList().getRealSize();
+        ByteList byteList = str.getByteList();
+        int size = byteList.getRealSize();
 
         if (beg > size) return runtime.getNil();
         if (end > size) end = size;
 
-        return str.makeSharedString(runtime, beg, end - beg);
+        return newString(runtime, beg, end - beg);
     }
 
     private IRubyObject extractBegLen(Ruby runtime, int beg, int len) {
@@ -256,7 +257,7 @@ public class RubyStringScanner extends RubyObject {
         if (beg > size) return runtime.getNil();
         len = Math.min(len, size - beg);
 
-        return str.makeSharedString(runtime, beg, len);
+        return newString(runtime, beg, len);
     }
 
     // MRI: strscan_do_scan
@@ -866,6 +867,16 @@ public class RubyStringScanner extends RubyObject {
         if (!isMatched()) return context.nil;
 
         return RubyArray.newArray(context.runtime, op_aref(context, index1), op_aref(context, index2), op_aref(context, index3));
+    }
+
+    // MRI: str_new
+    private RubyString newString(Ruby runtime, int start, int length) {
+        ByteList byteList = str.getByteList();
+        int begin = byteList.begin();
+
+        ByteList newByteList = new ByteList(byteList.unsafeBytes(), begin + start, begin + length, byteList.getEncoding(), true);
+
+        return RubyString.newString(runtime, newByteList);
     }
 
     /**
