@@ -1,5 +1,31 @@
 # News
 
+## 3.0.9 - 2024-01-21
+
+### Improvements
+
+  * jruby: `StringScanner#rest`: Changed to use the source encoding instead of
+    `US-ASCII` for empty case.
+    * GH-78
+    * GH-79
+    * GH-80
+    * Reported by NAITOH Jun
+
+  * jruby: Dropped support for old Joni.
+    * GH-76
+    * Patch by Olle Jonsson
+
+  * jruby: `StringScanner#scan`: Stopped to use shared string for result.
+    * GH-83
+    * GH-84
+    * Reported by NAITOH Jun
+
+### Thanks
+
+  * NAITOH Jun
+
+  * Olle Jonsson
+
 ## 3.0.8 - 2024-01-13
 
 ### Improvements
