@@ -874,7 +874,7 @@ public class RubyStringScanner extends RubyObject {
         ByteList byteList = str.getByteList();
         int begin = byteList.begin();
 
-        ByteList newByteList = new ByteList(byteList.unsafeBytes(), begin + start, begin + length, byteList.getEncoding(), true);
+        ByteList newByteList = new ByteList(byteList.unsafeBytes(), begin + start, length, byteList.getEncoding(), true);
 
         return RubyString.newString(runtime, newByteList);
     }
