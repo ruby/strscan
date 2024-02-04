@@ -1,5 +1,13 @@
 # News
 
+## 3.1.0 - 2024-02-04
+
+### Fixes
+
+  * jruby: Fixed a bug that substring can't be used.
+    * GH-86
+    * GH-87
+
 ## 3.0.9 - 2024-01-21
 
 ### Improvements
