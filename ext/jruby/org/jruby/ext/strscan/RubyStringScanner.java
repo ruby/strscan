@@ -45,7 +45,6 @@ import org.jruby.RubyObject;
 import org.jruby.RubyRegexp;
 import org.jruby.RubyString;
 import org.jruby.RubySymbol;
-import org.jruby.RubyThread;
 import org.jruby.anno.JRubyClass;
 import org.jruby.anno.JRubyMethod;
 import org.jruby.ast.util.ArgsUtil;
@@ -77,8 +76,6 @@ public class RubyStringScanner extends RubyObject {
     private transient Regex pattern;
     private boolean matched;
     private boolean fixedAnchor;
-
-    private static final int MATCHED_STR_SCN_F = 1 << 11;
 
     public static RubyClass createScannerClass(final Ruby runtime) {
         RubyClass Object = runtime.getObject();
