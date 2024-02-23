@@ -927,12 +927,12 @@ strscan_scan_byte(VALUE self)
     if (EOS_P(p))
         return Qnil;
 
-    VALUE ret = INT2FIX((unsigned char)*CURPTR(p));
+    VALUE byte = INT2FIX((unsigned char)*CURPTR(p));
     p->prev = p->curr;
     p->curr++;
     MATCHED(p);
     adjust_registers_to_matched(p);
-    return ret;
+    return byte;
 }
 
 /*
