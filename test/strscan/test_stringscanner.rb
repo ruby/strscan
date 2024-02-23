@@ -8,7 +8,7 @@ require 'strscan'
 require 'test/unit'
 
 module StringScannerTests
-  def test_peekbyte
+  def test_peek_byte
     s = create_string_scanner('ab')
     assert_equal 97, s.peek_byte
     assert_equal 97, s.scan_byte
