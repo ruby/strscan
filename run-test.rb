@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+gem 'strscan'
 require 'strscan'
 puts "Loaded strscan from #{$".grep(/\/strscan\./).join(', ')}"
 puts "Gem from #{Gem.loaded_specs["strscan"]&.full_gem_path}"
