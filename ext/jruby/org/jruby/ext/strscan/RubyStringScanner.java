@@ -513,26 +513,27 @@ public class RubyStringScanner extends RubyObject {
         Ruby runtime = context.runtime;
         check(context);
         clearMatched();
-        if (curr >= str.getByteList().getRealSize()) return context.nil;
+        ByteList byteList = str.getByteList();
+        int curr = this.curr;
+        if (curr >= byteList.getRealSize()) return context.nil;
 
-        byte[] bytes = str.getBytes();
-
-        byte bite = bytes[curr];
+        int bite = byteList.get(curr);
         prev = curr;
-        curr++;
+        this.curr++;
 
         setMatched();
         adjustRegisters();
-        return RubyFixnum.newFixnum(context.runtime, bite & 0xff);
+        return RubyFixnum.newFixnum(runtime, bite);
     }
 
     @JRubyMethod(name = "peek_byte")
     public IRubyObject peek_byte(ThreadContext context) {
-        Ruby runtime = context.runtime;
         check(context);
-        if (curr >= str.getByteList().getRealSize()) return context.nil;
+        ByteList byteList = str.getByteList();
+        int curr = this.curr;
+        if (curr >= byteList.getRealSize()) return context.nil;
 
-        return RubyFixnum.newFixnum(context.runtime, (str.getBytes()[curr]) & 0xff);
+        return RubyFixnum.newFixnum(context.runtime, byteList.get(curr));
     }
 
     @JRubyMethod(name = "peek")
