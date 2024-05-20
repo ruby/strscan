@@ -1,0 +1,7 @@
+COPYING
+LICENSE.txt
+NEWS.md
+README.md
+ext/strscan/strscan.c
+ext/strscan/helper_methods.md
+
