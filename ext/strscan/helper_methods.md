@@ -1,12 +1,12 @@
 ## Helper Methods
 
-These helper methods display values returned by a scanner's methods.
+These helper methods display values returned by scanner's methods.
 
 ### `put_situation(scanner)`
 
 Display scanner's situation:
 
-- Byte position (`#pos)`.
+- Byte position (`#pos`).
 - Character position (`#charpos`)
 - Target string (`#rest`) and size (`#rest_size`).
 
@@ -80,7 +80,7 @@ def put_situation(scanner)
   puts '# Situation:'
   puts "#   pos:       #{scanner.pos}"
   puts "#   charpos:   #{scanner.charpos}"
-  puts "#   rest:      \"#{scanner.rest}\""
+  puts "#   rest:      #{scanner.rest.inspect}"
   puts "#   rest_size: #{scanner.rest_size}"
 end
 ```
@@ -88,35 +88,24 @@ end
 ```
 def put_match_values(scanner)
   puts '# Basic match values:'
-  puts "#   matched?:       #{scanner.send(:matched?)}"
+  puts "#   matched?:       #{scanner.matched?}"
   value = scanner.matched_size || 'nil'
   puts "#   matched_size:   #{value}"
-  value = scanner.send(:pre_match)
-  value = value.nil? ? 'nil' : '"' + value + '"'
-  puts "#   pre_match:      #{value}"
-  value = scanner.send(:matched)
-  value = value.nil? ? 'nil' : '"' + value + '"'
-  puts "#   matched  :      #{value}"
-  value = scanner.send(:post_match)
-  value = value.nil? ? 'nil' : '"' + value + '"'
-  puts "#   post_match:     #{value}"
+  puts "#   pre_match:      #{scanner.pre_match.inspect}"
+  puts "#   matched  :      #{scanner.matched.inspect}"
+  puts "#   post_match:     #{scanner.post_match.inspect}"
   puts '# Captured match values:'
-  value = scanner.send(:size) || 'nil'
-  puts "#   size:           #{value}"
-  value = scanner.send(:captures) || 'nil'
-  puts "#   captures:       #{value}"
-  value = scanner.send(:named_captures)
-  puts "#   named_captures: #{value}"
+  puts "#   size:           #{scanner.size}"
+  puts "#   captures:       #{scanner.captures}"
+  puts "#   named_captures: #{scanner.named_captures}"
   if scanner.size.nil?
-    puts "#   values_at:      #{scanner.send(:values_at, 0) || 'nil'}"
-    puts "#   [0]:            #{scanner.send(:[], nil) || 'nil'}"
+    puts "#   values_at:      #{scanner.values_at(0)}"
+    puts "#   [0]:            #{scanner[0]}"
   else
-    puts "#   values_at:      #{scanner.send(:values_at, *(0..scanner.size)) || 'nil'}"
+    puts "#   values_at:      #{scanner.values_at(*(0..scanner.size))}"
     puts "#   []:"
-    (0..scanner.size).each do |i|
-      value = scanner.send(:[], i)
-      value = value.nil? ? 'nil' : '"' + value + '"'
-      puts "#     [#{i}]:          #{value}"
+    scanner.size.times do |i|
+      puts "#     [#{i}]:          #{scanner[i].inspect}"
     end
   end
 end
