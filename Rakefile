@@ -12,6 +12,13 @@ namespace :version do
       "STRSCAN_VERSION \"#{version.succ}\""
     end
     File.write(strscan_c_path, strscan_c)
+
+    strscan_java_path = "ext/jruby/org/jruby/ext/strscan/RubyStringScanner.java"
+    strscan_java = File.read(strscan_java_path).gsub(/STRSCAN_VERSION = "(.+?)"/) do
+      version = $1
+      "STRSCAN_VERSION = \"#{version.succ}\""
+    end
+    File.write(strscan_java_path, strscan_java)
   end
 end
 
