@@ -29,6 +29,7 @@ Gem::Specification.new do |s|
     s.require_paths = %w{lib}
     files << "ext/strscan/extconf.rb"
     files << "ext/strscan/strscan.c"
+    files.concat Dir.glob("doc/strscan/**/*")
     s.extensions = %w{ext/strscan/extconf.rb}
   end
   s.files = files
