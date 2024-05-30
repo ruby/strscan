@@ -65,7 +65,7 @@ jobs:
         if: >-
           startsWith(github.ref, 'refs/tags/') &&
             matrix.os == 'ubuntu-latest' &&
-            (matrix.ruby == '3.3' || matrix.ruby == 'jruby')
+            (matrix.ruby == needs.ruby-version.outputs.latest || matrix.ruby == 'jruby')
         run: |
           ruby \
             -e 'print("## strscan "); \
@@ -83,7 +83,7 @@ jobs:
 
       - run: gem install --verbose --backtrace pkg/*.gem
 
-      - run: gem install test-unit-ruby-core
+      - run: gem install test-unit-ruby-core test-unit
 
       - name: Run tests on the installed gem
         run: ruby run-test.rb
