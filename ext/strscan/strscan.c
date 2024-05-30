@@ -219,7 +219,7 @@ strscan_s_allocate(VALUE klass)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   StringScanner.new(string, fixed_anchor: false) -> string_scanner
@@ -279,7 +279,7 @@ check_strscan(VALUE obj)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   dup -> shallow_copy
@@ -327,7 +327,7 @@ strscan_s_mustc(VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   reset -> self
@@ -364,8 +364,8 @@ strscan_reset(VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
- * :include: ../../doc/strscan/methods/terminate.md
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/terminate.md
  */
 static VALUE
 strscan_terminate(VALUE self)
@@ -395,7 +395,7 @@ strscan_clear(VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   string -> stored_string
@@ -421,7 +421,7 @@ strscan_get_string(VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   string = other_string -> other_string
@@ -468,7 +468,7 @@ strscan_set_string(VALUE self, VALUE str)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   concat(more_string) -> self
@@ -508,8 +508,8 @@ strscan_concat(VALUE self, VALUE str)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
- * :include: ../../doc/strscan/methods/get_pos.md
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/get_pos.md
  */
 static VALUE
 strscan_get_pos(VALUE self)
@@ -522,8 +522,8 @@ strscan_get_pos(VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
- * :include: ../../doc/strscan/methods/get_charpos.md
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/get_charpos.md
  */
 static VALUE
 strscan_get_charpos(VALUE self)
@@ -537,8 +537,8 @@ strscan_get_charpos(VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
- * :include: ../../doc/strscan/methods/set_pos.md
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/set_pos.md
  */
 static VALUE
 strscan_set_pos(VALUE self, VALUE v)
@@ -743,8 +743,8 @@ strscan_do_scan(VALUE self, VALUE pattern, int succptr, int getstr, int headonly
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
- * :include: ../../doc/strscan/methods/scan.md
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/scan.md
  */
 static VALUE
 strscan_scan(VALUE self, VALUE re)
@@ -754,7 +754,7 @@ strscan_scan(VALUE self, VALUE re)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   match?(pattern) -> updated_position or nil
@@ -816,8 +816,8 @@ strscan_match_p(VALUE self, VALUE re)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
- * :include: ../../doc/strscan/methods/skip.md
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/skip.md
  */
 static VALUE
 strscan_skip(VALUE self, VALUE re)
@@ -827,7 +827,7 @@ strscan_skip(VALUE self, VALUE re)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   check(pattern) -> matched_substring or nil
@@ -913,8 +913,8 @@ strscan_scan_full(VALUE self, VALUE re, VALUE s, VALUE f)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
- * :include: ../../doc/strscan/methods/scan_until.md
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/scan_until.md
  */
 static VALUE
 strscan_scan_until(VALUE self, VALUE re)
@@ -924,7 +924,7 @@ strscan_scan_until(VALUE self, VALUE re)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   exist?(pattern) -> byte_offset or nil
@@ -987,8 +987,8 @@ strscan_exist_p(VALUE self, VALUE re)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
- * :include: ../../doc/strscan/methods/skip_until.md
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/skip_until.md
  */
 static VALUE
 strscan_skip_until(VALUE self, VALUE re)
@@ -998,7 +998,7 @@ strscan_skip_until(VALUE self, VALUE re)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   check_until(pattern) -> substring or nil
@@ -1098,8 +1098,8 @@ adjust_registers_to_matched(struct strscanner *p)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
- * :include: ../../doc/strscan/methods/getch.md
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/getch.md
  */
 static VALUE
 strscan_getch(VALUE self)
@@ -1170,8 +1170,8 @@ strscan_peek_byte(VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
- * :include: ../../doc/strscan/methods/get_byte.md
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/get_byte.md
  */
 static VALUE
 strscan_get_byte(VALUE self)
@@ -1210,7 +1210,7 @@ strscan_getbyte(VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   peek(length) -> substring
@@ -1261,7 +1261,7 @@ strscan_peep(VALUE self, VALUE vlen)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   unscan -> self
@@ -1313,7 +1313,7 @@ strscan_unscan(VALUE self)
 /*
  *
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   beginning_of_line? -> true or false
@@ -1356,7 +1356,7 @@ strscan_bol_p(VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   eos? -> true or false
@@ -1424,7 +1424,7 @@ strscan_rest_p(VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   matched? -> true or false
@@ -1455,7 +1455,7 @@ strscan_matched_p(VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   matched -> matched_substring or nil
@@ -1490,7 +1490,7 @@ strscan_matched(VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   matched_size -> substring_size or nil
@@ -1544,7 +1544,7 @@ name_to_backref_number(struct re_registers *regs, VALUE regexp, const char* name
 /*
  *
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   [](specifier) -> substring or nil
@@ -1648,7 +1648,7 @@ strscan_aref(VALUE self, VALUE idx)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   size -> captures_count
@@ -1682,7 +1682,7 @@ strscan_size(VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   captures -> substring_array or nil
@@ -1735,7 +1735,7 @@ strscan_captures(VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   values_at(*specifiers) -> array_of_captures or nil
@@ -1775,7 +1775,7 @@ strscan_values_at(int argc, VALUE *argv, VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   pre_match -> substring
@@ -1812,7 +1812,7 @@ strscan_pre_match(VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   post_match -> substring
@@ -1849,7 +1849,7 @@ strscan_post_match(VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   rest -> target_substring
@@ -1881,7 +1881,7 @@ strscan_rest(VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   rest_size -> integer
@@ -1935,7 +1935,7 @@ strscan_restsize(VALUE self)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   inspect -> string
@@ -2039,7 +2039,7 @@ inspect2(struct strscanner *p)
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   fixed_anchor? -> true or false
@@ -2081,7 +2081,7 @@ named_captures_iter(const OnigUChar *name,
 
 /*
  * :markup: markdown
- * :include: ../../doc/strscan/link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   named_captures -> hash
@@ -2131,8 +2131,8 @@ strscan_named_captures(VALUE self)
  *
  * :markup: markdown
  *
- * :include: ../../doc/strscan/link_refs.txt
- * :include: ../../doc/strscan/strscan.md
+ * :include: strscan/link_refs.txt
+ * :include: strscan/strscan.md
  *
  */
 void
