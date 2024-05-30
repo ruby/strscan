@@ -3,7 +3,7 @@
 /Gemfile.lock
 /_yardoc/
 /coverage/
-/doc/
+/html/
 /lib/*.jar
 /lib/*.so
 /lib/*.dylib

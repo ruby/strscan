@@ -1,5 +1,6 @@
 require "bundler/gem_tasks"
 require "rake/testtask"
+require "rdoc/task"
 
 task :default => [:compile, :test]
 
@@ -50,6 +51,8 @@ task :benchmark do
        "benchmark-driver",
        "benchmark/scan.yaml")
 end
+
+RDoc::Task.new
 
 release_task = Rake.application["release"]
 release_task.prerequisites.delete("build")
