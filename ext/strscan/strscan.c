@@ -219,7 +219,7 @@ strscan_s_allocate(VALUE klass)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   StringScanner.new(string, fixed_anchor: false) -> string_scanner
@@ -279,7 +279,7 @@ check_strscan(VALUE obj)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   dup -> shallow_copy
@@ -327,7 +327,7 @@ strscan_s_mustc(VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   reset -> self
@@ -364,39 +364,8 @@ strscan_reset(VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
- *
- * call-seq:
- *   terminate -> self
- *
- * Sets the scanner to end-of-string;
- * returns +self+:
- *
- * - Sets both [positions][11] to end-of-stream.
- * - Clears [match values][9].
- *
- * ```
- * scanner = StringScanner.new(HIRAGANA_TEXT)
- * scanner.string                 # => "こんにちは"
- * scanner.scan_until(/に/)
- * put_situation(scanner)
- * # Situation:
- * #   pos:       9
- * #   charpos:   3
- * #   rest:      "ちは"
- * #   rest_size: 6
- * match_values_cleared?(scanner) # => false
- *
- * scanner.terminate              # => #<StringScanner fin>
- * put_situation(scanner)
- * # Situation:
- * #   pos:       15
- * #   charpos:   5
- * #   rest:      ""
- * #   rest_size: 0
- * match_values_cleared?(scanner) # => true
- * ```
- *
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/terminate.md
  */
 static VALUE
 strscan_terminate(VALUE self)
@@ -426,7 +395,7 @@ strscan_clear(VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   string -> stored_string
@@ -452,7 +421,7 @@ strscan_get_string(VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   string = other_string -> other_string
@@ -499,7 +468,7 @@ strscan_set_string(VALUE self, VALUE str)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   concat(more_string) -> self
@@ -539,23 +508,8 @@ strscan_concat(VALUE self, VALUE str)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
- *
- * call-seq:
- *   pos -> byte_position
- *
- * Returns the integer [byte position][2],
- * which may be different from the [character position][7]:
- *
- * ```
- * scanner = StringScanner.new(HIRAGANA_TEXT)
- * scanner.string  # => "こんにちは"
- * scanner.pos     # => 0
- * scanner.getch   # => "こ" # 3-byte character.
- * scanner.charpos # => 1
- * scanner.pos     # => 3
- * ```
- *
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/get_pos.md
  */
 static VALUE
 strscan_get_pos(VALUE self)
@@ -568,28 +522,8 @@ strscan_get_pos(VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
- *
- * call-seq:
- *   charpos -> character_position
- *
- * Returns the [character position][7] (initially zero),
- * which may be different from the [byte position][2]
- * given by method #pos:
- *
- * ```
- * scanner = StringScanner.new(HIRAGANA_TEXT)
- * scanner.string # => "こんにちは"
- * scanner.getch  # => "こ" # 3-byte character.
- * scanner.getch  # => "ん" # 3-byte character.
- * put_situation(scanner)
- * # Situation:
- * #   pos:       6
- * #   charpos:   2
- * #   rest:      "にちは"
- * #   rest_size: 9
- * ```
- *
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/get_charpos.md
  */
 static VALUE
 strscan_get_charpos(VALUE self)
@@ -603,35 +537,8 @@ strscan_get_charpos(VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
- *
- * call-seq:
- *   pos = n -> n
- *
- * Sets the [byte position][2] and the [character position][11];
- * returns `n`.
- *
- * Does not affect [match values][9].
- *
- * For non-negative `n`, sets the position to `n`:
- *
- * ```
- * scanner = StringScanner.new(HIRAGANA_TEXT)
- * scanner.string  # => "こんにちは"
- * scanner.pos = 3 # => 3
- * scanner.rest    # => "んにちは"
- * scanner.charpos # => 1
- * ```
- *
- * For negative `n`, counts from the end of the [stored string][1]:
- *
- * ```
- * scanner.pos = -9 # => -9
- * scanner.pos      # => 6
- * scanner.rest     # => "にちは"
- * scanner.charpos  # => 2
- * ```
- *
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/set_pos.md
  */
 static VALUE
 strscan_set_pos(VALUE self, VALUE v)
@@ -836,60 +743,8 @@ strscan_do_scan(VALUE self, VALUE pattern, int succptr, int getstr, int headonly
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
- *
- * call-seq:
- *   scan(pattern) -> substring or nil
- *
- * Attempts to [match][17] the given `pattern`
- * at the beginning of the [target substring][3].
- *
- * If the match succeeds:
- *
- * - Returns the matched substring.
- * - Increments the [byte position][2] by <tt>substring.bytesize</tt>,
- *   and may increment the [character position][7].
- * - Sets [match values][9].
- *
- * ```
- * scanner = StringScanner.new(HIRAGANA_TEXT)
- * scanner.string     # => "こんにちは"
- * scanner.pos = 6
- * scanner.scan(/に/) # => "に"
- * put_match_values(scanner)
- * # Basic match values:
- * #   matched?:       true
- * #   matched_size:   3
- * #   pre_match:      "こん"
- * #   matched  :      "に"
- * #   post_match:     "ちは"
- * # Captured match values:
- * #   size:           1
- * #   captures:       []
- * #   named_captures: {}
- * #   values_at:      ["に", nil]
- * #   []:
- * #     [0]:          "に"
- * #     [1]:          nil
- * put_situation(scanner)
- * # Situation:
- * #   pos:       9
- * #   charpos:   3
- * #   rest:      "ちは"
- * #   rest_size: 6
- * ```
- *
- * If the match fails:
- *
- * - Returns `nil`.
- * - Does not increment byte and character positions.
- * - Clears match values.
- *
- * ```
- * scanner.scan(/nope/)           # => nil
- * match_values_cleared?(scanner) # => true
- * ```
- *
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/scan.md
  */
 static VALUE
 strscan_scan(VALUE self, VALUE re)
@@ -899,7 +754,7 @@ strscan_scan(VALUE self, VALUE re)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   match?(pattern) -> updated_position or nil
@@ -961,52 +816,8 @@ strscan_match_p(VALUE self, VALUE re)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
- *
- * call-seq:
- *   skip(pattern) match_size or nil
- *
- * Attempts to [match][17] the given `pattern`
- * at the beginning of the [target substring][3];
- *
- * If the match succeeds:
- *
- * - Increments the [byte position][2] by substring.bytesize,
- *   and may increment the [character position][7].
- * - Sets [match values][9].
- * - Returns the size (bytes) of the matched substring.
- *
- * ```
- * scanner = StringScanner.new(HIRAGANA_TEXT)
- * scanner.string                  # => "こんにちは"
- * scanner.pos = 6
- * scanner.skip(/に/)              # => 3
- * put_match_values(scanner)
- * # Basic match values:
- * #   matched?:       true
- * #   matched_size:   3
- * #   pre_match:      "こん"
- * #   matched  :      "に"
- * #   post_match:     "ちは"
- * # Captured match values:
- * #   size:           1
- * #   captures:       []
- * #   named_captures: {}
- * #   values_at:      ["に", nil]
- * #   []:
- * #     [0]:          "に"
- * #     [1]:          nil
- * put_situation(scanner)
- * # Situation:
- * #   pos:       9
- * #   charpos:   3
- * #   rest:      "ちは"
- * #   rest_size: 6
- *
- * scanner.skip(/nope/)            # => nil
- * match_values_cleared?(scanner)  # => true
- * ```
- *
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/skip.md
  */
 static VALUE
 strscan_skip(VALUE self, VALUE re)
@@ -1016,7 +827,7 @@ strscan_skip(VALUE self, VALUE re)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   check(pattern) -> matched_substring or nil
@@ -1102,61 +913,8 @@ strscan_scan_full(VALUE self, VALUE re, VALUE s, VALUE f)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
- *
- * call-seq:
- *   scan_until(pattern) -> substring or nil
- *
- * Attempts to [match][17] the given `pattern`
- * anywhere (at any [position][2]) in the [target substring][3].
- *
- * If the match attempt succeeds:
- *
- * - Sets [match values][9].
- * - Sets the [byte position][2] to the end of the matched substring;
- *   may adjust the [character position][7].
- * - Returns the matched substring.
- *
- *
- * ```
- * scanner = StringScanner.new(HIRAGANA_TEXT)
- * scanner.string           # => "こんにちは"
- * scanner.pos = 6
- * scanner.scan_until(/ち/) # => "にち"
- * put_match_values(scanner)
- * # Basic match values:
- * #   matched?:       true
- * #   matched_size:   3
- * #   pre_match:      "こんに"
- * #   matched  :      "ち"
- * #   post_match:     "は"
- * # Captured match values:
- * #   size:           1
- * #   captures:       []
- * #   named_captures: {}
- * #   values_at:      ["ち", nil]
- * #   []:
- * #     [0]:          "ち"
- * #     [1]:          nil
- * put_situation(scanner)
- * # Situation:
- * #   pos:       12
- * #   charpos:   4
- * #   rest:      "は"
- * #   rest_size: 3
- * ```
- *
- * If the match attempt fails:
- *
- * - Clears match data.
- * - Returns `nil`.
- * - Does not update positions.
- *
- * ```
- * scanner.scan_until(/nope/)     # => nil
- * match_values_cleared?(scanner) # => true
- * ```
- *
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/scan_until.md
  */
 static VALUE
 strscan_scan_until(VALUE self, VALUE re)
@@ -1166,7 +924,7 @@ strscan_scan_until(VALUE self, VALUE re)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   exist?(pattern) -> byte_offset or nil
@@ -1229,58 +987,8 @@ strscan_exist_p(VALUE self, VALUE re)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
- *
- * call-seq:
- *   skip_until(pattern) -> matched_substring_size or nil
- *
- * Attempts to [match][17] the given `pattern`
- * anywhere (at any [position][2]) in the [target substring][3];
- * does not modify the positions.
- *
- * If the match attempt succeeds:
- *
- * - Sets [match values][9].
- * - Returns the size of the matched substring.
- *
- * ```
- * scanner = StringScanner.new(HIRAGANA_TEXT)
- * scanner.string           # => "こんにちは"
- * scanner.pos = 6
- * scanner.skip_until(/ち/) # => 6
- * put_match_values(scanner)
- * # Basic match values:
- * #   matched?:       true
- * #   matched_size:   3
- * #   pre_match:      "こんに"
- * #   matched  :      "ち"
- * #   post_match:     "は"
- * # Captured match values:
- * #   size:           1
- * #   captures:       []
- * #   named_captures: {}
- * #   values_at:      ["ち", nil]
- * #   []:
- * #     [0]:          "ち"
- * #     [1]:          nil
- * put_situation(scanner)
- * # Situation:
- * #   pos:       12
- * #   charpos:   4
- * #   rest:      "は"
- * #   rest_size: 3
- * ```
- *
- * If the match attempt fails:
- *
- * - Clears match values.
- * - Returns `nil`.
- *
- * ```
- * scanner.skip_until(/nope/)     # => nil
- * match_values_cleared?(scanner) # => true
- * ```
- *
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/skip_until.md
  */
 static VALUE
 strscan_skip_until(VALUE self, VALUE re)
@@ -1290,7 +998,7 @@ strscan_skip_until(VALUE self, VALUE re)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   check_until(pattern) -> substring or nil
@@ -1390,52 +1098,8 @@ adjust_registers_to_matched(struct strscanner *p)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
- *
- * call-seq:
- *   getch -> character or nil
- *
- * Returns the next (possibly multibyte) character,
- * if available:
- *
- * - If the [position][2]
- *   is at the beginning of a character:
- *
- *     - Returns the character.
- *     - Increments the [character position][7] by 1.
- *     - Increments the [byte position][2]
- *       by the size (in bytes) of the character.
- *
- *     ```
- *     scanner = StringScanner.new(HIRAGANA_TEXT)
- *     scanner.string                                # => "こんにちは"
- *     [scanner.getch, scanner.pos, scanner.charpos] # => ["こ", 3, 1]
- *     [scanner.getch, scanner.pos, scanner.charpos] # => ["ん", 6, 2]
- *     [scanner.getch, scanner.pos, scanner.charpos] # => ["に", 9, 3]
- *     [scanner.getch, scanner.pos, scanner.charpos] # => ["ち", 12, 4]
- *     [scanner.getch, scanner.pos, scanner.charpos] # => ["は", 15, 5]
- *     [scanner.getch, scanner.pos, scanner.charpos] # => [nil, 15, 5]
- *     ```
- *
- * - If the [position][2] is within a multi-byte character
- *   (that is, not at its beginning),
- *   behaves like #get_byte (returns a 1-byte character):
- *
- *     ```
- *     scanner.pos = 1
- *     [scanner.getch, scanner.pos, scanner.charpos] # => ["\x81", 2, 2]
- *     [scanner.getch, scanner.pos, scanner.charpos] # => ["\x93", 3, 1]
- *     [scanner.getch, scanner.pos, scanner.charpos] # => ["ん", 6, 2]
- *     ```
- *
- * - If the [position][2] is at the end of the [stored string][1],
- *   returns `nil` and does not modify the positions:
- *
- *     ```
- *     scanner.terminate
- *     [scanner.getch, scanner.pos, scanner.charpos] # => [nil, 15, 5]
- *     ```
- *
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/getch.md
  */
 static VALUE
 strscan_getch(VALUE self)
@@ -1506,39 +1170,8 @@ strscan_peek_byte(VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
- *
- * call-seq:
- *   get_byte -> byte_as_character or nil
- *
- * Returns the next byte, if available:
- *
- * - If the [position][2]
- *   is not at the end of the [stored string][1]:
- *
- *     - Returns the next byte.
- *     - Increments the [byte position][2].
- *     - Adjusts the [character position][7].
- *
- *     ```
- *     scanner = StringScanner.new(HIRAGANA_TEXT)
- *     # => #<StringScanner 0/15 @ "\xE3\x81\x93\xE3\x82...">
- *     scanner.string                                   # => "こんにちは"
- *     [scanner.get_byte, scanner.pos, scanner.charpos] # => ["\xE3", 1, 1]
- *     [scanner.get_byte, scanner.pos, scanner.charpos] # => ["\x81", 2, 2]
- *     [scanner.get_byte, scanner.pos, scanner.charpos] # => ["\x93", 3, 1]
- *     [scanner.get_byte, scanner.pos, scanner.charpos] # => ["\xE3", 4, 2]
- *     [scanner.get_byte, scanner.pos, scanner.charpos] # => ["\x82", 5, 3]
- *     [scanner.get_byte, scanner.pos, scanner.charpos] # => ["\x93", 6, 2]
- *     ```
-
- * - Otherwise, returns `nil`, and does not change the positions.
- *
- *     ```
- *     scanner.terminate
- *     [scanner.get_byte, scanner.pos, scanner.charpos] # => [nil, 15, 5]
- *     ```
- *
+ * :include: strscan/link_refs.txt
+ * :include: strscan/methods/get_byte.md
  */
 static VALUE
 strscan_get_byte(VALUE self)
@@ -1577,7 +1210,7 @@ strscan_getbyte(VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   peek(length) -> substring
@@ -1628,7 +1261,7 @@ strscan_peep(VALUE self, VALUE vlen)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   unscan -> self
@@ -1680,7 +1313,7 @@ strscan_unscan(VALUE self)
 /*
  *
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   beginning_of_line? -> true or false
@@ -1723,7 +1356,7 @@ strscan_bol_p(VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   eos? -> true or false
@@ -1791,7 +1424,7 @@ strscan_rest_p(VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   matched? -> true or false
@@ -1822,7 +1455,7 @@ strscan_matched_p(VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   matched -> matched_substring or nil
@@ -1857,7 +1490,7 @@ strscan_matched(VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   matched_size -> substring_size or nil
@@ -1911,7 +1544,7 @@ name_to_backref_number(struct re_registers *regs, VALUE regexp, const char* name
 /*
  *
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   [](specifier) -> substring or nil
@@ -2015,7 +1648,7 @@ strscan_aref(VALUE self, VALUE idx)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   size -> captures_count
@@ -2049,7 +1682,7 @@ strscan_size(VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   captures -> substring_array or nil
@@ -2102,7 +1735,7 @@ strscan_captures(VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   values_at(*specifiers) -> array_of_captures or nil
@@ -2142,7 +1775,7 @@ strscan_values_at(int argc, VALUE *argv, VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   pre_match -> substring
@@ -2179,7 +1812,7 @@ strscan_pre_match(VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   post_match -> substring
@@ -2216,7 +1849,7 @@ strscan_post_match(VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   rest -> target_substring
@@ -2248,7 +1881,7 @@ strscan_rest(VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   rest_size -> integer
@@ -2302,7 +1935,7 @@ strscan_restsize(VALUE self)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   inspect -> string
@@ -2406,7 +2039,7 @@ inspect2(struct strscanner *p)
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   fixed_anchor? -> true or false
@@ -2448,7 +2081,7 @@ named_captures_iter(const OnigUChar *name,
 
 /*
  * :markup: markdown
- * :include: link_refs.txt
+ * :include: strscan/link_refs.txt
  *
  * call-seq:
  *   named_captures -> hash
@@ -2498,8 +2131,8 @@ strscan_named_captures(VALUE self)
  *
  * :markup: markdown
  *
- * :include: link_refs.txt
- * :include: strscan.md
+ * :include: strscan/link_refs.txt
+ * :include: strscan/strscan.md
  *
  */
 void
