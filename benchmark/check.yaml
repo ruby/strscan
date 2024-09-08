@@ -4,8 +4,8 @@ prelude: |-
   scanner = StringScanner.new("test string")
 benchmark:
   regexp_pattern: |
-    scanner.scan(/\w/)
+    scanner.check(/\w/)
   regexp_literal: |
-    scanner.scan(/test/)
+    scanner.check(/test/)
   string: |
-    scanner.scan("test")
+    scanner.check("test")
