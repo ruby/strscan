@@ -2,10 +2,16 @@ prelude: |-
   $LOAD_PATH.unshift(File.expand_path("lib"))
   require "strscan"
   scanner = StringScanner.new("test string")
+  str = "test"
+  reg = /test/
 benchmark:
   regexp_pattern: |
     scanner.check(/\w/)
   regexp_literal: |
     scanner.check(/test/)
+  regexp_literal_var: |
+    scanner.check(reg)
   string: |
     scanner.check("test")
+  string_var: |
+    scanner.check(str)
