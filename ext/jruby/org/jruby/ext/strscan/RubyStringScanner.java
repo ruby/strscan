@@ -262,17 +262,6 @@ public class RubyStringScanner extends RubyObject {
     // MRI: strscan_do_scan
     private IRubyObject scan(ThreadContext context, IRubyObject regex, boolean succptr, boolean getstr, boolean headonly) {
         final Ruby runtime = context.runtime;
-
-        if (headonly) {
-            if (!(regex instanceof RubyRegexp)) {
-                regex = regex.convertToString();
-            }
-        } else {
-            if (!(regex instanceof RubyRegexp)) {
-                throw runtime.newTypeError("wrong argument type " + regex.getMetaClass() + " (expected Regexp)");
-            }
-        }
-
         check(context);
 
         ByteList strBL = str.getByteList();
@@ -310,9 +299,9 @@ public class RubyStringScanner extends RubyObject {
             }
             if (ret < 0) return context.nil;
         } else {
-            RubyString pattern = (RubyString) regex;
+            RubyString pattern = regex.convertToString();
 
-            str.checkEncoding(pattern);
+            Encoding patternEnc = str.checkEncoding(pattern);
 
             if (restLen() < pattern.size()) {
                 return context.nil;
@@ -321,11 +310,18 @@ public class RubyStringScanner extends RubyObject {
             ByteList patternBL = pattern.getByteList();
             int patternSize = patternBL.realSize();
 
-            if (ByteList.memcmp(strBL.unsafeBytes(), strBeg + curr, patternBL.unsafeBytes(), patternBL.begin(), patternSize) != 0) {
-                return context.nil;
+            if (headonly) {
+                if (ByteList.memcmp(strBL.unsafeBytes(), strBeg + curr, patternBL.unsafeBytes(), patternBL.begin(), patternSize) != 0) {
+                    return context.nil;
+                }
+                setRegisters(patternSize);
+            } else {
+                int pos = StringSupport.index(strBL, patternBL, strBeg + curr, patternEnc);
+                if (pos == -1) {
+                    return context.nil;
+                }
+                setRegisters(patternSize + pos - curr);
             }
-
-            setRegisters(patternSize);
         }
 
         setMatched();
