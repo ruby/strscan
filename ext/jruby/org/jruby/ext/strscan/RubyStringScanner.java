@@ -263,20 +263,18 @@ public class RubyStringScanner extends RubyObject {
     private IRubyObject scan(ThreadContext context, IRubyObject regex, boolean succptr, boolean getstr, boolean headonly) {
         final Ruby runtime = context.runtime;
         check(context);
-
-        ByteList strBL = str.getByteList();
-        int strBeg = strBL.getBegin();
-
         clearMatched();
 
         if (restLen() < 0) {
             return context.nil;
         }
 
+        ByteList strBL = str.getByteList();
+        int currPtr = strBL.getBegin() + curr;
+
         if (regex instanceof RubyRegexp) {
             pattern = ((RubyRegexp) regex).preparePattern(str);
 
-            int currPtr = currPtr();
             int range = currPtr + restLen();
 
             Matcher matcher = pattern.matcher(strBL.getUnsafeBytes(), matchTarget(), range);
@@ -311,12 +309,12 @@ public class RubyStringScanner extends RubyObject {
             int patternSize = patternBL.realSize();
 
             if (headonly) {
-                if (ByteList.memcmp(strBL.unsafeBytes(), strBeg + curr, patternBL.unsafeBytes(), patternBL.begin(), patternSize) != 0) {
+                if (ByteList.memcmp(strBL.unsafeBytes(), currPtr, patternBL.unsafeBytes(), patternBL.begin(), patternSize) != 0) {
                     return context.nil;
                 }
                 setRegisters(patternSize);
             } else {
-                int pos = StringSupport.index(strBL, patternBL, strBeg + curr, patternEnc);
+                int pos = StringSupport.index(strBL, patternBL, currPtr, patternEnc);
                 if (pos == -1) {
                     return context.nil;
                 }
