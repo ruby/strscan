@@ -265,7 +265,8 @@ public class RubyStringScanner extends RubyObject {
         check(context);
         clearMatched();
 
-        if (restLen() < 0) {
+        int restLen = restLen();
+        if (restLen < 0) {
             return context.nil;
         }
 
@@ -275,7 +276,7 @@ public class RubyStringScanner extends RubyObject {
         if (regex instanceof RubyRegexp) {
             pattern = ((RubyRegexp) regex).preparePattern(str);
 
-            int range = currPtr + restLen();
+            int range = currPtr + restLen;
 
             Matcher matcher = pattern.matcher(strBL.getUnsafeBytes(), matchTarget(), range);
             final int ret;
@@ -298,17 +299,14 @@ public class RubyStringScanner extends RubyObject {
             if (ret < 0) return context.nil;
         } else {
             RubyString pattern = regex.convertToString();
-
             Encoding patternEnc = str.checkEncoding(pattern);
-
-            if (restLen() < pattern.size()) {
-                return context.nil;
-            }
-
             ByteList patternBL = pattern.getByteList();
             int patternSize = patternBL.realSize();
 
             if (headonly) {
+                if (restLen < pattern.size()) {
+                    return context.nil;
+                }
                 if (ByteList.memcmp(strBL.unsafeBytes(), currPtr, patternBL.unsafeBytes(), patternBL.begin(), patternSize) != 0) {
                     return context.nil;
                 }
