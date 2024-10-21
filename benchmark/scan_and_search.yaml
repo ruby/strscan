@@ -1,0 +1,26 @@
+prelude: |
+  $LOAD_PATH.unshift(File.expand_path("lib"))
+  require "strscan"
+  str = "test string"
+  scanner = StringScanner.new(str)
+  str1 = "test"
+  reg1 = /test/
+  str2 = "string"
+  reg2 = /string/
+benchmark:
+  check(reg1): |
+    scanner.check(reg1)
+  check(str1): |
+    scanner.check(str1)
+  check_until(reg2): |
+    scanner.check_until(reg2)
+  check_until(str2): |
+    scanner.check_until(str2)
+  match?(reg1): |
+    scanner.match?(reg1)
+  match?(str1): |
+    scanner.match?(str1)
+  exist?(reg2): |
+    scanner.exist?(reg2)
+  exist?(str2): |
+    scanner.exist?(str2)
