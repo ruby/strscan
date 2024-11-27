@@ -557,8 +557,8 @@ public class RubyStringScanner extends RubyObject {
         return peek(context, length);
     }
 
-    @JRubyMethod(name = "scan_integer")
-    public IRubyObject scan_integer(ThreadContext context) {
+    @JRubyMethod(name = "scan_base10_integer", visibility = PRIVATE)
+    public IRubyObject scan_base10_integer(ThreadContext context) {
         final Ruby runtime = context.runtime;
         check(context);
         clearMatched();
@@ -596,6 +596,52 @@ public class RubyStringScanner extends RubyObject {
         adjustRegisters();
 
         return ConvertBytes.byteListToInum(runtime, bytes, prev, curr, 10, true);
+    }
+
+    @JRubyMethod(name = "scan_base16_integer", visibility = PRIVATE)
+    public IRubyObject scan_base16_integer(ThreadContext context) {
+        final Ruby runtime = context.runtime;
+        check(context);
+        clearMatched();
+
+        if (!str.getEncoding().isAsciiCompatible()) {
+            throw runtime.newEncodingCompatibilityError("ASCII incompatible encoding: " + str.getEncoding());
+        }
+
+
+        ByteList bytes = str.getByteList();
+        int curr = this.curr;
+
+        int bite = bytes.get(curr);
+        if (bite == '-' || bite == '+') {
+            curr++;
+            bite = bytes.get(curr);
+        }
+
+        if (bite == '0' && bytes.get(curr + 1) == 'x') {
+            curr += 2;
+            bite = bytes.get(curr);
+        }
+
+        if (!((bite >= '0' && bite <= '9') || (bite >= 'a' && bite <= 'f') || (bite >= 'A' && bite <= 'F'))) {
+            return context.nil;
+        }
+
+        while ((bite >= '0' && bite <= '9') || (bite >= 'a' && bite <= 'f') || (bite >= 'A' && bite <= 'F')) {
+            curr++;
+            if (curr >= bytes.getRealSize()) {
+                break;
+            }
+            bite = bytes.get(curr);
+        }
+
+        int length = curr - this.curr;
+        prev = this.curr;
+        this.curr = curr;
+        setMatched();
+        adjustRegisters();
+
+        return ConvertBytes.byteListToInum(runtime, bytes, prev, curr, 16, true);
     }
 
     @JRubyMethod(name = "unscan")
