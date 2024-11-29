@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+$VERBOSE = true
+
 gem 'strscan'
 require 'strscan'
 puts "Loaded strscan from #{$".grep(/\/strscan\./).join(', ')}"
