@@ -46,7 +46,7 @@ jobs:
           bundler-cache: true
       - name: Build
         run: |
-          bundle exec rake build
+          bundle exec rake compile
       - uses: rubygems/configure-rubygems-credentials@v1.0.0
       - name: Push gems
         run: |
