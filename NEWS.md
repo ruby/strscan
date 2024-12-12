@@ -1,5 +1,42 @@
 # News
 
+## 3.1.1 - 2024-12-12
+
+### Improvements
+
+  * Added `StringScanner#scan_byte`
+    * GH-89
+
+  * Added `StringScanner#peek_byte`
+    * GH-89
+
+  * Added support for `String` pattern by the following methods:
+    * `StringScanner#exist?`
+    * `StringScanner#scan_until`
+    * `StringScanner#skip_until`
+    * `StringScanner#check_until`
+    * `StringScanner#search_full`
+    * GH-106
+    * Patch by NAITOH Jun
+
+  * Improved performance.
+    * GH-108
+    * GH-109
+    * GH-110
+    * Patch by NAITOH Jun
+
+  * Improved performance.
+    * GH-117
+
+  * Added `StringScanner#scan_integer`
+    * GH-113
+    * GH-115
+    * GH-116
+
+### Thanks
+
+  * NAITOH Jun
+
 ## 3.1.0 - 2024-02-04
 
 ### Fixes
