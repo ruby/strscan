@@ -608,40 +608,44 @@ public class RubyStringScanner extends RubyObject {
             throw runtime.newEncodingCompatibilityError("ASCII incompatible encoding: " + str.getEncoding());
         }
 
-
         ByteList bytes = str.getByteList();
         int curr = this.curr;
 
-        int bite = bytes.get(curr);
-        if (bite == '-' || bite == '+') {
-            curr++;
-            bite = bytes.get(curr);
-        }
+        int remaining_len = bytes.realSize() - curr;
 
-        if (bite == '0' && bytes.get(curr + 1) == 'x') {
-            curr += 2;
-            bite = bytes.get(curr);
-        }
-
-        if (!((bite >= '0' && bite <= '9') || (bite >= 'a' && bite <= 'f') || (bite >= 'A' && bite <= 'F'))) {
+        if (remaining_len <= 0) {
             return context.nil;
         }
 
-        while ((bite >= '0' && bite <= '9') || (bite >= 'a' && bite <= 'f') || (bite >= 'A' && bite <= 'F')) {
-            curr++;
-            if (curr >= bytes.getRealSize()) {
-                break;
-            }
-            bite = bytes.get(curr);
+        int len = 0;
+
+        if (bytes.get(len) == '-' || bytes.get(len) == '+') {
+            len++;
         }
 
-        int length = curr - this.curr;
-        prev = this.curr;
-        this.curr = curr;
+        if ((remaining_len >= (len + 2)) && bytes.get(len) == '0' && bytes.get(len + 1) == 'x') {
+            len += 2;
+        }
+
+        if (len >= remaining_len || !isHexChar(bytes.get(len))) {
+            return context.nil;
+        }
+
         setMatched();
         adjustRegisters();
+        prev = curr;
 
-        return ConvertBytes.byteListToInum(runtime, bytes, prev, curr, 16, true);
+        while (len < remaining_len && isHexChar(bytes.get(len))) {
+            len++;
+        }
+
+        this.curr = curr + len;
+
+        return ConvertBytes.byteListToInum(runtime, bytes, 0, len, 16, true);
+    }
+
+    private static boolean isHexChar(int c) {
+        return Character.isDigit(c) || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F');
     }
 
     @JRubyMethod(name = "unscan")
