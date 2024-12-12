@@ -604,14 +604,12 @@ public class RubyStringScanner extends RubyObject {
         check(context);
         clearMatched();
 
-        if (!str.getEncoding().isAsciiCompatible()) {
-            throw runtime.newEncodingCompatibilityError("ASCII incompatible encoding: " + str.getEncoding());
-        }
+        strscanMustAsciiCompat(runtime);
 
         ByteList bytes = str.getByteList();
-        int curr = this.curr;
+        int ptr = this.curr;
 
-        int remaining_len = bytes.realSize() - curr;
+        int remaining_len = bytes.realSize() - ptr;
 
         if (remaining_len <= 0) {
             return context.nil;
@@ -619,29 +617,35 @@ public class RubyStringScanner extends RubyObject {
 
         int len = 0;
 
-        if (bytes.get(len) == '-' || bytes.get(len) == '+') {
+        if (bytes.get(ptr + len) == '-' || bytes.get(ptr + len) == '+') {
             len++;
         }
 
-        if ((remaining_len >= (len + 2)) && bytes.get(len) == '0' && bytes.get(len + 1) == 'x') {
+        if ((remaining_len >= (len + 2)) && bytes.get(ptr + len) == '0' && bytes.get(ptr + len + 1) == 'x') {
             len += 2;
         }
 
-        if (len >= remaining_len || !isHexChar(bytes.get(len))) {
+        if (len >= remaining_len || !isHexChar(bytes.get(ptr + len))) {
             return context.nil;
         }
 
         setMatched();
         adjustRegisters();
-        prev = curr;
+        prev = ptr;
 
-        while (len < remaining_len && isHexChar(bytes.get(len))) {
+        while (len < remaining_len && isHexChar(bytes.get(ptr + len))) {
             len++;
         }
 
-        this.curr = curr + len;
+        this.curr = ptr + len;
 
         return ConvertBytes.byteListToInum(runtime, bytes, 0, len, 16, true);
+    }
+
+    private void strscanMustAsciiCompat(Ruby runtime) {
+        if (!str.getEncoding().isAsciiCompatible()) {
+            throw runtime.newEncodingCompatibilityError("ASCII incompatible encoding: " + str.getEncoding());
+        }
     }
 
     private static boolean isHexChar(int c) {
