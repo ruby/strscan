@@ -14,11 +14,15 @@ gem 'strscan'
 
 And then execute:
 
-    $ bundle
+```console
+$ bundle
+```
 
 Or install it yourself as:
 
-    $ gem install strscan
+```console
+$ gem install strscan
+```
 
 ## Usage
 
