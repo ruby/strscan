@@ -563,39 +563,36 @@ public class RubyStringScanner extends RubyObject {
         check(context);
         clearMatched();
 
-        if (!str.getEncoding().isAsciiCompatible()) {
-            throw runtime.newEncodingCompatibilityError("ASCII incompatible encoding: " + str.getEncoding());
-        }
-
+        strscanMustAsciiCompat(runtime);
 
         ByteList bytes = str.getByteList();
-        int curr = this.curr;
+        int ptr = curr;
+        int len = 0;
 
-        int bite = bytes.get(curr);
-        if (bite == '-' || bite == '+') {
-            curr++;
-            bite = bytes.get(curr);
-        }
+        int remaining_len = bytes.realSize() - curr;
 
-        if (!(bite >= '0' && bite <= '9')) {
+        if (remaining_len <= 0) {
             return context.nil;
         }
 
-        while (bite >= '0' && bite <= '9') {
-            curr++;
-            if (curr >= bytes.getRealSize()) {
-                break;
-            }
-            bite = bytes.get(curr);
+        if (bytes.get(ptr + len) == '-' || bytes.get(ptr + len) == '+') {
+            len++;
         }
 
-        int length = curr - this.curr;
-        prev = this.curr;
-        this.curr = curr;
-        setMatched();
-        adjustRegisters();
+        if (!Character.isDigit(bytes.get(ptr + len))) {
+            return context.nil;
+        }
 
-        return ConvertBytes.byteListToInum(runtime, bytes, prev, curr, 10, true);
+        setMatched();
+        prev = ptr;
+
+        while (len < remaining_len && Character.isDigit(bytes.get(ptr + len))) {
+            len++;
+        }
+
+        this.curr = ptr + len;
+
+        return ConvertBytes.byteListToInum(runtime, bytes, 0, len, 10, true);
     }
 
     @JRubyMethod(name = "scan_base16_integer", visibility = PRIVATE)
