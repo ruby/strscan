@@ -39,6 +39,7 @@ import org.jruby.RubyBoolean;
 import org.jruby.RubyClass;
 import org.jruby.RubyFixnum;
 import org.jruby.RubyHash;
+import org.jruby.RubyInteger;
 import org.jruby.RubyMatchData;
 import org.jruby.RubyNumeric;
 import org.jruby.RubyObject;
@@ -590,9 +591,7 @@ public class RubyStringScanner extends RubyObject {
             len++;
         }
 
-        this.curr = ptr + len;
-
-        return ConvertBytes.byteListToInum(runtime, bytes, 0, len, 10, true);
+        return strscanParseInteger(runtime, bytes, ptr, len, 10);
     }
 
     @JRubyMethod(name = "scan_base16_integer", visibility = PRIVATE)
@@ -634,9 +633,13 @@ public class RubyStringScanner extends RubyObject {
             len++;
         }
 
+        return strscanParseInteger(runtime, bytes, ptr, len, 16);
+    }
+
+    private RubyInteger strscanParseInteger(Ruby runtime, ByteList bytes, int ptr, int len, int base) {
         this.curr = ptr + len;
 
-        return ConvertBytes.byteListToInum(runtime, bytes, 0, len, 16, true);
+        return ConvertBytes.byteListToInum(runtime, bytes, ptr, len, base, true);
     }
 
     private void strscanMustAsciiCompat(Ruby runtime) {
