@@ -69,7 +69,7 @@ import static org.jruby.runtime.Visibility.PRIVATE;
 public class RubyStringScanner extends RubyObject {
     private static final long serialVersionUID = -3722138049229128675L;
 
-    private static final String STRSCAN_VERSION = "3.1.0";
+    private static final String STRSCAN_VERSION = "3.1.2";
 
     private RubyString str;
     private int curr = 0;
