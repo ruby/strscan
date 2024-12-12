@@ -4,6 +4,9 @@ on:
 - push
 - pull_request
 
+env:
+  JRUBY_OPTS: "-X+C" # temporarily force JRuby to compile, so Java exception trace will contain .rb lines
+
 jobs:
   ruby-versions:
     uses: ruby/actions/.github/workflows/ruby_versions.yml@master
