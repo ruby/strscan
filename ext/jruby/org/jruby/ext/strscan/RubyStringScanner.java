@@ -39,6 +39,7 @@ import org.jruby.RubyBoolean;
 import org.jruby.RubyClass;
 import org.jruby.RubyFixnum;
 import org.jruby.RubyHash;
+import org.jruby.RubyInteger;
 import org.jruby.RubyMatchData;
 import org.jruby.RubyNumeric;
 import org.jruby.RubyObject;
@@ -563,39 +564,34 @@ public class RubyStringScanner extends RubyObject {
         check(context);
         clearMatched();
 
-        if (!str.getEncoding().isAsciiCompatible()) {
-            throw runtime.newEncodingCompatibilityError("ASCII incompatible encoding: " + str.getEncoding());
-        }
-
+        strscanMustAsciiCompat(runtime);
 
         ByteList bytes = str.getByteList();
-        int curr = this.curr;
+        int ptr = curr;
+        int len = 0;
 
-        int bite = bytes.get(curr);
-        if (bite == '-' || bite == '+') {
-            curr++;
-            bite = bytes.get(curr);
-        }
+        int remaining_len = bytes.realSize() - curr;
 
-        if (!(bite >= '0' && bite <= '9')) {
+        if (remaining_len <= 0) {
             return context.nil;
         }
 
-        while (bite >= '0' && bite <= '9') {
-            curr++;
-            if (curr >= bytes.getRealSize()) {
-                break;
-            }
-            bite = bytes.get(curr);
+        if (bytes.get(ptr + len) == '-' || bytes.get(ptr + len) == '+') {
+            len++;
         }
 
-        int length = curr - this.curr;
-        prev = this.curr;
-        this.curr = curr;
-        setMatched();
-        adjustRegisters();
+        if (!Character.isDigit(bytes.get(ptr + len))) {
+            return context.nil;
+        }
 
-        return ConvertBytes.byteListToInum(runtime, bytes, prev, curr, 10, true);
+        setMatched();
+        prev = ptr;
+
+        while (len < remaining_len && Character.isDigit(bytes.get(ptr + len))) {
+            len++;
+        }
+
+        return strscanParseInteger(runtime, bytes, ptr, len, 10);
     }
 
     @JRubyMethod(name = "scan_base16_integer", visibility = PRIVATE)
@@ -604,44 +600,56 @@ public class RubyStringScanner extends RubyObject {
         check(context);
         clearMatched();
 
-        if (!str.getEncoding().isAsciiCompatible()) {
-            throw runtime.newEncodingCompatibilityError("ASCII incompatible encoding: " + str.getEncoding());
-        }
-
+        strscanMustAsciiCompat(runtime);
 
         ByteList bytes = str.getByteList();
-        int curr = this.curr;
+        int ptr = this.curr;
 
-        int bite = bytes.get(curr);
-        if (bite == '-' || bite == '+') {
-            curr++;
-            bite = bytes.get(curr);
-        }
+        int remaining_len = bytes.realSize() - ptr;
 
-        if (bite == '0' && bytes.get(curr + 1) == 'x') {
-            curr += 2;
-            bite = bytes.get(curr);
-        }
-
-        if (!((bite >= '0' && bite <= '9') || (bite >= 'a' && bite <= 'f') || (bite >= 'A' && bite <= 'F'))) {
+        if (remaining_len <= 0) {
             return context.nil;
         }
 
-        while ((bite >= '0' && bite <= '9') || (bite >= 'a' && bite <= 'f') || (bite >= 'A' && bite <= 'F')) {
-            curr++;
-            if (curr >= bytes.getRealSize()) {
-                break;
-            }
-            bite = bytes.get(curr);
+        int len = 0;
+
+        if (bytes.get(ptr + len) == '-' || bytes.get(ptr + len) == '+') {
+            len++;
         }
 
-        int length = curr - this.curr;
-        prev = this.curr;
-        this.curr = curr;
+        if ((remaining_len >= (len + 2)) && bytes.get(ptr + len) == '0' && bytes.get(ptr + len + 1) == 'x') {
+            len += 2;
+        }
+
+        if (len >= remaining_len || !isHexChar(bytes.get(ptr + len))) {
+            return context.nil;
+        }
+
         setMatched();
         adjustRegisters();
+        prev = ptr;
 
-        return ConvertBytes.byteListToInum(runtime, bytes, prev, curr, 16, true);
+        while (len < remaining_len && isHexChar(bytes.get(ptr + len))) {
+            len++;
+        }
+
+        return strscanParseInteger(runtime, bytes, ptr, len, 16);
+    }
+
+    private RubyInteger strscanParseInteger(Ruby runtime, ByteList bytes, int ptr, int len, int base) {
+        this.curr = ptr + len;
+
+        return ConvertBytes.byteListToInum(runtime, bytes, ptr, len, base, true);
+    }
+
+    private void strscanMustAsciiCompat(Ruby runtime) {
+        if (!str.getEncoding().isAsciiCompatible()) {
+            throw runtime.newEncodingCompatibilityError("ASCII incompatible encoding: " + str.getEncoding());
+        }
+    }
+
+    private static boolean isHexChar(int c) {
+        return Character.isDigit(c) || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F');
     }
 
     @JRubyMethod(name = "unscan")
