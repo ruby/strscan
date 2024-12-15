@@ -1,5 +1,16 @@
 # News
 
+## 3.1.2 - 2024-12-15
+
+### Fixes
+
+  * JRuby: Fixed a bug that `StringScanner#scan_integer` may read
+    out-of-bounds data.
+    * GH-125
+    * GH-127
+
+  * JRuby: Fixed a wrong `StringScanner::Version` value bug.
+
 ## 3.1.1 - 2024-12-12
 
 ### Improvements
