@@ -584,7 +584,6 @@ public class RubyStringScanner extends RubyObject {
             return context.nil;
         }
 
-        setMatched();
         prev = ptr;
 
         while (len < remaining_len && Character.isDigit(bytes.get(ptr + len))) {
@@ -625,8 +624,6 @@ public class RubyStringScanner extends RubyObject {
             return context.nil;
         }
 
-        setMatched();
-        adjustRegisters();
         prev = ptr;
 
         while (len < remaining_len && isHexChar(bytes.get(ptr + len))) {
@@ -638,6 +635,9 @@ public class RubyStringScanner extends RubyObject {
 
     private RubyInteger strscanParseInteger(Ruby runtime, ByteList bytes, int ptr, int len, int base) {
         this.curr = ptr + len;
+
+        setMatched();
+        adjustRegisters();
 
         return ConvertBytes.byteListToInum(runtime, bytes, ptr, len, base, true);
     }
