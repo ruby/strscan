@@ -312,13 +312,13 @@ public class RubyStringScanner extends RubyObject {
                 if (ByteList.memcmp(strBL.unsafeBytes(), currPtr, patternBL.unsafeBytes(), patternBL.begin(), patternSize) != 0) {
                     return context.nil;
                 }
-                setRegisters(patternSize);
+                setRegisters(0, patternSize);
             } else {
                 int pos = StringSupport.index(strBL, patternBL, currPtr, patternEnc);
                 if (pos == -1) {
                     return context.nil;
                 }
-                setRegisters(patternSize + pos - curr);
+                setRegisters(pos - curr, patternSize);
             }
         }
 
@@ -371,11 +371,11 @@ public class RubyStringScanner extends RubyObject {
     }
 
     // MRI: set_registers
-    private void setRegisters(int length) {
+    private void setRegisters(int pos, int length) {
         if (fixedAnchor) {
-            regs = Region.newRegion(curr, curr + length);
+            regs = Region.newRegion(pos + curr, pos + curr + length);
         } else {
-            regs = Region.newRegion(0, length);
+            regs = Region.newRegion(pos, pos + length);
         }
     }
 
