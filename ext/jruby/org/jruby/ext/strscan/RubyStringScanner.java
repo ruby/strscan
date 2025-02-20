@@ -616,7 +616,10 @@ public class RubyStringScanner extends RubyObject {
             len++;
         }
 
-        if ((remaining_len >= (len + 2)) && bytes.get(ptr + len) == '0' && bytes.get(ptr + len + 1) == 'x') {
+        if ((remaining_len >= (len + 3)) &&
+                bytes.get(ptr + len) == '0' &&
+                bytes.get(ptr + len + 1) == 'x' &&
+                isHexChar(bytes.get(ptr + len + 2))) {
             len += 2;
         }
 
