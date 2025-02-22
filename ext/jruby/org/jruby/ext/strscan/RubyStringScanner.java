@@ -108,6 +108,15 @@ public class RubyStringScanner extends RubyObject {
         matched = false;
     }
 
+    private void clearNamedCaptures() {
+        pattern = null;
+    }
+
+    private void clearMatchStatus() {
+        clearMatched();
+        clearNamedCaptures();
+    }
+
     private void setMatched() {
         matched = true;
     }
@@ -167,7 +176,7 @@ public class RubyStringScanner extends RubyObject {
     public IRubyObject reset(ThreadContext context) {
         check(context);
         curr = 0;
-        clearMatched();
+        clearMatchStatus();
         return this;
     }
 
@@ -175,7 +184,7 @@ public class RubyStringScanner extends RubyObject {
     public IRubyObject terminate(ThreadContext context) {
         check(context);
         curr = str.getByteList().getRealSize();
-        clearMatched();
+        clearMatchStatus();
         return this;
     }
 
@@ -198,7 +207,7 @@ public class RubyStringScanner extends RubyObject {
     public IRubyObject set_string(ThreadContext context, IRubyObject str) {
         this.str = RubyString.stringValue(str);
         curr = 0;
-        clearMatched();
+        clearMatchStatus();
         return str;
     }
 
@@ -265,7 +274,7 @@ public class RubyStringScanner extends RubyObject {
     private IRubyObject scan(ThreadContext context, IRubyObject regex, boolean succptr, boolean getstr, boolean headonly) {
         final Ruby runtime = context.runtime;
         check(context);
-        clearMatched();
+        clearMatchStatus();
 
         int restLen = restLen();
         if (restLen < 0) {
@@ -453,7 +462,7 @@ public class RubyStringScanner extends RubyObject {
 
     public IRubyObject getchCommon(ThreadContext context) {
         check(context);
-        clearMatched();
+        clearMatchStatus();
         ByteList strBL = str.getByteList();
         int strSize = strBL.getRealSize();
 
@@ -481,7 +490,7 @@ public class RubyStringScanner extends RubyObject {
     @JRubyMethod(name = "get_byte")
     public IRubyObject get_byte(ThreadContext context) {
         check(context);
-        clearMatched();
+        clearMatchStatus();
         if (curr >= str.getByteList().getRealSize()) return context.nil;
 
         prev = curr;
@@ -508,7 +517,7 @@ public class RubyStringScanner extends RubyObject {
     public IRubyObject scan_byte(ThreadContext context) {
         Ruby runtime = context.runtime;
         check(context);
-        clearMatched();
+        clearMatchStatus();
         ByteList byteList = str.getByteList();
         int curr = this.curr;
         if (curr >= byteList.getRealSize()) return context.nil;
@@ -562,7 +571,7 @@ public class RubyStringScanner extends RubyObject {
     public IRubyObject scan_base10_integer(ThreadContext context) {
         final Ruby runtime = context.runtime;
         check(context);
-        clearMatched();
+        clearMatchStatus();
 
         strscanMustAsciiCompat(runtime);
 
@@ -597,7 +606,7 @@ public class RubyStringScanner extends RubyObject {
     public IRubyObject scan_base16_integer(ThreadContext context) {
         final Ruby runtime = context.runtime;
         check(context);
-        clearMatched();
+        clearMatchStatus();
 
         strscanMustAsciiCompat(runtime);
 
@@ -667,7 +676,7 @@ public class RubyStringScanner extends RubyObject {
         }
 
         curr = prev;
-        clearMatched();
+        clearMatchStatus();
 
         return this;
     }
