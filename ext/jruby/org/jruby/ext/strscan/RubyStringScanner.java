@@ -751,11 +751,13 @@ public class RubyStringScanner extends RubyObject {
             return context.nil;
         }
 
-        if (idx instanceof RubySymbol || idx instanceof RubyString) {
-            if (pattern == null) return context.nil;
-        }
-
         Ruby runtime = context.runtime;
+
+        if (idx instanceof RubySymbol || idx instanceof RubyString) {
+            if (pattern == null) {
+                throw runtime.newRaiseException((RubyClass) getMetaClass().getConstant("IndexError"), "undefined group name reference: " + idx);
+            }
+        }
 
         int i = RubyMatchData.backrefNumber(runtime, pattern, regs, idx);
 
