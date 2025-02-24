@@ -32,6 +32,8 @@ jobs:
           - { os: macos-latest , ruby: 2.4 }
           - { os: macos-latest , ruby: 2.5 }
           - { os: windows-latest , ruby: head }
+          - { os: ubuntu-latest , ruby: truffleruby }
+          - { os: macos-latest , ruby: truffleruby }
           - { os: windows-latest , ruby: truffleruby }
           - { os: windows-latest , ruby: truffleruby-head }
 
