@@ -857,7 +857,7 @@ public class RubyStringScanner extends RubyObject {
     }
 
     @JRubyMethod(name = "named_captures")
-    public IRubyObject named_captured(ThreadContext context) {
+    public IRubyObject named_captures(ThreadContext context) {
         Ruby runtime = context.runtime;
         IRubyObject nil = context.nil;
 
@@ -872,7 +872,10 @@ public class RubyStringScanner extends RubyObject {
             IRubyObject value = nil;
 
             for (int i : nameEntry.getBackRefs()) {
-                value = extractRegion(context, i);
+                IRubyObject v = extractRegion(context, i);
+                if (v != nil) {
+                    value = v;
+                }
             }
 
             int nameP = nameEntry.nameP;
