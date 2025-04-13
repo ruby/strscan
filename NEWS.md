@@ -1,5 +1,55 @@
 # News
 
+## 3.1.3 - 2025-04-13
+
+### Fixes
+
+  * `StringScanner#scan_integer`: Fixed a bug that matched data isn't
+    updated.
+    * GH-130
+    * GH-133
+    * Reported by Andrii Konchyn
+    * Patch by Jean Boussier
+
+  * `StringScanner#scan_until`: Fixed a bug that `String` pattern
+    usage set incorrect match data.
+    * GH-131
+    * GH-138
+    * Reported by Andrii Konchyn
+    * Patch by NAITOH Jun
+
+  * `StringScanner#scan_integer(base: 16)`: Fixed a bug that `0x<EOS>`
+     and `0x<NON_HEX_DECIMAL>` isn't matched.
+    * GH-140
+    * GH-141
+    * Reported by Andrii Konchyn
+    * Patch by Jean Boussier
+
+  * Fixed a bug that `String` pattern doesn't clear named captures.
+    * GH-135
+    * GH-142
+    * Reported by Andrii Konchyn
+    * Patch by NAITOH Jun
+
+  * `StrinScanner#[]`: Fixed a bug that `String` pattern and unknown
+    capture group name returns `nil` instead of raising `IndexError`
+    like `Regexp` pattern.
+    * GH-139
+    * GH-143
+    * Reported by Benoit Daloze
+    * Patch by NAITOH Jun
+
+  * `StrinScanner#pos` and `StrinScanner#pos=`: Fixed a bug that
+    position is treated as `int` not `long`.
+    * GH-147
+    * Patch by Jean Boussier
+
+### Thanks
+
+  * Andrii Konchyn
+  * Jean Boussier
+  * NAITOH Jun
+
 ## 3.1.2 - 2024-12-15
 
 ### Fixes
