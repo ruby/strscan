@@ -1,5 +1,19 @@
 # News
 
+## 3.1.4 - 2025-04-29
+
+### Fixes
+
+  * `StringScanner#named_captures`: Fixed an incompatible behavior
+    when there are multiple same name groups.
+    * GH-145
+    * GH-146
+    * Reported by Linus Sellberg
+
+### Thanks
+
+  * Linus Sellberg
+
 ## 3.1.3 - 2025-04-13
 
 ### Fixes
