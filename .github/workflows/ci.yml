@@ -45,7 +45,7 @@ jobs:
           distribution: zulu
           java-version: 21
         if: >-
-          matrix.ruby == 'jruby-head'
+          startWith(matrix.ruby, 'jruby')
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
