@@ -651,7 +651,7 @@ public class RubyStringScanner extends RubyObject {
         setMatched();
         adjustRegisters();
 
-        return ConvertBytes.byteListToInum(runtime, bytes, ptr, len, base, true);
+        return ConvertBytes.byteListToInum(runtime, bytes, ptr, ptr + len, base, true);
     }
 
     private void strscanMustAsciiCompat(Ruby runtime) {
