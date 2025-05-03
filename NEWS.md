@@ -1,5 +1,23 @@
 # News
 
+## 3.1.4 - 2025-05-03
+
+### Fixes
+
+  * JRuby: `StringScanner#scan_integer`: Fixed a integer converting
+    problem.
+    * GH-150
+    * jruby/jruby#8823
+    * Reported by Thomas Leitner
+
+  * JRuby: `StringScanner#scan_integer`: Added missing length check.
+    * GH-152
+    * GH-153
+
+### Thanks
+
+  * Thomas Leitner
+
 ## 3.1.4 - 2025-04-29
 
 ### Fixes
