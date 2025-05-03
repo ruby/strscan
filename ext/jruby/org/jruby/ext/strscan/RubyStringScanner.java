@@ -589,7 +589,7 @@ public class RubyStringScanner extends RubyObject {
             len++;
         }
 
-        if (!Character.isDigit(bytes.get(ptr + len))) {
+        if (len >= remaining_len || !Character.isDigit(bytes.get(ptr + len))) {
             return context.nil;
         }
 
