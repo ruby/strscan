@@ -40,13 +40,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: zulu
-          java-version: 21
-        if: >-
-          startsWith(matrix.ruby, 'jruby')
-
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
