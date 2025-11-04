@@ -31,16 +31,21 @@ if RUBY_ENGINE == "jruby"
     ext.target_version = '1.8'
     ext.ext_dir = 'ext/jruby'
   end
+  extra_require_path = "ext/jruby/lib"
 elsif RUBY_ENGINE == "ruby"
   require 'rake/extensiontask'
-  Rake::ExtensionTask.new("strscan")
+  Rake::ExtensionTask.new("strscan") do |x|
+    extra_require_path = x.lib_dir.sub!(%r[(?:\A|/)\Klib(?=/|\z)]) {
+      ".ext/#{RUBY_VERSION}/#{x.platform}"
+    }
+  end
 else
   task :compile
+  extra_require_path = "lib"
 end
 
 desc "Run test"
 task :test do
-  extra_require_path = RUBY_ENGINE == 'jruby' ? "ext/jruby/lib" : "lib"
   ENV["RUBYOPT"] = "-I#{extra_require_path} -rbundler/setup"
   ruby("run-test.rb")
 end

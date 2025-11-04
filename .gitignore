@@ -1,3 +1,4 @@
+/.ext/
 /.bundle/
 /.yardoc
 /Gemfile.lock
@@ -5,9 +6,6 @@
 /coverage/
 /html/
 /lib/*.jar
-/lib/*.so
-/lib/*.dylib
-/lib/*.bundle
 /pkg/
 /spec/reports/
 /tmp/
