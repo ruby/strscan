@@ -87,18 +87,10 @@ public class RubyStringScanner extends RubyObject {
 
         RubyClass standardError = runtime.getStandardError();
         RubyClass error = scannerClass.defineClassUnder("Error", standardError, standardError.getAllocator());
-        if (!Object.isConstantDefined("ScanError", true)) {
-            Object.defineConstant("ScanError", error);
-            Object.deprecateConstant(runtime, "ScanError");
-        }
 
         RubyString version = runtime.newString(STRSCAN_VERSION);
         version.setFrozen(true);
         scannerClass.setConstant("Version", version);
-        RubyString id = runtime.newString("$Id$");
-        id.setFrozen(true);
-        scannerClass.setConstant("Id", id);
-        scannerClass.deprecateConstant(runtime, "Id");
 
         scannerClass.defineAnnotatedMethods(RubyStringScanner.class);
 
