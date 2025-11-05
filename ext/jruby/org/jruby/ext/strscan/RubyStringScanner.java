@@ -100,6 +100,7 @@ public class RubyStringScanner extends RubyObject {
         RubyString id = runtime.newString("$Id$");
         id.setFrozen(true);
         scannerClass.setConstant(context, "Id", id);
+        scannerClass.deprecateConstant(context, "Id");
 
         scannerClass.defineAnnotatedMethods(RubyStringScanner.class);
 
