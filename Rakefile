@@ -46,8 +46,9 @@ end
 
 desc "Run test"
 task :test do
+  require 'shellwords'
   ENV["RUBYOPT"] = "-I#{extra_require_path} -rbundler/setup"
-  ruby("run-test.rb")
+  ruby("run-test.rb", *ENV["TESTOPTS"]&.shellsplit)
 end
 
 desc "Run benchmark"
