@@ -73,6 +73,9 @@ jobs:
           name: gem-${{ matrix.os }}-${{ matrix.ruby }}
           path: pkg/
 
+      - run: echo 'TESTOPTS=-v --ignore-name=/unscan/' >> $GITHUB_ENV
+        if: ${{ startsWith(matrix.ruby, 'truffle') }}
+
       - run: bundle exec rake test
 
       - run: gem install --verbose --backtrace pkg/*.gem
@@ -80,5 +83,5 @@ jobs:
       - run: gem install test-unit-ruby-core test-unit
 
       - name: Run tests on the installed gem
-        run: ruby run-test.rb
+        run: ruby run-test.rb ${TESTOPTS}
         if: matrix.ruby != '2.4' # strscan is a default gem from 2.5
