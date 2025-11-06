@@ -2,4 +2,4 @@
 rdoc_include:
 - doc
 main_page: README.md
-op_dir: _site
+op_dir: html
