@@ -4,3 +4,4 @@ NEWS.md
 README.md
 ext/strscan/strscan.c
 doc/strscan/
+lib/strscan/
