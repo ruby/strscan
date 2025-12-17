@@ -1,5 +1,48 @@
 # News
 
+## 3.1.5 - 2025-12-17
+
+### Improvements
+
+  * CRuby: Added support for write barrier.
+    * GH-156
+    * Patch by Daniel Colson
+
+  * Improved documents.
+    * GH-162
+    * Patch by Burdette Lamar
+
+  * Removed obsoleted methods:
+    * `StringScanner#clear`
+    * `StringScanner#getbyte`
+    * `StringScanner#peep`
+    * `StringScanner#empty?`
+    * `StringScanner#restsize`
+
+  * Deprecated `ScanError`. Use `StringScanner::Error` instead.
+
+  * Deprecated `StringScanner::Id`.
+
+### Fixes
+
+  * Fixed broken link in documents.
+    * GH-179
+    * Patch by Berkan Ünal
+
+  * Fixed broken markup in documents.
+    * GH-180
+    * Patch by Yuki Kurihara
+
+### Thanks
+
+  * Daniel Colson
+
+  * Burdette Lamar
+
+  * Berkan Ünal
+
+  * Yuki Kurihara
+
 ## 3.1.4 - 2025-05-03
 
 ### Fixes
