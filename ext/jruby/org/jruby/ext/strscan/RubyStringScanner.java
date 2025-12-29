@@ -945,12 +945,9 @@ public class RubyStringScanner extends RubyObject {
 
     // MRI: str_new
     private RubyString newString(Ruby runtime, int start, int length) {
-        ByteList byteList = str.getByteList();
-        int begin = byteList.begin();
-
-        ByteList newByteList = new ByteList(byteList.unsafeBytes(), begin + start, length, byteList.getEncoding(), true);
-
-        return RubyString.newString(runtime, newByteList);
+        final ByteList strBytes = this.str.getByteList();
+        ByteList newBytes = new ByteList(strBytes.unsafeBytes(), strBytes.begin() + start, length, true);
+        return RubyString.newString(runtime, newBytes, strBytes.getEncoding());
     }
 
     /**
