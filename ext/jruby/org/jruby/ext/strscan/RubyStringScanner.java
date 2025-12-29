@@ -185,7 +185,7 @@ public class RubyStringScanner extends RubyObject {
     @JRubyMethod(name = "terminate")
     public IRubyObject terminate(ThreadContext context) {
         check(context);
-        curr = str.getByteList().getRealSize();
+        curr = str.size();
         clearMatchStatus();
         return this;
     }
@@ -223,7 +223,7 @@ public class RubyStringScanner extends RubyObject {
         Ruby runtime = context.runtime;
 
         int i = RubyNumeric.num2int(pos);
-        int size = str.getByteList().getRealSize();
+        int size = str.size();
         if (i < 0) i += size;
         if (i < 0 || i > size) throw runtime.newRangeError("index out of range.");
         this.curr = i;
@@ -242,8 +242,7 @@ public class RubyStringScanner extends RubyObject {
     }
 
     private IRubyObject extractRange(Ruby runtime, int beg, int end) {
-        ByteList byteList = str.getByteList();
-        int size = byteList.getRealSize();
+        int size = str.size();
 
         if (beg > size) return runtime.getNil();
         if (end > size) end = size;
@@ -254,7 +253,7 @@ public class RubyStringScanner extends RubyObject {
     private IRubyObject extractBegLen(Ruby runtime, int beg, int len) {
         assert len >= 0;
 
-        int size = str.getByteList().getRealSize();
+        int size = str.size();
 
         if (beg > size) return runtime.getNil();
         len = Math.min(len, size - beg);
@@ -296,7 +295,7 @@ public class RubyStringScanner extends RubyObject {
                 regs = matchRegion;
             }
 
-            if  (ret == -2) {
+            if (ret == -2) {
                 throw runtime.newRaiseException((RubyClass) getMetaClass().getConstant("ScanError"), "regexp buffer overflow");
             }
             if (ret < 0) return context.nil;
@@ -483,7 +482,7 @@ public class RubyStringScanner extends RubyObject {
     public IRubyObject get_byte(ThreadContext context) {
         check(context);
         clearMatchStatus();
-        if (curr >= str.getByteList().getRealSize()) return context.nil;
+        if (curr >= str.size()) return context.nil;
 
         prev = curr;
         curr++;
@@ -760,8 +759,7 @@ public class RubyStringScanner extends RubyObject {
         check(context);
         Ruby runtime = context.runtime;
 
-        ByteList value = str.getByteList();
-        int realSize = value.getRealSize();
+        int realSize = str.size();
 
         if (curr >= realSize) {
             return RubyString.newEmptyString(runtime, str.getEncoding());
