@@ -49,7 +49,6 @@ import org.jruby.RubySymbol;
 import org.jruby.anno.JRubyClass;
 import org.jruby.anno.JRubyMethod;
 import org.jruby.ast.util.ArgsUtil;
-import org.jruby.common.IRubyWarnings.ID;
 import org.jruby.exceptions.RaiseException;
 import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
@@ -81,26 +80,26 @@ public class RubyStringScanner extends RubyObject {
     private boolean matched;
     private boolean fixedAnchor;
 
+    @SuppressWarnings("deprecation")
     public static RubyClass createScannerClass(final Ruby runtime) {
         RubyClass Object = runtime.getObject();
-        ThreadContext context = runtime.getCurrentContext();
 
         RubyClass scannerClass = runtime.defineClass("StringScanner", Object, RubyStringScanner::new);
 
         RubyClass standardError = runtime.getStandardError();
-        RubyClass error = scannerClass.defineClassUnder(context, "Error", standardError, standardError.getAllocator());
-        if (!Object.isConstantDefined(context, "ScanError")) {
-            Object.defineConstant(context, "ScanError", error);
-            Object.deprecateConstant(context, "ScanError");
+        RubyClass error = scannerClass.defineClassUnder("Error", standardError, standardError.getAllocator());
+        if (!Object.isConstantDefined("ScanError", true)) {
+            Object.defineConstant("ScanError", error);
+            Object.deprecateConstant(runtime, "ScanError");
         }
 
         RubyString version = runtime.newString(STRSCAN_VERSION);
         version.setFrozen(true);
-        scannerClass.setConstant(context, "Version", version);
+        scannerClass.setConstant("Version", version);
         RubyString id = runtime.newString("$Id$");
         id.setFrozen(true);
-        scannerClass.setConstant(context, "Id", id);
-        scannerClass.deprecateConstant(context, "Id");
+        scannerClass.setConstant("Id", id);
+        scannerClass.deprecateConstant(runtime, "Id");
 
         scannerClass.defineAnnotatedMethods(RubyStringScanner.class);
 
