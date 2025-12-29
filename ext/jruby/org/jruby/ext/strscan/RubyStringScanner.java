@@ -299,20 +299,23 @@ public class RubyStringScanner extends RubyObject {
             }
         } else {
             RubyString patternStr = RubyString.stringValue(pattern);
-            Encoding patternEnc = str.checkEncoding(patternStr);
             ByteList patternBL = patternStr.getByteList();
             final int patternSize = patternBL.realSize();
 
+            if (restLen < patternSize) {
+                str.checkEncoding(patternStr);
+                return context.nil;
+            }
+
             if (headonly) {
-                if (restLen < patternSize) {
-                    return context.nil;
-                }
+                str.checkEncoding(patternStr);
+
                 if (ByteList.memcmp(strBL.unsafeBytes(), currPtr, patternBL.unsafeBytes(), patternBL.begin(), patternSize) != 0) {
                     return context.nil;
                 }
                 setRegisters(0, patternSize);
             } else {
-                int pos = StringSupport.index(strBL, patternBL, currPtr, patternEnc);
+                int pos = StringSupport.index(strBL, patternBL, currPtr, str.checkEncoding(patternStr));
                 if (pos == -1) {
                     return context.nil;
                 }
