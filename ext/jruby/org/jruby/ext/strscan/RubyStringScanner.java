@@ -354,10 +354,6 @@ public class RubyStringScanner extends RubyObject {
         }
     }
 
-    private int currPtr() {
-        return str.getByteList().getBegin() + curr;
-    }
-
     private int matchTarget() {
         if (fixedAnchor) {
             return str.getByteList().getBegin();
