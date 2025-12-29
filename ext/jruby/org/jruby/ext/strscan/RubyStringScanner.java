@@ -203,9 +203,9 @@ public class RubyStringScanner extends RubyObject {
     }
 
     @JRubyMethod(name = {"concat", "<<"})
-    public IRubyObject concat(ThreadContext context, IRubyObject obj) {
+    public IRubyObject concat(ThreadContext context, IRubyObject str) {
         check(context);
-        str.append(obj.convertToString());
+        this.str.append(RubyString.stringValue(str));
         return this;
     }
 
@@ -261,7 +261,7 @@ public class RubyStringScanner extends RubyObject {
     }
 
     // MRI: strscan_do_scan
-    private IRubyObject scan(ThreadContext context, IRubyObject regex, boolean succptr, boolean getstr, boolean headonly) {
+    private IRubyObject scan(ThreadContext context, IRubyObject pattern, boolean succptr, boolean getstr, boolean headonly) {
         final Ruby runtime = context.runtime;
         check(context);
         clearMatchStatus();
@@ -274,12 +274,12 @@ public class RubyStringScanner extends RubyObject {
         ByteList strBL = str.getByteList();
         int currPtr = strBL.getBegin() + curr;
 
-        if (regex instanceof RubyRegexp) {
-            pattern = ((RubyRegexp) regex).preparePattern(str);
+        if (pattern instanceof RubyRegexp) {
+            this.pattern = ((RubyRegexp) pattern).preparePattern(str);
 
             int range = currPtr + restLen;
 
-            Matcher matcher = pattern.matcher(strBL.getUnsafeBytes(), matchTarget(), range);
+            Matcher matcher = this.pattern.matcher(strBL.getUnsafeBytes(), matchTarget(), range);
             final int ret;
             if (headonly) {
                 ret = RubyRegexp.matcherMatch(context, matcher, currPtr, range, Option.NONE);
@@ -299,13 +299,13 @@ public class RubyStringScanner extends RubyObject {
             }
             if (ret < 0) return context.nil;
         } else {
-            RubyString pattern = regex.convertToString();
-            Encoding patternEnc = str.checkEncoding(pattern);
-            ByteList patternBL = pattern.getByteList();
-            int patternSize = patternBL.realSize();
+            RubyString patternStr = RubyString.stringValue(pattern);
+            Encoding patternEnc = str.checkEncoding(patternStr);
+            ByteList patternBL = patternStr.getByteList();
+            final int patternSize = patternBL.realSize();
 
             if (headonly) {
-                if (restLen < pattern.size()) {
+                if (restLen < patternSize) {
                     return context.nil;
                 }
                 if (ByteList.memcmp(strBL.unsafeBytes(), currPtr, patternBL.unsafeBytes(), patternBL.begin(), patternSize) != 0) {
