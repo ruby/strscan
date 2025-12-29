@@ -295,7 +295,8 @@ public class RubyStringScanner extends RubyObject {
             }
 
             if (ret == -2) {
-                throw runtime.newRaiseException((RubyClass) getMetaClass().getConstant("ScanError"), "regexp buffer overflow");
+                RubyClass errorClass = (RubyClass) runtime.getClassFromPath("StringScanner::Error");
+                throw runtime.newRaiseException(errorClass, "regexp buffer overflow");
             }
             if (ret < 0) return context.nil;
         } else {
@@ -705,7 +706,7 @@ public class RubyStringScanner extends RubyObject {
 
         if (idx instanceof RubySymbol || idx instanceof RubyString) {
             if (pattern == null) {
-                throw runtime.newRaiseException((RubyClass) getMetaClass().getConstant("IndexError"), "undefined group name reference: " + idx);
+                throw runtime.newRaiseException(runtime.getIndexError(), "undefined group name reference: " + idx);
             }
         }
 
