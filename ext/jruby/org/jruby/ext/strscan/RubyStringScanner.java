@@ -947,7 +947,23 @@ public class RubyStringScanner extends RubyObject {
     private RubyString newString(Ruby runtime, int start, int length) {
         final ByteList strBytes = this.str.getByteList();
         ByteList newBytes = new ByteList(strBytes.unsafeBytes(), strBytes.begin() + start, length, true);
-        return RubyString.newString(runtime, newBytes, strBytes.getEncoding());
+
+        final RubyString newStr = RubyString.newString(runtime, newBytes, strBytes.getEncoding());
+        copyCodeRangeForSubstr(newStr, this.str);
+        return newStr;
+    }
+
+    /**
+     * Same as JRuby's (private) <code>RubyString#copyCodeRangeForSubstr</code>.
+     * Isn't really necessary, but will avoid extra code-range scans for the substrings returned.
+     */
+    private void copyCodeRangeForSubstr(RubyString str, RubyString from) {
+        if (str.size() == 0) {
+            str.setCodeRange(from.getEncoding().isAsciiCompatible() ? StringSupport.CR_7BIT : StringSupport.CR_VALID);
+        } else {
+            if (from.getCodeRange() == StringSupport.CR_7BIT) str.setCodeRange(StringSupport.CR_7BIT);
+            // otherwise, leave it as CR_UNKNOWN
+        }
     }
 
     /**
