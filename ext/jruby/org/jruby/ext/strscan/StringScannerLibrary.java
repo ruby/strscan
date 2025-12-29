@@ -3,7 +3,6 @@ package org.jruby.ext.strscan;
 import java.io.IOException;
 
 import org.jruby.Ruby;
-import org.jruby.ext.strscan.RubyStringScanner;
 import org.jruby.runtime.load.Library;
 
 /**
