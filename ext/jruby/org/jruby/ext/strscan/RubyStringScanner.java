@@ -294,11 +294,9 @@ public class RubyStringScanner extends RubyObject {
                 regs = matchRegion;
             }
 
-            if (ret == -2) {
-                RubyClass errorClass = (RubyClass) runtime.getClassFromPath("StringScanner::Error");
-                throw runtime.newRaiseException(errorClass, "regexp buffer overflow");
+            if (ret < 0) { // MISMATCH
+                return context.nil;
             }
-            if (ret < 0) return context.nil;
         } else {
             RubyString patternStr = RubyString.stringValue(pattern);
             Encoding patternEnc = str.checkEncoding(patternStr);
