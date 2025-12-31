@@ -80,7 +80,6 @@ public class RubyStringScanner extends RubyObject {
     private boolean matched;
     private boolean fixedAnchor;
 
-    @SuppressWarnings("deprecation")
     public static RubyClass createScannerClass(final Ruby runtime) {
         RubyClass Object = runtime.getObject();
 
