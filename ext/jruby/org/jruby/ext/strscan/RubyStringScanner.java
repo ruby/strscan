@@ -203,9 +203,9 @@ public class RubyStringScanner extends RubyObject {
     }
 
     @JRubyMethod(name = {"concat", "<<"})
-    public IRubyObject concat(ThreadContext context, IRubyObject obj) {
+    public IRubyObject concat(ThreadContext context, IRubyObject str) {
         check(context);
-        str.append(obj.convertToString());
+        this.str.append(RubyString.stringValue(str));
         return this;
     }
 
@@ -261,7 +261,7 @@ public class RubyStringScanner extends RubyObject {
     }
 
     // MRI: strscan_do_scan
-    private IRubyObject scan(ThreadContext context, IRubyObject regex, boolean succptr, boolean getstr, boolean headonly) {
+    private IRubyObject scan(ThreadContext context, IRubyObject pattern, boolean succptr, boolean getstr, boolean headonly) {
         final Ruby runtime = context.runtime;
         check(context);
         clearMatchStatus();
@@ -274,12 +274,12 @@ public class RubyStringScanner extends RubyObject {
         ByteList strBL = str.getByteList();
         int currPtr = strBL.getBegin() + curr;
 
-        if (regex instanceof RubyRegexp) {
-            pattern = ((RubyRegexp) regex).preparePattern(str);
+        if (pattern instanceof RubyRegexp) {
+            this.pattern = ((RubyRegexp) pattern).preparePattern(str);
 
             int range = currPtr + restLen;
 
-            Matcher matcher = pattern.matcher(strBL.getUnsafeBytes(), matchTarget(), range);
+            Matcher matcher = this.pattern.matcher(strBL.getUnsafeBytes(), matchTarget(), range);
             final int ret;
             if (headonly) {
                 ret = RubyRegexp.matcherMatch(context, matcher, currPtr, range, Option.NONE);
@@ -294,26 +294,28 @@ public class RubyStringScanner extends RubyObject {
                 regs = matchRegion;
             }
 
-            if (ret == -2) {
-                throw runtime.newRaiseException((RubyClass) getMetaClass().getConstant("ScanError"), "regexp buffer overflow");
+            if (ret < 0) { // MISMATCH
+                return context.nil;
             }
-            if (ret < 0) return context.nil;
         } else {
-            RubyString pattern = regex.convertToString();
-            Encoding patternEnc = str.checkEncoding(pattern);
-            ByteList patternBL = pattern.getByteList();
-            int patternSize = patternBL.realSize();
+            RubyString patternStr = RubyString.stringValue(pattern);
+            ByteList patternBL = patternStr.getByteList();
+            final int patternSize = patternBL.realSize();
+
+            if (restLen < patternSize) {
+                str.checkEncoding(patternStr);
+                return context.nil;
+            }
 
             if (headonly) {
-                if (restLen < pattern.size()) {
-                    return context.nil;
-                }
+                str.checkEncoding(patternStr);
+
                 if (ByteList.memcmp(strBL.unsafeBytes(), currPtr, patternBL.unsafeBytes(), patternBL.begin(), patternSize) != 0) {
                     return context.nil;
                 }
                 setRegisters(0, patternSize);
             } else {
-                int pos = StringSupport.index(strBL, patternBL, currPtr, patternEnc);
+                int pos = StringSupport.index(strBL, patternBL, currPtr, str.checkEncoding(patternStr));
                 if (pos == -1) {
                     return context.nil;
                 }
@@ -705,7 +707,7 @@ public class RubyStringScanner extends RubyObject {
 
         if (idx instanceof RubySymbol || idx instanceof RubyString) {
             if (pattern == null) {
-                throw runtime.newRaiseException((RubyClass) getMetaClass().getConstant("IndexError"), "undefined group name reference: " + idx);
+                throw runtime.newRaiseException(runtime.getIndexError(), "undefined group name reference: " + idx);
             }
         }
 
@@ -943,12 +945,25 @@ public class RubyStringScanner extends RubyObject {
 
     // MRI: str_new
     private RubyString newString(Ruby runtime, int start, int length) {
-        ByteList byteList = str.getByteList();
-        int begin = byteList.begin();
+        final ByteList strBytes = this.str.getByteList();
+        ByteList newBytes = new ByteList(strBytes.unsafeBytes(), strBytes.begin() + start, length, true);
 
-        ByteList newByteList = new ByteList(byteList.unsafeBytes(), begin + start, length, byteList.getEncoding(), true);
+        final RubyString newStr = RubyString.newString(runtime, newBytes, strBytes.getEncoding());
+        copyCodeRangeForSubstr(newStr, this.str);
+        return newStr;
+    }
 
-        return RubyString.newString(runtime, newByteList);
+    /**
+     * Same as JRuby's (private) <code>RubyString#copyCodeRangeForSubstr</code>.
+     * Isn't really necessary, but will avoid extra code-range scans for the substrings returned.
+     */
+    private void copyCodeRangeForSubstr(RubyString str, RubyString from) {
+        if (str.size() == 0) {
+            str.setCodeRange(from.getEncoding().isAsciiCompatible() ? StringSupport.CR_7BIT : StringSupport.CR_VALID);
+        } else {
+            if (from.getCodeRange() == StringSupport.CR_7BIT) str.setCodeRange(StringSupport.CR_7BIT);
+            // otherwise, leave it as CR_UNKNOWN
+        }
     }
 
     /**
