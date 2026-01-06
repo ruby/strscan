@@ -1,5 +1,22 @@
 # News
 
+## 3.1.7 - 2026-01-06
+
+### Fixes
+
+  * JRuby: Restore compatibility with JRuby 9.4 and earlier.
+    * GH-185
+    * Patch by Karol Bucek
+
+### Improvements
+
+  * JRuby: Preserve code range in substrings to avoid recalculating.
+    * GH-186
+    * Patch by Karol Bucek
+### Thanks
+
+  * Karol Bucek
+
 ## 3.1.6 - 2025-12-17
 
 ### Improvements
