@@ -968,60 +968,60 @@ module StringScannerTests
     assert_equal({"number" => "1"}, scan.named_captures)
   end
 
-  def test_get_int
+  def test_integer_at
     s = create_string_scanner("2024-06-15")
     s.scan(/(\d{4})-(\d{2})-(\d{2})/)
-    assert_equal(2024, s.get_int(1))
-    assert_equal(6, s.get_int(2))
-    assert_equal(15, s.get_int(3))
+    assert_equal(2024, s.integer_at(1))
+    assert_equal(6, s.integer_at(2))
+    assert_equal(15, s.integer_at(3))
   end
 
-  def test_get_int_index_zero
+  def test_integer_at_index_zero
     s = create_string_scanner("42 abc")
     s.scan(/(\d+)/)
-    assert_equal(42, s.get_int(0))
+    assert_equal(42, s.integer_at(0))
   end
 
-  def test_get_int_negative_index
+  def test_integer_at_negative_index
     s = create_string_scanner("2024-06-15")
     s.scan(/(\d{4})-(\d{2})-(\d{2})/)
-    assert_equal(15, s.get_int(-1))
-    assert_equal(6, s.get_int(-2))
-    assert_equal(2024, s.get_int(-3))
+    assert_equal(15, s.integer_at(-1))
+    assert_equal(6, s.integer_at(-2))
+    assert_equal(2024, s.integer_at(-3))
   end
 
-  def test_get_int_no_match
+  def test_integer_at_no_match
     s = create_string_scanner("abc")
     s.scan(/\d+/)
-    assert_nil(s.get_int(0))
+    assert_nil(s.integer_at(0))
   end
 
-  def test_get_int_before_match
+  def test_integer_at_before_match
     s = create_string_scanner("abc")
-    assert_nil(s.get_int(0))
+    assert_nil(s.integer_at(0))
   end
 
-  def test_get_int_index_out_of_range
+  def test_integer_at_index_out_of_range
     s = create_string_scanner("42")
     s.scan(/(\d+)/)
-    assert_nil(s.get_int(2))
-    assert_nil(s.get_int(100))
-    assert_nil(s.get_int(-3))
+    assert_nil(s.integer_at(2))
+    assert_nil(s.integer_at(100))
+    assert_nil(s.integer_at(-3))
   end
 
-  def test_get_int_optional_group_not_matched
+  def test_integer_at_optional_group_not_matched
     s = create_string_scanner("2024-06")
     s.scan(/(\d{4})-(\d{2})(-(\d{2}))?/)
-    assert_equal(2024, s.get_int(1))
-    assert_equal(6, s.get_int(2))
-    assert_nil(s.get_int(4))
+    assert_equal(2024, s.integer_at(1))
+    assert_equal(6, s.integer_at(2))
+    assert_nil(s.integer_at(4))
   end
 
-  def test_get_int_large_number
+  def test_integer_at_large_number
     huge = '9' * 100
     s = create_string_scanner(huge)
     s.scan(/(#{huge})/)
-    assert_equal(huge.to_i, s.get_int(1))
+    assert_equal(huge.to_i, s.integer_at(1))
   end
 
   def test_scan_integer

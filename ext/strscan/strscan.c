@@ -1854,7 +1854,7 @@ strscan_values_at(int argc, VALUE *argv, VALUE self)
 
 /*
  * call-seq:
- *   get_int(index) -> integer or nil
+ *   integer_at(index) -> integer or nil
  *
  * Returns the captured substring at the given +index+ as an Integer,
  * without creating an intermediate String object.
@@ -1868,20 +1868,20 @@ strscan_values_at(int argc, VALUE *argv, VALUE self)
  *
  *   scanner = StringScanner.new("2024-06-15")
  *   scanner.scan(/(\d{4})-(\d{2})-(\d{2})/)
- *   scanner.get_int(1)  # => 2024
- *   scanner.get_int(2)  # => 6
- *   scanner.get_int(3)  # => 15
- *   scanner.get_int(0)  # => 20240615 (entire match as integer)
+ *   scanner.integer_at(1)  # => 2024
+ *   scanner.integer_at(2)  # => 6
+ *   scanner.integer_at(3)  # => 15
+ *   scanner.integer_at(0)  # => 20240615 (entire match as integer)
  *
  */
 /* Max digits that fit in a long (excluding sign).
  * LONG_MAX is at least 2147483647 (10 digits) on 32-bit,
  * and 9223372036854775807 (19 digits) on 64-bit. We use a
  * conservative limit to avoid overflow checks per digit. */
-#define GET_INT_MAX_DIGITS (sizeof(long) >= 8 ? 18 : 9)
+#define INTEGER_AT_MAX_DIGITS (sizeof(long) >= 8 ? 18 : 9)
 
 static VALUE
-strscan_get_int(VALUE self, VALUE idx)
+strscan_integer_at(VALUE self, VALUE idx)
 {
     struct strscanner *p;
     long i;
@@ -1918,7 +1918,7 @@ strscan_get_int(VALUE self, VALUE idx)
 
         digit_count = len - j;
 
-        if (digit_count <= GET_INT_MAX_DIGITS) {
+        if (digit_count <= INTEGER_AT_MAX_DIGITS) {
             long result = 0;
             for (; j < len; j++) {
                 result = result * 10 + (ptr[j] - '0');
@@ -2378,7 +2378,7 @@ Init_strscan(void)
     rb_define_method(StringScanner, "size",        strscan_size,        0);
     rb_define_method(StringScanner, "captures",    strscan_captures,    0);
     rb_define_method(StringScanner, "values_at",   strscan_values_at,  -1);
-    rb_define_method(StringScanner, "get_int",     strscan_get_int,     1);
+    rb_define_method(StringScanner, "integer_at",     strscan_integer_at,     1);
 
     rb_define_method(StringScanner, "rest",        strscan_rest,        0);
     rb_define_method(StringScanner, "rest_size",   strscan_rest_size,   0);
