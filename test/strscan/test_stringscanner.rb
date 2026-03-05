@@ -1042,6 +1042,38 @@ module StringScannerTests
     assert_raise(ArgumentError) { s.integer_at(1) }
   end
 
+  def test_integer_at_sign_only
+    s = create_string_scanner("+")
+    s.scan(/([+\-])/)
+    assert_raise(ArgumentError) { s.integer_at(1) }
+
+    s = create_string_scanner("-")
+    s.scan(/([+\-])/)
+    assert_raise(ArgumentError) { s.integer_at(1) }
+  end
+
+  def test_integer_at_signed_number
+    s = create_string_scanner("-42")
+    s.scan(/([+\-]?\d+)/)
+    assert_equal(-42, s.integer_at(1))
+
+    s = create_string_scanner("+42")
+    s.scan(/([+\-]?\d+)/)
+    assert_equal(42, s.integer_at(1))
+  end
+
+  def test_integer_at_leading_zeros
+    s = create_string_scanner("007")
+    s.scan(/(\d+)/)
+    assert_equal(7, s.integer_at(1))
+  end
+
+  def test_integer_at_full_match_with_non_digits
+    s = create_string_scanner("2024-06-15")
+    s.scan(/(\d{4})-(\d{2})-(\d{2})/)
+    assert_raise(ArgumentError) { s.integer_at(0) }
+  end
+
   def test_scan_integer
     s = create_string_scanner('abc')
     assert_equal(3, s.match?(/(?<a>abc)/)) # set named_captures
