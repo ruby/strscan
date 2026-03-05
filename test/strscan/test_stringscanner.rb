@@ -1024,6 +1024,18 @@ module StringScannerTests
     assert_equal(huge.to_i, s.integer_at(1))
   end
 
+  def test_integer_at_non_digit
+    s = create_string_scanner("1.5")
+    s.scan(/([\d.]+)/)
+    assert_raise(ArgumentError) { s.integer_at(1) }
+  end
+
+  def test_integer_at_non_digit_alpha
+    s = create_string_scanner("foo bar")
+    s.scan(/(\w+)/)
+    assert_raise(ArgumentError) { s.integer_at(1) }
+  end
+
   def test_scan_integer
     s = create_string_scanner('abc')
     assert_equal(3, s.match?(/(?<a>abc)/)) # set named_captures

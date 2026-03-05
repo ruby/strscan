@@ -1921,9 +1921,25 @@ strscan_integer_at(VALUE self, VALUE idx)
         if (digit_count <= INTEGER_AT_MAX_DIGITS) {
             long result = 0;
             for (; j < len; j++) {
-                result = result * 10 + (ptr[j] - '0');
+                unsigned char c = (unsigned char)ptr[j];
+                if (c < '0' || c > '9') {
+                    rb_raise(rb_eArgError,
+                             "non-digit character in capture: %.*s",
+                             (int)len, ptr);
+                }
+                result = result * 10 + (c - '0');
             }
             return LONG2NUM(negative ? -result : result);
+        }
+
+        /* Validate remaining digits for bignum path */
+        for (; j < len; j++) {
+            unsigned char c = (unsigned char)ptr[j];
+            if (c < '0' || c > '9') {
+                rb_raise(rb_eArgError,
+                         "non-digit character in capture: %.*s",
+                         (int)len, ptr);
+            }
         }
     }
 
