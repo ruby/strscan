@@ -968,6 +968,55 @@ module StringScannerTests
     assert_equal({"number" => "1"}, scan.named_captures)
   end
 
+  def test_get_int
+    s = create_string_scanner("2024-06-15")
+    s.scan(/(\d{4})-(\d{2})-(\d{2})/)
+    assert_equal(2024, s.get_int(1))
+    assert_equal(6, s.get_int(2))
+    assert_equal(15, s.get_int(3))
+  end
+
+  def test_get_int_index_zero
+    s = create_string_scanner("42 abc")
+    s.scan(/(\d+)/)
+    assert_equal(42, s.get_int(0))
+  end
+
+  def test_get_int_negative_index
+    s = create_string_scanner("2024-06-15")
+    s.scan(/(\d{4})-(\d{2})-(\d{2})/)
+    assert_equal(15, s.get_int(-1))
+    assert_equal(6, s.get_int(-2))
+    assert_equal(2024, s.get_int(-3))
+  end
+
+  def test_get_int_no_match
+    s = create_string_scanner("abc")
+    s.scan(/\d+/)
+    assert_nil(s.get_int(0))
+  end
+
+  def test_get_int_before_match
+    s = create_string_scanner("abc")
+    assert_nil(s.get_int(0))
+  end
+
+  def test_get_int_index_out_of_range
+    s = create_string_scanner("42")
+    s.scan(/(\d+)/)
+    assert_nil(s.get_int(2))
+    assert_nil(s.get_int(100))
+    assert_nil(s.get_int(-3))
+  end
+
+  def test_get_int_optional_group_not_matched
+    s = create_string_scanner("2024-06")
+    s.scan(/(\d{4})-(\d{2})(-(\d{2}))?/)
+    assert_equal(2024, s.get_int(1))
+    assert_equal(6, s.get_int(2))
+    assert_nil(s.get_int(4))
+  end
+
   def test_scan_integer
     s = create_string_scanner('abc')
     assert_equal(3, s.match?(/(?<a>abc)/)) # set named_captures

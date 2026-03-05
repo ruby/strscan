@@ -1853,6 +1853,67 @@ strscan_values_at(int argc, VALUE *argv, VALUE self)
 }
 
 /*
+ * call-seq:
+ *   get_int(index) -> integer or nil
+ *
+ * Returns the captured substring at the given +index+ as an Integer,
+ * without creating an intermediate String object.
+ *
+ * Returns +nil+ if the most recent match failed, or if the capture
+ * at +index+ is out of range, or if the capture did not participate
+ * in the match.
+ *
+ * This is semantically equivalent to <tt>self[index].to_i</tt> but
+ * avoids the allocation of a temporary String.
+ *
+ *   scanner = StringScanner.new("2024-06-15")
+ *   scanner.scan(/(\d{4})-(\d{2})-(\d{2})/)
+ *   scanner.get_int(1)  # => 2024
+ *   scanner.get_int(2)  # => 6
+ *   scanner.get_int(3)  # => 15
+ *   scanner.get_int(0)  # => 20240615 (entire match as integer)
+ *
+ */
+static VALUE
+strscan_get_int(VALUE self, VALUE idx)
+{
+    struct strscanner *p;
+    long i;
+    long beg, end, len;
+    const char *ptr;
+    VALUE buffer_v, integer;
+
+    GET_SCANNER(self, p);
+    if (! MATCHED_P(p))        return Qnil;
+
+    i = NUM2LONG(idx);
+
+    if (i < 0)
+        i += p->regs.num_regs;
+    if (i < 0)                 return Qnil;
+    if (i >= p->regs.num_regs) return Qnil;
+    if (p->regs.beg[i] == -1)  return Qnil;
+
+    beg = adjust_register_position(p, p->regs.beg[i]);
+    end = adjust_register_position(p, p->regs.end[i]);
+    len = end - beg;
+
+    if (len <= 0) return INT2FIX(0);
+
+    ptr = S_PBEG(p) + beg;
+
+    {
+        char *buffer = RB_ALLOCV_N(char, buffer_v, len + 1);
+        MEMCPY(buffer, ptr, char, len);
+        buffer[len] = '\0';
+        integer = rb_cstr2inum(buffer, 10);
+        RB_ALLOCV_END(buffer_v);
+    }
+
+    return integer;
+}
+
+/*
  * :markup: markdown
  * :include: strscan/link_refs.txt
  *
@@ -2290,6 +2351,7 @@ Init_strscan(void)
     rb_define_method(StringScanner, "size",        strscan_size,        0);
     rb_define_method(StringScanner, "captures",    strscan_captures,    0);
     rb_define_method(StringScanner, "values_at",   strscan_values_at,  -1);
+    rb_define_method(StringScanner, "get_int",     strscan_get_int,     1);
 
     rb_define_method(StringScanner, "rest",        strscan_rest,        0);
     rb_define_method(StringScanner, "rest_size",   strscan_rest_size,   0);
