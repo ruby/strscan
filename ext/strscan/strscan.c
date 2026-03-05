@@ -1874,6 +1874,12 @@ strscan_values_at(int argc, VALUE *argv, VALUE self)
  *   scanner.get_int(0)  # => 20240615 (entire match as integer)
  *
  */
+/* Max digits that fit in a long (excluding sign).
+ * LONG_MAX is at least 2147483647 (10 digits) on 32-bit,
+ * and 9223372036854775807 (19 digits) on 64-bit. We use a
+ * conservative limit to avoid overflow checks per digit. */
+#define GET_INT_MAX_DIGITS (sizeof(long) >= 8 ? 18 : 9)
+
 static VALUE
 strscan_get_int(VALUE self, VALUE idx)
 {
@@ -1881,7 +1887,6 @@ strscan_get_int(VALUE self, VALUE idx)
     long i;
     long beg, end, len;
     const char *ptr;
-    VALUE buffer_v, integer;
 
     GET_SCANNER(self, p);
     if (! MATCHED_P(p))        return Qnil;
@@ -1902,15 +1907,37 @@ strscan_get_int(VALUE self, VALUE idx)
 
     ptr = S_PBEG(p) + beg;
 
+    /* Fast path: parse directly from source bytes without allocation */
     {
+        long j = 0;
+        int negative = 0;
+        long digit_count;
+
+        if (ptr[0] == '-') { negative = 1; j = 1; }
+        else if (ptr[0] == '+') { j = 1; }
+
+        digit_count = len - j;
+
+        if (digit_count <= GET_INT_MAX_DIGITS) {
+            long result = 0;
+            for (; j < len; j++) {
+                result = result * 10 + (ptr[j] - '0');
+            }
+            return LONG2NUM(negative ? -result : result);
+        }
+    }
+
+    /* Slow path: bignum - fall back to rb_cstr2inum */
+    {
+        VALUE buffer_v;
+        VALUE integer;
         char *buffer = RB_ALLOCV_N(char, buffer_v, len + 1);
         MEMCPY(buffer, ptr, char, len);
         buffer[len] = '\0';
         integer = rb_cstr2inum(buffer, 10);
         RB_ALLOCV_END(buffer_v);
+        return integer;
     }
-
-    return integer;
 }
 
 /*

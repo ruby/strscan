@@ -1017,6 +1017,13 @@ module StringScannerTests
     assert_nil(s.get_int(4))
   end
 
+  def test_get_int_large_number
+    huge = '9' * 100
+    s = create_string_scanner(huge)
+    s.scan(/(#{huge})/)
+    assert_equal(huge.to_i, s.get_int(1))
+  end
+
   def test_scan_integer
     s = create_string_scanner('abc')
     assert_equal(3, s.match?(/(?<a>abc)/)) # set named_captures
