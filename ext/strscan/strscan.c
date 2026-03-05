@@ -1874,11 +1874,12 @@ strscan_values_at(int argc, VALUE *argv, VALUE self)
  *   scanner.integer_at(0)  # => 20240615 (entire match as integer)
  *
  */
-/* Max digits that fit in a long (excluding sign).
- * LONG_MAX is at least 2147483647 (10 digits) on 32-bit,
- * and 9223372036854775807 (19 digits) on 64-bit. We use a
- * conservative limit to avoid overflow checks per digit. */
-#define INTEGER_AT_MAX_DIGITS (sizeof(long) >= 8 ? 18 : 9)
+/* rb_int_parse_cstr is declared in internal/bignum.h which is not
+ * available to extensions. Declare it here since the symbol is
+ * exported from libruby. */
+VALUE rb_int_parse_cstr(const char *str, ssize_t len, char **endp,
+                        size_t *ndigits, int base, int flags);
+#define RB_INT_PARSE_SIGN 0x01
 
 static VALUE
 strscan_integer_at(VALUE self, VALUE idx)
@@ -1907,51 +1908,18 @@ strscan_integer_at(VALUE self, VALUE idx)
 
     ptr = S_PBEG(p) + beg;
 
-    /* Fast path: parse directly from source bytes without allocation */
+    /* Parse directly from source bytes without buffer allocation.
+     * rb_int_parse_cstr accepts a length so no NUL-termination needed.
+     * Use endp to verify the entire capture was consumed as digits. */
     {
-        long j = 0;
-        int negative = 0;
-        long digit_count;
+        char *endp;
+        VALUE integer = rb_int_parse_cstr(ptr, len, &endp, NULL, 10, RB_INT_PARSE_SIGN);
 
-        if (ptr[0] == '-') { negative = 1; j = 1; }
-        else if (ptr[0] == '+') { j = 1; }
-
-        digit_count = len - j;
-
-        if (digit_count <= INTEGER_AT_MAX_DIGITS) {
-            long result = 0;
-            for (; j < len; j++) {
-                unsigned char c = (unsigned char)ptr[j];
-                if (c < '0' || c > '9') {
-                    rb_raise(rb_eArgError,
-                             "non-digit character in capture: %.*s",
-                             (int)len, ptr);
-                }
-                result = result * 10 + (c - '0');
-            }
-            return LONG2NUM(negative ? -result : result);
+        if (endp != ptr + len) {
+            rb_raise(rb_eArgError,
+                     "non-digit character in capture: %.*s",
+                     (int)len, ptr);
         }
-
-        /* Validate remaining digits for bignum path */
-        for (; j < len; j++) {
-            unsigned char c = (unsigned char)ptr[j];
-            if (c < '0' || c > '9') {
-                rb_raise(rb_eArgError,
-                         "non-digit character in capture: %.*s",
-                         (int)len, ptr);
-            }
-        }
-    }
-
-    /* Slow path: bignum - fall back to rb_cstr2inum */
-    {
-        VALUE buffer_v;
-        VALUE integer;
-        char *buffer = RB_ALLOCV_N(char, buffer_v, len + 1);
-        MEMCPY(buffer, ptr, char, len);
-        buffer[len] = '\0';
-        integer = rb_cstr2inum(buffer, 10);
-        RB_ALLOCV_END(buffer_v);
         return integer;
     }
 }
