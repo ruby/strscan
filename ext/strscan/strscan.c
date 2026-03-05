@@ -1621,6 +1621,37 @@ name_to_backref_number(struct re_registers *regs, VALUE regexp, const char* name
                  rb_long2int(name_end - name), name);
 }
 
+/* Resolve capture group index from Integer, Symbol, or String.
+ * Returns the resolved register index, or -1 if unmatched/out of range. */
+static long
+resolve_capture_index(struct strscanner *p, VALUE idx)
+{
+    const char *name;
+    long i;
+
+    if (! MATCHED_P(p)) return -1;
+
+    switch (TYPE(idx)) {
+        case T_SYMBOL:
+            idx = rb_sym2str(idx);
+            /* fall through */
+        case T_STRING:
+            RSTRING_GETMEM(idx, name, i);
+            i = name_to_backref_number(&(p->regs), p->regex, name, name + i, rb_enc_get(idx));
+            break;
+        default:
+            i = NUM2LONG(idx);
+    }
+
+    if (i < 0)
+        i += p->regs.num_regs;
+    if (i < 0)                 return -1;
+    if (i >= p->regs.num_regs) return -1;
+    if (p->regs.beg[i] == -1)  return -1;
+
+    return i;
+}
+
 /*
  *
  * :markup: markdown
@@ -1695,30 +1726,12 @@ name_to_backref_number(struct re_registers *regs, VALUE regexp, const char* name
 static VALUE
 strscan_aref(VALUE self, VALUE idx)
 {
-    const char *name;
     struct strscanner *p;
     long i;
 
     GET_SCANNER(self, p);
-    if (! MATCHED_P(p))        return Qnil;
-
-    switch (TYPE(idx)) {
-        case T_SYMBOL:
-            idx = rb_sym2str(idx);
-            /* fall through */
-        case T_STRING:
-            RSTRING_GETMEM(idx, name, i);
-            i = name_to_backref_number(&(p->regs), p->regex, name, name + i, rb_enc_get(idx));
-            break;
-        default:
-            i = NUM2LONG(idx);
-    }
-
-    if (i < 0)
-        i += p->regs.num_regs;
-    if (i < 0)                 return Qnil;
-    if (i >= p->regs.num_regs) return Qnil;
-    if (p->regs.beg[i] == -1)  return Qnil;
+    i = resolve_capture_index(p, idx);
+    if (i < 0) return Qnil;
 
     return extract_range(p,
                          adjust_register_position(p, p->regs.beg[i]),
@@ -1850,6 +1863,60 @@ strscan_values_at(int argc, VALUE *argv, VALUE self)
     }
 
     return new_ary;
+}
+
+/*
+ * call-seq:
+ *   integer_at(index, base = 10) -> integer or nil
+ *
+ * Returns the captured substring at the given +index+ as an Integer,
+ * following the behavior of <tt>String#to_i(base)</tt>.
+ *
+ * +index+ can be an Integer (positive, negative, or zero), a Symbol,
+ * or a String for named capture groups.
+ *
+ * Returns +nil+ if:
+ * - No match has been performed or the last match failed
+ * - The +index+ is out of range
+ * - The group at +index+ did not participate in the match
+ *
+ * This is semantically equivalent to <tt>self[index].to_i(base)</tt>
+ * but avoids the allocation of a temporary String when possible.
+ *
+ *   scanner = StringScanner.new("2024-06-15")
+ *   scanner.scan(/(\d{4})-(\d{2})-(\d{2})/)
+ *   scanner.integer_at(1)       # => 2024
+ *   scanner.integer_at(1, 16)   # => 8228
+ *
+ */
+static VALUE
+strscan_integer_at(int argc, VALUE *argv, VALUE self)
+{
+    struct strscanner *p;
+    long i;
+    long beg, end, len;
+    const char *ptr;
+    VALUE idx, vbase;
+    int base = 10;
+
+    rb_scan_args(argc, argv, "11", &idx, &vbase);
+    if (!NIL_P(vbase)) base = NUM2INT(vbase);
+
+    GET_SCANNER(self, p);
+    i = resolve_capture_index(p, idx);
+    if (i < 0) return Qnil;
+
+    beg = adjust_register_position(p, p->regs.beg[i]);
+    end = adjust_register_position(p, p->regs.end[i]);
+    len = end - beg;
+
+    if (len <= 0) return INT2FIX(0);
+
+    ptr = S_PBEG(p) + beg;
+
+    /* Follow String#to_i(base) semantics via rb_str_to_inum.
+     * badcheck=0 returns 0 for non-numeric input instead of raising. */
+    return rb_str_to_inum(rb_str_new(ptr, len), base, 0);
 }
 
 /*
@@ -2290,6 +2357,7 @@ Init_strscan(void)
     rb_define_method(StringScanner, "size",        strscan_size,        0);
     rb_define_method(StringScanner, "captures",    strscan_captures,    0);
     rb_define_method(StringScanner, "values_at",   strscan_values_at,  -1);
+    rb_define_method(StringScanner, "integer_at",  strscan_integer_at, -1);
 
     rb_define_method(StringScanner, "rest",        strscan_rest,        0);
     rb_define_method(StringScanner, "rest_size",   strscan_rest_size,   0);
