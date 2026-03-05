@@ -968,6 +968,135 @@ module StringScannerTests
     assert_equal({"number" => "1"}, scan.named_captures)
   end
 
+  def test_integer_at
+    s = create_string_scanner("2024-06-15")
+    s.scan(/(\d{4})-(\d{2})-(\d{2})/)
+    assert_equal(2024, s.integer_at(1))
+    assert_equal(6, s.integer_at(2))
+    assert_equal(15, s.integer_at(3))
+  end
+
+  def test_integer_at_index_zero
+    s = create_string_scanner("42 abc")
+    s.scan(/(\d+)/)
+    assert_equal(42, s.integer_at(0))
+  end
+
+  def test_integer_at_negative_index
+    s = create_string_scanner("2024-06-15")
+    s.scan(/(\d{4})-(\d{2})-(\d{2})/)
+    assert_equal(15, s.integer_at(-1))
+    assert_equal(6, s.integer_at(-2))
+    assert_equal(2024, s.integer_at(-3))
+  end
+
+  def test_integer_at_no_match
+    s = create_string_scanner("abc")
+    s.scan(/\d+/)
+    assert_nil(s.integer_at(0))
+  end
+
+  def test_integer_at_before_match
+    s = create_string_scanner("abc")
+    assert_nil(s.integer_at(0))
+  end
+
+  def test_integer_at_index_out_of_range
+    s = create_string_scanner("42")
+    s.scan(/(\d+)/)
+    assert_nil(s.integer_at(2))
+    assert_nil(s.integer_at(100))
+    assert_nil(s.integer_at(-3))
+  end
+
+  def test_integer_at_optional_group_not_matched
+    s = create_string_scanner("2024-06")
+    s.scan(/(\d{4})-(\d{2})(-(\d{2}))?/)
+    assert_equal(2024, s.integer_at(1))
+    assert_equal(6, s.integer_at(2))
+    assert_nil(s.integer_at(4))
+  end
+
+  def test_integer_at_large_number
+    huge = '9' * 100
+    s = create_string_scanner(huge)
+    s.scan(/(#{huge})/)
+    assert_equal(huge.to_i, s.integer_at(1))
+  end
+
+  def test_integer_at_non_digit
+    s = create_string_scanner("1.5")
+    s.scan(/([\d.]+)/)
+    assert_raise(ArgumentError) { s.integer_at(1) }
+  end
+
+  def test_integer_at_non_digit_alpha
+    s = create_string_scanner("foo bar")
+    s.scan(/(\w+)/)
+    assert_raise(ArgumentError) { s.integer_at(1) }
+  end
+
+  def test_integer_at_empty_capture
+    s = create_string_scanner("abc")
+    s.scan(/()abc/)
+    assert_raise(ArgumentError) { s.integer_at(1) }
+  end
+
+  def test_integer_at_sign_only
+    s = create_string_scanner("+")
+    s.scan(/([+\-])/)
+    assert_raise(ArgumentError) { s.integer_at(1) }
+
+    s = create_string_scanner("-")
+    s.scan(/([+\-])/)
+    assert_raise(ArgumentError) { s.integer_at(1) }
+  end
+
+  def test_integer_at_signed_number
+    s = create_string_scanner("-42")
+    s.scan(/([+\-]?\d+)/)
+    assert_equal(-42, s.integer_at(1))
+
+    s = create_string_scanner("+42")
+    s.scan(/([+\-]?\d+)/)
+    assert_equal(42, s.integer_at(1))
+  end
+
+  def test_integer_at_leading_zeros
+    s = create_string_scanner("007")
+    s.scan(/(\d+)/)
+    assert_equal(7, s.integer_at(1))
+  end
+
+  def test_integer_at_full_match_with_non_digits
+    s = create_string_scanner("2024-06-15")
+    s.scan(/(\d{4})-(\d{2})-(\d{2})/)
+    assert_raise(ArgumentError) { s.integer_at(0) }
+  end
+
+  def test_integer_at_named_capture_symbol
+    s = create_string_scanner("2024-06-15")
+    s.scan(/(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/)
+    assert_equal(2024, s.integer_at(:year))
+    assert_equal(6, s.integer_at(:month))
+    assert_equal(15, s.integer_at(:day))
+  end
+
+  def test_integer_at_named_capture_string
+    s = create_string_scanner("2024-06-15")
+    s.scan(/(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/)
+    assert_equal(2024, s.integer_at("year"))
+    assert_equal(6, s.integer_at("month"))
+    assert_equal(15, s.integer_at("day"))
+  end
+
+  def test_integer_at_named_capture_undefined
+    s = create_string_scanner("2024-06-15")
+    s.scan(/(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/)
+    assert_raise(IndexError) { s.integer_at(:unknown) }
+    assert_raise(IndexError) { s.integer_at("unknown") }
+  end
+
   def test_scan_integer
     s = create_string_scanner('abc')
     assert_equal(3, s.match?(/(?<a>abc)/)) # set named_captures
