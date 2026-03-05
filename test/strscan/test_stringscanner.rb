@@ -1036,6 +1036,12 @@ module StringScannerTests
     assert_raise(ArgumentError) { s.integer_at(1) }
   end
 
+  def test_integer_at_empty_capture
+    s = create_string_scanner("abc")
+    s.scan(/()abc/)
+    assert_raise(ArgumentError) { s.integer_at(1) }
+  end
+
   def test_scan_integer
     s = create_string_scanner('abc')
     assert_equal(3, s.match?(/(?<a>abc)/)) # set named_captures

@@ -1904,7 +1904,9 @@ strscan_integer_at(VALUE self, VALUE idx)
     end = adjust_register_position(p, p->regs.end[i]);
     len = end - beg;
 
-    if (len <= 0) return INT2FIX(0);
+    if (len <= 0) {
+        rb_raise(rb_eArgError, "empty capture for integer conversion");
+    }
 
     ptr = S_PBEG(p) + beg;
 
