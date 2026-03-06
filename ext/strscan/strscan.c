@@ -1855,7 +1855,9 @@ strscan_values_at(int argc, VALUE *argv, VALUE self)
 #ifdef HAVE_RB_INT_PARSE_CSTR
 VALUE rb_int_parse_cstr(const char *str, ssize_t len, char **endp,
                         size_t *ndigits, int base, int flags);
+#ifndef RB_INT_PARSE_SIGN
 #define RB_INT_PARSE_SIGN 0x01
+#endif
 #endif
 
 /*
