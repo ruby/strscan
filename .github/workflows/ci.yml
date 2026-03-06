@@ -3,6 +3,7 @@ name: CI
 on:
 - push
 - pull_request
+- workflow_dispatch
 
 env:
   JRUBY_OPTS: "-X+C" # temporarily force JRuby to compile, so Java exception trace will contain .rb lines
