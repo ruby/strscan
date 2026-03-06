@@ -1852,6 +1852,114 @@ strscan_values_at(int argc, VALUE *argv, VALUE self)
     return new_ary;
 }
 
+#ifdef HAVE_RB_INT_PARSE_CSTR
+VALUE rb_int_parse_cstr(const char *str, ssize_t len, char **endp,
+                        size_t *ndigits, int base, int flags);
+#ifndef RB_INT_PARSE_SIGN
+#define RB_INT_PARSE_SIGN 0x01
+#endif
+#endif
+
+/*
+ * call-seq:
+ *   integer_at(index) -> integer or nil
+ *
+ * Returns the captured substring at the given +index+ as an Integer,
+ * without creating an intermediate String object.
+ *
+ * Returns +nil+ if the most recent match failed, or if the capture
+ * at +index+ is out of range, or if the capture did not participate
+ * in the match.
+ *
+ * This is semantically equivalent to <tt>self[index].to_i</tt> but
+ * avoids the allocation of a temporary String.
+ *
+ *   scanner = StringScanner.new("2024-06-15")
+ *   scanner.scan(/(\d{4})-(\d{2})-(\d{2})/)
+ *   scanner.integer_at(1)  # => 2024
+ *   scanner.integer_at(2)  # => 6
+ *   scanner.integer_at(3)  # => 15
+ *   scanner.integer_at(0)  # => 20240615 (entire match as integer)
+ *
+ */
+static VALUE
+strscan_integer_at(VALUE self, VALUE idx)
+{
+    const char *name;
+    struct strscanner *p;
+    long i;
+    long beg, end, len;
+    const char *ptr;
+
+    GET_SCANNER(self, p);
+    if (! MATCHED_P(p))        return Qnil;
+
+    switch (TYPE(idx)) {
+        case T_SYMBOL:
+            idx = rb_sym2str(idx);
+            /* fall through */
+        case T_STRING:
+            RSTRING_GETMEM(idx, name, i);
+            i = name_to_backref_number(&(p->regs), p->regex, name, name + i, rb_enc_get(idx));
+            break;
+        default:
+            i = NUM2LONG(idx);
+    }
+
+    if (i < 0)
+        i += p->regs.num_regs;
+    if (i < 0)                 return Qnil;
+    if (i >= p->regs.num_regs) return Qnil;
+    if (p->regs.beg[i] == -1)  return Qnil;
+
+    beg = adjust_register_position(p, p->regs.beg[i]);
+    end = adjust_register_position(p, p->regs.end[i]);
+    len = end - beg;
+
+    if (len <= 0) {
+        rb_raise(rb_eArgError, "empty capture for integer conversion");
+    }
+
+    ptr = S_PBEG(p) + beg;
+
+#ifdef HAVE_RB_INT_PARSE_CSTR
+    /* Parse directly from source bytes without buffer allocation.
+     * rb_int_parse_cstr accepts a length so no NUL-termination needed.
+     * Use endp to verify the entire capture was consumed as digits. */
+    {
+        char *endp;
+        VALUE integer = rb_int_parse_cstr(ptr, len, &endp, NULL, 10, RB_INT_PARSE_SIGN);
+
+        if (endp != ptr + len) {
+            rb_raise(rb_eArgError,
+                     "non-digit character in capture: %.*s",
+                     (int)len, ptr);
+        }
+        return integer;
+    }
+#else
+    /* Fallback: create a temporary Ruby String and use rb_str_to_inum.
+     * Validate that the capture contains only digits (with optional sign). */
+    {
+        long j = 0;
+        if (ptr[0] == '-' || ptr[0] == '+') j = 1;
+        if (j >= len) {
+            rb_raise(rb_eArgError,
+                     "non-digit character in capture: %.*s",
+                     (int)len, ptr);
+        }
+        for (; j < len; j++) {
+            if (ptr[j] < '0' || ptr[j] > '9') {
+                rb_raise(rb_eArgError,
+                         "non-digit character in capture: %.*s",
+                         (int)len, ptr);
+            }
+        }
+        return rb_str_to_inum(rb_str_new(ptr, len), 10, 0);
+    }
+#endif
+}
+
 /*
  * :markup: markdown
  * :include: strscan/link_refs.txt
@@ -2290,6 +2398,7 @@ Init_strscan(void)
     rb_define_method(StringScanner, "size",        strscan_size,        0);
     rb_define_method(StringScanner, "captures",    strscan_captures,    0);
     rb_define_method(StringScanner, "values_at",   strscan_values_at,  -1);
+    rb_define_method(StringScanner, "integer_at",  strscan_integer_at,  1);
 
     rb_define_method(StringScanner, "rest",        strscan_rest,        0);
     rb_define_method(StringScanner, "rest_size",   strscan_rest_size,   0);
