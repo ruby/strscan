@@ -2398,7 +2398,7 @@ Init_strscan(void)
     rb_define_method(StringScanner, "size",        strscan_size,        0);
     rb_define_method(StringScanner, "captures",    strscan_captures,    0);
     rb_define_method(StringScanner, "values_at",   strscan_values_at,  -1);
-    rb_define_method(StringScanner, "integer_at",     strscan_integer_at,     1);
+    rb_define_method(StringScanner, "integer_at",  strscan_integer_at,  1);
 
     rb_define_method(StringScanner, "rest",        strscan_rest,        0);
     rb_define_method(StringScanner, "rest_size",   strscan_rest_size,   0);
