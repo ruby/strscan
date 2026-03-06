@@ -1066,6 +1066,16 @@ module StringScannerTests
     s = create_string_scanner("007")
     s.scan(/(\d+)/)
     assert_equal(7, s.integer_at(1))
+
+    # "09" would be invalid in octal, but integer_at always uses base 10
+    s = create_string_scanner("09")
+    s.scan(/(\d+)/)
+    assert_equal(9, s.integer_at(1))
+
+    # "010" is 8 in octal (Integer("010")), but 10 in base 10
+    s = create_string_scanner("010")
+    s.scan(/(\d+)/)
+    assert_equal(10, s.integer_at(1))
   end
 
   def test_integer_at_full_match_with_non_digits
