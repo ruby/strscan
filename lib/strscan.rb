@@ -1,0 +1,19 @@
+case RUBY_ENGINE
+when 'ruby'
+  require 'strscan.so'
+  require_relative 'strscan/strscan'
+when 'jruby'
+  require 'strscan.jar'
+  JRuby::Util.load_ext('org.jruby.ext.strscan.StringScannerLibrary')
+  require_relative 'strscan/strscan'
+when 'truffleruby'
+  if RUBY_ENGINE_VERSION.to_i >= 34
+    require 'strscan/truffleruby_strscan'
+    require_relative 'strscan/strscan'
+  else
+    $LOAD_PATH.delete __dir__
+    require 'strscan'
+  end
+else
+  raise "Unknown Ruby: #{RUBY_ENGINE}"
+end

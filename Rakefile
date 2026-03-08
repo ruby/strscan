@@ -31,7 +31,7 @@ if RUBY_ENGINE == "jruby"
     ext.target_version = '1.8'
     ext.ext_dir = 'ext/jruby'
   end
-  extra_require_path = "ext/jruby/lib"
+  extra_require_path = "lib"
 elsif RUBY_ENGINE == "ruby"
   require 'rake/extensiontask'
   Rake::ExtensionTask.new("strscan") do |x|

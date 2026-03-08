@@ -29,6 +29,7 @@ jobs:
           - { os: windows-latest , ruby: mingw }
           - { os: windows-latest , ruby: mswin }
           - { os: ubuntu-latest , ruby: jruby-9.4 }
+          - { os: ubuntu-latest , ruby: truffleruby-33 }
         exclude:
           - { os: macos-latest , ruby: 2.4 }
           - { os: ubuntu-latest , ruby: 2.5 }
