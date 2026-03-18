@@ -1914,7 +1914,42 @@ strscan_integer_at(int argc, VALUE *argv, VALUE self)
 
     ptr = S_PBEG(p) + beg;
 
-    /* Follow String#to_i(base) semantics via rb_str_to_inum.
+    /* Fast path for base 10 with pure digits: parse directly from
+     * source bytes without temporary String allocation.
+     * This covers the Date._strptime use case. */
+    if (base == 10) {
+        long j = 0;
+        int negative = 0;
+        long digit_count;
+
+        if (ptr[0] == '-') { negative = 1; j = 1; }
+        else if (ptr[0] == '+') { j = 1; }
+
+        digit_count = len - j;
+        if (digit_count > 0) {
+            long k;
+            int all_digits = 1;
+            for (k = j; k < len; k++) {
+                if (ptr[k] < '0' || ptr[k] > '9') {
+                    all_digits = 0;
+                    break;
+                }
+            }
+            if (all_digits) {
+                if (digit_count <= (sizeof(long) >= 8 ? 18 : 9)) {
+                    long result = 0;
+                    for (; j < len; j++) {
+                        result = result * 10 + (ptr[j] - '0');
+                    }
+                    if (negative) result = -result;
+                    return LONG2NUM(result);
+                }
+                /* Bignum: fall through to rb_str_to_inum */
+            }
+        }
+    }
+
+    /* General path: follow String#to_i(base) semantics via rb_str_to_inum.
      * badcheck=0 returns 0 for non-numeric input instead of raising. */
     return rb_str_to_inum(rb_str_new(ptr, len), base, 0);
 }
