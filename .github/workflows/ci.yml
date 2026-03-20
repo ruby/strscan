@@ -29,14 +29,13 @@ jobs:
           - { os: windows-latest , ruby: mingw }
           - { os: windows-latest , ruby: mswin }
           - { os: ubuntu-latest , ruby: jruby-9.4 }
-          - { os: ubuntu-latest , ruby: truffleruby-33 }
+          - { os: ubuntu-latest , ruby: truffleruby-33 } # using stdlib implementation
+          - { os: ubuntu-latest , ruby: truffleruby-head } # using truffleruby_strscan.rb
         exclude:
           - { os: macos-latest , ruby: 2.4 }
           - { os: ubuntu-latest , ruby: 2.5 }
           - { os: macos-latest , ruby: 2.5 }
           - { os: windows-latest , ruby: head }
-          - { os: ubuntu-latest , ruby: truffleruby }
-          - { os: macos-latest , ruby: truffleruby }
           - { os: windows-latest , ruby: truffleruby }
           - { os: windows-latest , ruby: truffleruby-head }
 
