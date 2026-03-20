@@ -46,24 +46,26 @@ class StringScanner
   end
 
   def inspect
-    return "#<#{self.class} (uninitialized)>" unless @string
-    return "#<#{self.class} fin>" if eos?
+    return "#<#{Primitive.class(self)} (uninitialized)>" unless @string
+    return "#<#{Primitive.class(self)} fin>" if eos?
 
-    before = if @pos == 0
-      ''
-    elsif @pos < 5
-      "#{@string.byteslice(0, @pos).inspect} "
-    else
-      "#{('...' + @string.byteslice(@pos - 5, 5)).inspect} "
-    end
+    before =
+      if @pos == 0
+        ''
+      elsif @pos < 5
+        "#{@string.byteslice(0, @pos).inspect} "
+      else
+        "#{('...' + @string.byteslice(@pos - 5, 5)).inspect} "
+      end
 
-    after = if @pos >= @string.bytesize - 5
-      " #{@string.byteslice(@pos..).inspect}"
-    else
-      " #{(@string.byteslice(@pos, 5) + '...').inspect}"
-    end
+    after =
+      if @pos >= @string.bytesize - 5
+        " #{@string.byteslice(@pos..).inspect}"
+      else
+        " #{(@string.byteslice(@pos, 5) + '...').inspect}"
+      end
 
-    "#<#{self.class} #{@pos}/#{@string.bytesize} #{before}@#{after}>"
+    "#<#{Primitive.class(self)} #{@pos}/#{@string.bytesize} #{before}@#{after}>"
   end
 
   def pos=(new_pos)
@@ -80,7 +82,7 @@ class StringScanner
 
   def rest = @string.byteslice(@pos..)
 
-  def rest_size = rest.size
+  def rest_size = rest.bytesize
 
   def concat(more_string)
     @string.concat(Primitive.convert_with_to_str(more_string))
@@ -137,7 +139,7 @@ class StringScanner
 
   # MatchData-like methods
 
-  def matched? = @last_match != nil
+  def matched? = !Primitive.nil?(@last_match)
 
   def matched = @last_match&.to_s
 
@@ -196,7 +198,18 @@ class StringScanner
     end
   end
 
-  def getch = scan(/./)
+  def getch = scan(/./m)
+
+  def scan_integer(base: 10)
+    case base
+    when 10
+      scan(/[+-]?\d+/)&.to_i
+    when 16
+      scan(/[+-]?(0x)?[0-9a-fA-F]+/)&.to_i(16)
+    else
+      raise ArgumentError, "Unsupported integer base: #{base}, expected 10 or 16"
+    end
+  end
 
   def scan_full(pattern, advance_pointer, return_string)
     if advance_pointer
@@ -428,14 +441,4 @@ class StringScanner
     end
   end
   Primitive.always_split self, :skip_until
-
-  # Private methods
-
-  private def scan_base10_integer
-    scan(/[+-]?\d+/)&.to_i
-  end
-
-  private def scan_base16_integer
-    scan(/[+-]?(0x)?[0-9a-fA-F]+/)&.to_i(16)
-  end
 end
