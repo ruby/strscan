@@ -12,6 +12,16 @@ class StringScanner
   #
   # The scanned string must be encoded with an ASCII compatible encoding, otherwise
   # Encoding::CompatibilityError will be raised.
+  unless method_defined?(:integer_at)
+    # Fallback implementation for platforms without C extension (e.g. JRuby).
+    # Equivalent to self[index].to_i(base).
+    def integer_at(index, base = 10)
+      str = self[index]
+      return nil if str.nil?
+      str.to_i(base)
+    end
+  end
+
   def scan_integer(base: 10)
     case base
     when 10
