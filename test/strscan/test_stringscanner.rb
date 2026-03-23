@@ -1018,10 +1018,10 @@ module StringScannerTests
   end
 
   def test_integer_at_large_number
-    huge = '9' * 100
-    s = create_string_scanner(huge)
+    large = '9' * 100
+    s = create_string_scanner(large)
     s.scan(/(\d+)/)
-    assert_equal(huge.to_i, s.integer_at(1))
+    assert_equal(large.to_i, s.integer_at(1))
   end
 
   def test_integer_at_fixnum_bignum_boundary
