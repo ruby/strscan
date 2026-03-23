@@ -1914,6 +1914,11 @@ strscan_integer_at(int argc, VALUE *argv, VALUE self)
 
     ptr = S_PBEG(p) + beg;
 
+    /* Max decimal digits guaranteed to fit in long without overflow check.
+     * floor(log10(INT64_MAX)) = 18, floor(log10(INT32_MAX)) = 9 */
+#define INT64_DECIMAL_SAFE_DIGITS 18
+#define INT32_DECIMAL_SAFE_DIGITS 9
+
     /* Fast path for base 10 with pure digits: parse directly from
      * source bytes without temporary String allocation.
      * This covers the Date._strptime use case. */
@@ -1943,7 +1948,7 @@ strscan_integer_at(int argc, VALUE *argv, VALUE self)
                     first_nonzero++;
                 effective_digits = len - first_nonzero;
 
-                if (effective_digits <= (sizeof(long) >= 8 ? 18 : 9)) {
+                if (effective_digits <= (sizeof(long) >= 8 ? INT64_DECIMAL_SAFE_DIGITS : INT32_DECIMAL_SAFE_DIGITS)) {
                     long result = 0;
                     for (; j < len; j++) {
                         result = result * 10 + (ptr[j] - '0');
@@ -1951,8 +1956,8 @@ strscan_integer_at(int argc, VALUE *argv, VALUE self)
                     if (negative) result = -result;
                     return LONG2NUM(result);
                 }
-                /* 19 digits on 64-bit (or 10 on 32-bit): may fit in long */
-                if (effective_digits <= (sizeof(long) >= 8 ? 19 : 10)) {
+                /* One more digit than safe: may still fit in long with overflow check */
+                if (effective_digits <= (sizeof(long) >= 8 ? INT64_DECIMAL_SAFE_DIGITS + 1 : INT32_DECIMAL_SAFE_DIGITS + 1)) {
                     unsigned long result = 0;
                     unsigned long limit = negative
                         ? (unsigned long)LONG_MAX + 1
