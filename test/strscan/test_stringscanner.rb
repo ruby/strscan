@@ -1120,7 +1120,7 @@ module StringScannerTests
   def test_integer_at_full_match_with_non_digits
     # follows String#to_i: "2024-06-15".to_i => 2024
     s = create_string_scanner("2024-06-15")
-    s.scan(/(\d{4})-(\d{2})-(\d{2})/)
+    s.scan(/\d{4}-\d{2}-\d{2}/)
     assert_equal(2024, s.integer_at(0))
   end
 
