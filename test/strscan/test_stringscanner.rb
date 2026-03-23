@@ -1011,10 +1011,10 @@ module StringScannerTests
 
   def test_integer_at_optional_group_not_matched
     s = create_string_scanner("2024-06")
-    s.scan(/(\d{4})-(\d{2})(-(\d{2}))?/)
+    s.scan(/(\d{4})-(\d{2})-?(\d{2})?/)
     assert_equal(2024, s.integer_at(1))
     assert_equal(6, s.integer_at(2))
-    assert_nil(s.integer_at(4))
+    assert_nil(s.integer_at(3))
   end
 
   def test_integer_at_large_number
