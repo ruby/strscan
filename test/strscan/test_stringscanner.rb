@@ -978,7 +978,7 @@ module StringScannerTests
 
   def test_integer_at_index_zero
     s = create_string_scanner("42 abc")
-    s.scan(/(\d+)/)
+    s.scan(/\d+/)
     assert_equal(42, s.integer_at(0))
   end
 
