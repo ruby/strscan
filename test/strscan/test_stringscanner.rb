@@ -1133,7 +1133,7 @@ module StringScannerTests
     assert_equal(15, s.integer_at("day"))
   end
 
-  def test_integer_at_named_capture_undefined
+  def test_integer_at_named_capture_unknown
     s = create_string_scanner("2024-06-15")
     s.scan(/(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/)
     assert_raise(IndexError) { s.integer_at(:unknown) }
