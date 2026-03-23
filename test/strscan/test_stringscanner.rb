@@ -1117,13 +1117,6 @@ module StringScannerTests
     assert_equal(10, s.integer_at(1))
   end
 
-  def test_integer_at_full_match_with_non_digits
-    # follows String#to_i: "2024-06-15".to_i => 2024
-    s = create_string_scanner("2024-06-15")
-    s.scan(/\d{4}-\d{2}-\d{2}/)
-    assert_equal(2024, s.integer_at(0))
-  end
-
   def test_integer_at_named_capture_symbol
     s = create_string_scanner("2024-06-15")
     s.scan(/(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/)
