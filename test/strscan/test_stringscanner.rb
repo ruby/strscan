@@ -1044,6 +1044,28 @@ module StringScannerTests
     s = create_string_scanner("-9999999999999999999")
     s.scan(/([+\-]?\d+)/)
     assert_equal(-9999999999999999999, s.integer_at(1))
+
+    # LONG_MAX (19 digits, fits in long)
+    long_max = 2 ** (0.size * 8 - 1) - 1
+    s = create_string_scanner(long_max.to_s)
+    s.scan(/(\d+)/)
+    assert_equal(long_max, s.integer_at(1))
+
+    # LONG_MIN (19 digits + sign, fits in long)
+    long_min = -(2 ** (0.size * 8 - 1))
+    s = create_string_scanner(long_min.to_s)
+    s.scan(/([+\-]?\d+)/)
+    assert_equal(long_min, s.integer_at(1))
+
+    # LONG_MAX + 1 (bignum)
+    s = create_string_scanner((long_max + 1).to_s)
+    s.scan(/(\d+)/)
+    assert_equal(long_max + 1, s.integer_at(1))
+
+    # leading zeros with many digits
+    s = create_string_scanner("00000000000000000001")
+    s.scan(/(\d+)/)
+    assert_equal(1, s.integer_at(1))
   end
 
   def test_integer_at_non_digit

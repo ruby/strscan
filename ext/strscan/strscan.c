@@ -1936,13 +1936,41 @@ strscan_integer_at(int argc, VALUE *argv, VALUE self)
                 }
             }
             if (all_digits) {
-                if (digit_count <= (sizeof(long) >= 8 ? 18 : 9)) {
+                /* Skip leading zeros to get effective digit count */
+                long first_nonzero = j;
+                long effective_digits;
+                while (first_nonzero < len && ptr[first_nonzero] == '0')
+                    first_nonzero++;
+                effective_digits = len - first_nonzero;
+
+                if (effective_digits <= (sizeof(long) >= 8 ? 18 : 9)) {
                     long result = 0;
                     for (; j < len; j++) {
                         result = result * 10 + (ptr[j] - '0');
                     }
                     if (negative) result = -result;
                     return LONG2NUM(result);
+                }
+                /* 19 digits on 64-bit (or 10 on 32-bit): may fit in long */
+                if (effective_digits <= (sizeof(long) >= 8 ? 19 : 10)) {
+                    unsigned long result = 0;
+                    unsigned long limit = negative
+                        ? (unsigned long)LONG_MAX + 1
+                        : (unsigned long)LONG_MAX;
+                    bool overflow = false;
+                    for (; j < len; j++) {
+                        unsigned long d = ptr[j] - '0';
+                        if (result > (limit - d) / 10) {
+                            overflow = true;
+                            break;
+                        }
+                        result = result * 10 + d;
+                    }
+                    if (!overflow) {
+                        if (negative)
+                            return LONG2NUM(-(long)result);
+                        return LONG2NUM((long)result);
+                    }
                 }
                 /* Bignum: fall through to rb_str_to_inum */
             }
