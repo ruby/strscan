@@ -1919,19 +1919,19 @@ strscan_integer_at(int argc, VALUE *argv, VALUE self)
      * This covers the Date._strptime use case. */
     if (base == 10) {
         long j = 0;
-        int negative = 0;
+        bool negative = false;
         long digit_count;
 
-        if (ptr[0] == '-') { negative = 1; j = 1; }
+        if (ptr[0] == '-') { negative = true; j = 1; }
         else if (ptr[0] == '+') { j = 1; }
 
         digit_count = len - j;
         if (digit_count > 0) {
             long k;
-            int all_digits = 1;
+            bool all_digits = true;
             for (k = j; k < len; k++) {
                 if (ptr[k] < '0' || ptr[k] > '9') {
-                    all_digits = 0;
+                    all_digits = false;
                     break;
                 }
             }
