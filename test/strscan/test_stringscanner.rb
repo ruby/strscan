@@ -968,7 +968,7 @@ module StringScannerTests
     assert_equal({"number" => "1"}, scan.named_captures)
   end
 
-  def test_integer_at
+  def test_integer_at_date_parts
     s = create_string_scanner("2024-06-15")
     s.scan(/(\d{4})-(\d{2})-(\d{2})/)
     assert_equal(2024, s.integer_at(1))
