@@ -1867,20 +1867,20 @@ strscan_values_at(int argc, VALUE *argv, VALUE self)
 
 /*
  * call-seq:
- *   integer_at(index, base = 10) -> integer or nil
+ *   integer_at(specifier, base = 10) -> integer or nil
  *
- * Returns the captured substring at the given +index+ as an Integer,
+ * Returns the captured substring at the given +specifier+ as an Integer,
  * following the behavior of <tt>String#to_i(base)</tt>.
  *
- * +index+ can be an Integer (positive, negative, or zero), a Symbol,
+ * +specifier+ can be an Integer (positive, negative, or zero), a Symbol,
  * or a String for named capture groups.
  *
  * Returns +nil+ if:
  * - No match has been performed or the last match failed
- * - The +index+ is out of range
- * - The group at +index+ did not participate in the match
+ * - The +specifier+ is out of range
+ * - The group at +specifier+ did not participate in the match
  *
- * This is semantically equivalent to <tt>self[index].to_i(base)</tt>
+ * This is semantically equivalent to <tt>self[specifier].to_i(base)</tt>
  * but avoids the allocation of a temporary String when possible.
  *
  *   scanner = StringScanner.new("2024-06-15")
@@ -1896,14 +1896,14 @@ strscan_integer_at(int argc, VALUE *argv, VALUE self)
     long i;
     long beg, end, len;
     const char *ptr;
-    VALUE idx, vbase;
+    VALUE specifier, vbase;
     int base = 10;
 
-    rb_scan_args(argc, argv, "11", &idx, &vbase);
+    rb_scan_args(argc, argv, "11", &specifier, &vbase);
     if (!NIL_P(vbase)) base = NUM2INT(vbase);
 
     GET_SCANNER(self, p);
-    i = resolve_capture_index(p, idx);
+    i = resolve_capture_index(p, specifier);
     if (i < 0) return Qnil;
 
     beg = adjust_register_position(p, p->regs.beg[i]);

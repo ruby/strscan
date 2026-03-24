@@ -25,9 +25,9 @@ class StringScanner
 
   unless method_defined?(:integer_at)
     # Fallback implementation for platforms without C extension (e.g. JRuby).
-    # Equivalent to self[index].to_i(base).
-    def integer_at(index, base = 10)
-      str = self[index]
+    # Equivalent to self[specifier].to_i(base).
+    def integer_at(specifier, base = 10)
+      str = self[specifier]
       return nil if str.nil?
       str.to_i(base)
     end
