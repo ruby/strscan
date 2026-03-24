@@ -1161,6 +1161,16 @@ module StringScannerTests
     s = create_string_scanner("1_0_0")
     s.scan(/(\d+(?:_\d+)*)/)
     assert_equal(100, s.integer_at(1))
+
+    # large number with underscores
+    s = create_string_scanner("1_000_000_000")
+    s.scan(/(\d+(?:_\d+)*)/)
+    assert_equal(1_000_000_000, s.integer_at(1))
+
+    # signed with underscores
+    s = create_string_scanner("-1_000")
+    s.scan(/([+\-]?\d+(?:_\d+)*)/)
+    assert_equal(-1000, s.integer_at(1))
   end
 
   def test_scan_integer
