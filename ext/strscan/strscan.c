@@ -1996,8 +1996,11 @@ strscan_integer_at(int argc, VALUE *argv, VALUE self)
                     }
                 }
                 if (!overflow) {
-                    if (negative)
+                    if (negative) {
+                        if (result == (unsigned long)LONG_MAX + 1)
+                            return LONG2NUM(LONG_MIN);
                         return LONG2NUM(-(long)result);
+                    }
                     return LONG2NUM((long)result);
                 }
             }
