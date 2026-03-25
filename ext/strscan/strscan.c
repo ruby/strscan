@@ -1877,8 +1877,12 @@ strscan_values_at(int argc, VALUE *argv, VALUE self)
  *
  * Returns +nil+ if:
  * - No match has been performed or the last match failed
- * - The +specifier+ is out of range
+ * - The +specifier+ is an Integer and is out of range
  * - The group at +specifier+ did not participate in the match
+ *
+ * Raises IndexError if +specifier+ is a Symbol or String that does not
+ * correspond to a named capture group, consistent with
+ * <tt>StringScanner#[]</tt>.
  *
  * This is semantically equivalent to <tt>self[specifier].to_i(base)</tt>
  * but avoids the allocation of a temporary String when possible.
