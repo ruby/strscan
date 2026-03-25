@@ -1025,22 +1025,22 @@ module StringScannerTests
   end
 
   def test_integer_at_fixnum_bignum_boundary
-    # 18 digits max ("9" * 18): largest value without overflow check
+    # 18 digits max on 64-bit ("9" * 18): largest value without overflow check
     s = create_string_scanner("9" * 18)
     s.scan(/(\d+)/)
     assert_equal(("9" * 18).to_i, s.integer_at(1))
 
-    # 19 digits min ("1" * 19): smallest value with overflow check
+    # 19 digits min on 64-bit ("1" * 19): smallest value with overflow check
     s = create_string_scanner("1" * 19)
     s.scan(/(\d+)/)
     assert_equal(("1" * 19).to_i, s.integer_at(1))
 
-    # negative 18 digits max
+    # negative 18 digits max on 64-bit
     s = create_string_scanner("-" + "9" * 18)
     s.scan(/([+\-]?\d+)/)
     assert_equal(-("9" * 18).to_i, s.integer_at(1))
 
-    # negative 19 digits min
+    # negative 19 digits min on 64-bit
     s = create_string_scanner("-" + "1" * 19)
     s.scan(/([+\-]?\d+)/)
     assert_equal(-("1" * 19).to_i, s.integer_at(1))
