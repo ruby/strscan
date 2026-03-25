@@ -980,6 +980,12 @@ module StringScannerTests
     s = create_string_scanner("42 abc")
     s.scan(/\d+/)
     assert_equal(42, s.integer_at(0))
+
+    # when current position is not at the beginning
+    s = create_string_scanner("a 10")
+    s.scan(/a /)
+    s.scan(/\d+/)
+    assert_equal(10, s.integer_at(0))
   end
 
   def test_integer_at_negative_index
