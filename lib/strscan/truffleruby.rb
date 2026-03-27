@@ -106,7 +106,6 @@ class StringScanner
   alias_method :bol?, :beginning_of_line?
 
   def eos?
-    raise ArgumentError, 'uninitialized StringScanner object' unless @string
     @pos >= @string.bytesize
   end
 
@@ -250,7 +249,6 @@ class StringScanner
 
   # Matches at start, returns matched string, advances position
   def scan(pattern)
-    raise ArgumentError, 'uninitialized StringScanner object' unless @string
     prev = @pos
     if Primitive.is_a?(pattern, Regexp)
       start = @fixed_anchor ? 0 : prev

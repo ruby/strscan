@@ -56,6 +56,8 @@ module StringScannerTests
   def test_s_allocate
     s = StringScanner.allocate
     assert_equal('#<StringScanner (uninitialized)>', s.inspect.sub(/StringScanner_C/, 'StringScanner'))
+
+    omit("not supported on TruffleRuby") if RUBY_ENGINE == "truffleruby"
     assert_raise(UNINIT_ERROR) { s.eos? }
     assert_raise(UNINIT_ERROR) { s.scan(/a/) }
     s.string = 'test'
