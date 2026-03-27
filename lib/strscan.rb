@@ -14,5 +14,5 @@ when 'truffleruby'
     require 'strscan'
   end
 else
-  raise "Unknown Ruby: #{RUBY_ENGINE}"
+  raise NotImplementedError, "Unknown Ruby: #{RUBY_ENGINE}"
 end
