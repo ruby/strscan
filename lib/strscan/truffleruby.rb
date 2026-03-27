@@ -167,11 +167,11 @@ class StringScanner
   end
 
   def scan_byte
-    if rest?
-      byte_value = @string.getbyte(@pos)
-      get_byte
-      byte_value
-    end
+    return nil if eos?
+
+    byte_value = @string.getbyte(@pos)
+    get_byte
+    byte_value
   end
 
   def getch = scan(/./m)
