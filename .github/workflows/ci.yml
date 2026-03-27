@@ -30,7 +30,7 @@ jobs:
           - { os: windows-latest , ruby: mswin }
           - { os: ubuntu-latest , ruby: jruby-9.4 }
           - { os: ubuntu-latest , ruby: truffleruby-33 } # using stdlib implementation
-          - { os: ubuntu-latest , ruby: truffleruby-head } # using truffleruby_strscan.rb
+          - { os: ubuntu-latest , ruby: truffleruby-head } # using truffleruby.rb
         exclude:
           - { os: macos-latest , ruby: 2.4 }
           - { os: ubuntu-latest , ruby: 2.5 }

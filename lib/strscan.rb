@@ -8,7 +8,7 @@ when 'jruby'
   require_relative 'strscan/strscan'
 when 'truffleruby'
   if RUBY_ENGINE_VERSION.to_i >= 34
-    require 'strscan/truffleruby_strscan'
+    require 'strscan/truffleruby'
   else
     $LOAD_PATH.delete __dir__
     require 'strscan'

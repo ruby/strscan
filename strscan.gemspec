@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
     LICENSE.txt
     lib/strscan.rb
     lib/strscan/strscan.rb
-    lib/strscan/truffleruby_strscan.rb
+    lib/strscan/truffleruby.rb
   ]
 
   s.require_paths = %w{lib}
