@@ -20,6 +20,13 @@ namespace :version do
       "STRSCAN_VERSION = \"#{version.succ}\""
     end
     File.write(strscan_java_path, strscan_java)
+
+    strscan_truffleruby_path = "lib/strscan/truffleruby.rb"
+    strscan_truffleruby = File.read(strscan_truffleruby_path).gsub(/Version = '(.+?)'/) do
+      version = $1
+      "Version = '#{version.succ}'"
+    end
+    File.write(strscan_truffleruby_path, strscan_truffleruby)
   end
 end
 
