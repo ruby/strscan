@@ -68,9 +68,6 @@ jobs:
           name: gem-${{ matrix.os }}-${{ matrix.ruby }}
           path: pkg/
 
-      - run: echo 'TESTOPTS=-v --ignore-name=/unscan/' >> $GITHUB_ENV
-        if: ${{ startsWith(matrix.ruby, 'truffle') }}
-
       - run: bundle exec rake test
 
       - run: gem install --verbose --backtrace pkg/*.gem
