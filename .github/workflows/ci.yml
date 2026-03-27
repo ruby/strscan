@@ -29,7 +29,7 @@ jobs:
           - { os: windows-latest , ruby: mingw }
           - { os: windows-latest , ruby: mswin }
           - { os: ubuntu-latest , ruby: jruby-9.4 }
-          - { os: ubuntu-latest , ruby: truffleruby-33 } # using stdlib implementation
+          - { os: ubuntu-latest , ruby: truffleruby-33 } # using stdlib implementation, only a smoke test
           - { os: ubuntu-latest , ruby: truffleruby-head } # using truffleruby.rb
         exclude:
           - { os: macos-latest , ruby: 2.4 }
@@ -69,6 +69,7 @@ jobs:
           path: pkg/
 
       - run: bundle exec rake test
+        if: matrix.ruby != 'truffleruby-33'
 
       - run: gem install --verbose --backtrace pkg/*.gem
 
@@ -76,4 +77,8 @@ jobs:
 
       - name: Run tests on the installed gem
         run: ruby run-test.rb ${TESTOPTS}
-        if: matrix.ruby != '2.4' # strscan is a default gem from 2.5
+        if: matrix.ruby != '2.4' && matrix.ruby != 'truffleruby-33' # strscan is a default gem from 2.5
+
+      - name: Smoke test for older truffleruby using stdlib
+        run: ruby -rstrscan -e 'puts $".grep(/strscan/); abort("failed") unless StringScanner.new("abc").scan(/a/) == "a"'
+        if: matrix.ruby == 'truffleruby-33'

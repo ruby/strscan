@@ -8,12 +8,6 @@ require 'strscan'
 require 'test/unit'
 
 module StringScannerTests
-  private def omit_if_truffleruby_stdlib
-    if RUBY_ENGINE == 'truffleruby' && RUBY_ENGINE_VERSION.to_i < 34
-      omit 'not supported on TruffleRuby < 34 due to using strscan from stdlib'
-    end
-  end
-
   def test_peek_byte
     s = create_string_scanner('ab')
     assert_equal(97, s.peek_byte)
