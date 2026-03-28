@@ -59,7 +59,7 @@ class StringScanner
 
   def charpos = Primitive.string_byte_index_to_character_index(@string, @pos)
 
-  def rest = @string.byteslice(@pos..)
+  def rest = @string.byteslice(@pos, @string.bytesize)
 
   def rest_size = @string.bytesize - @pos
 
