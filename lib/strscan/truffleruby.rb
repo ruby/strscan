@@ -4,8 +4,10 @@
 class StringScanner
   class Error < StandardError
   end
-  ::Object::ScanError = Error
-  ::Object.deprecate_constant :ScanError
+  unless ::Object.const_defined?(:ScanError)
+    ::Object::ScanError = Error
+    ::Object.deprecate_constant :ScanError
+  end
 
   Version = '3.1.8'
   Id = '$Id$'
