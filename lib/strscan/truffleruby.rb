@@ -4,6 +4,7 @@
 class StringScanner
   class Error < StandardError
   end
+  # :stopdoc:
   unless ::Object.const_defined?(:ScanError)
     ::Object::ScanError = Error
     ::Object.deprecate_constant :ScanError
@@ -13,6 +14,7 @@ class StringScanner
   Id = '$Id$'
 
   def self.must_C_version = self
+  # :startdoc:
 
   attr_reader :string, :pos
   alias_method :pointer, :pos
