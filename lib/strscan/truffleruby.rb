@@ -185,7 +185,7 @@ class StringScanner
     when 16
       scan(/[+-]?(0x)?[0-9a-fA-F]+/)&.to_i(16)
     else
-      raise ArgumentError, "Unsupported integer base: #{base}, expected 10 or 16"
+      raise ArgumentError, "Unsupported integer base: #{base.inspect}, expected 10 or 16"
     end
   end
 
