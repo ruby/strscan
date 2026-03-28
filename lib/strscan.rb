@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 case RUBY_ENGINE
 when 'ruby'
   require 'strscan.so'
