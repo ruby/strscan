@@ -29,13 +29,13 @@ jobs:
           - { os: windows-latest , ruby: mingw }
           - { os: windows-latest , ruby: mswin }
           - { os: ubuntu-latest , ruby: jruby-9.4 }
+          - { os: ubuntu-latest , ruby: truffleruby-33 } # using stdlib implementation, only a smoke test
+          - { os: ubuntu-latest , ruby: truffleruby-head } # using truffleruby.rb
         exclude:
           - { os: macos-latest , ruby: 2.4 }
           - { os: ubuntu-latest , ruby: 2.5 }
           - { os: macos-latest , ruby: 2.5 }
           - { os: windows-latest , ruby: head }
-          - { os: ubuntu-latest , ruby: truffleruby }
-          - { os: macos-latest , ruby: truffleruby }
           - { os: windows-latest , ruby: truffleruby }
           - { os: windows-latest , ruby: truffleruby-head }
 
@@ -68,10 +68,8 @@ jobs:
           name: gem-${{ matrix.os }}-${{ matrix.ruby }}
           path: pkg/
 
-      - run: echo 'TESTOPTS=-v --ignore-name=/unscan/' >> $GITHUB_ENV
-        if: ${{ startsWith(matrix.ruby, 'truffle') }}
-
       - run: bundle exec rake test
+        if: matrix.ruby != 'truffleruby-33'
 
       - run: gem install --verbose --backtrace pkg/*.gem
 
@@ -79,4 +77,8 @@ jobs:
 
       - name: Run tests on the installed gem
         run: ruby run-test.rb ${TESTOPTS}
-        if: matrix.ruby != '2.4' # strscan is a default gem from 2.5
+        if: matrix.ruby != '2.4' && matrix.ruby != 'truffleruby-33' # strscan is a default gem from 2.5
+
+      - name: Smoke test for older truffleruby using stdlib
+        run: ruby -rstrscan -e 'puts $".grep(/strscan/); abort("failed") unless StringScanner.new("abc").scan(/a/) == "a"'
+        if: matrix.ruby == 'truffleruby-33'

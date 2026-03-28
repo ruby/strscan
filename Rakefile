@@ -20,6 +20,13 @@ namespace :version do
       "STRSCAN_VERSION = \"#{version.succ}\""
     end
     File.write(strscan_java_path, strscan_java)
+
+    strscan_truffleruby_path = "lib/strscan/truffleruby.rb"
+    strscan_truffleruby = File.read(strscan_truffleruby_path).gsub(/Version = '(.+?)'/) do
+      version = $1
+      "Version = '#{version.succ}'"
+    end
+    File.write(strscan_truffleruby_path, strscan_truffleruby)
   end
 end
 
@@ -31,7 +38,7 @@ if RUBY_ENGINE == "jruby"
     ext.target_version = '1.8'
     ext.ext_dir = 'ext/jruby'
   end
-  extra_require_path = "ext/jruby/lib"
+  extra_require_path = "lib"
 elsif RUBY_ENGINE == "ruby"
   require 'rake/extensiontask'
   Rake::ExtensionTask.new("strscan") do |x|
