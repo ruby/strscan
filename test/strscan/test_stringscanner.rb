@@ -1030,7 +1030,7 @@ module StringScannerTests
     assert_equal(large.to_i, s.integer_at(1))
   end
 
-  def test_integer_at_fixnum_bignum_boundary
+  def test_integer_at_digit_count_boundary
     # 18 digits max on 64-bit ("9" * 18): largest value without overflow check
     s = create_string_scanner("9" * 18)
     s.scan(/(\d+)/)
@@ -1050,15 +1050,18 @@ module StringScannerTests
     s = create_string_scanner("-" + "1" + "0" * 18)
     s.scan(/([+\-]?\d+)/)
     assert_equal(-("1" + "0" * 18).to_i, s.integer_at(1))
+  end
+
+  def test_integer_at_long_boundary
+    long_max = 2 ** (0.size * 8 - 1) - 1
+    long_min = -(2 ** (0.size * 8 - 1))
 
     # LONG_MAX (19 digits, fits in long)
-    long_max = 2 ** (0.size * 8 - 1) - 1
     s = create_string_scanner(long_max.to_s)
     s.scan(/(\d+)/)
     assert_equal(long_max, s.integer_at(1))
 
     # LONG_MIN (19 digits + sign, fits in long)
-    long_min = -(2 ** (0.size * 8 - 1))
     s = create_string_scanner(long_min.to_s)
     s.scan(/([+\-]?\d+)/)
     assert_equal(long_min, s.integer_at(1))
@@ -1072,11 +1075,6 @@ module StringScannerTests
     s = create_string_scanner((long_min - 1).to_s)
     s.scan(/([+\-]?\d+)/)
     assert_equal(long_min - 1, s.integer_at(1))
-
-    # leading zeros with many digits
-    s = create_string_scanner("0" * 19 + "1")
-    s.scan(/(\d+)/)
-    assert_equal(1, s.integer_at(1))
   end
 
   def test_integer_at_non_digit
@@ -1126,6 +1124,11 @@ module StringScannerTests
     s = create_string_scanner("010")
     s.scan(/(\d+)/)
     assert_equal(10, s.integer_at(1))
+
+    # leading zeros with many digits: effective digit count is 1, goes through safe path
+    s = create_string_scanner("0" * 19 + "1")
+    s.scan(/(\d+)/)
+    assert_equal(1, s.integer_at(1))
   end
 
   def test_integer_at_named_capture_symbol
