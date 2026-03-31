@@ -1624,23 +1624,23 @@ name_to_backref_number(struct re_registers *regs, VALUE regexp, const char* name
 /* Resolve capture group index from Integer, Symbol, or String.
  * Returns the resolved register index, or -1 if unmatched/out of range. */
 static long
-resolve_capture_index(struct strscanner *p, VALUE idx)
+resolve_capture_index(struct strscanner *p, VALUE specifier)
 {
     const char *name;
     long i;
 
     if (! MATCHED_P(p)) return -1;
 
-    switch (TYPE(idx)) {
+    switch (TYPE(specifier)) {
         case T_SYMBOL:
-            idx = rb_sym2str(idx);
+            specifier = rb_sym2str(specifier);
             /* fall through */
         case T_STRING:
-            RSTRING_GETMEM(idx, name, i);
-            i = name_to_backref_number(&(p->regs), p->regex, name, name + i, rb_enc_get(idx));
+            RSTRING_GETMEM(specifier, name, i);
+            i = name_to_backref_number(&(p->regs), p->regex, name, name + i, rb_enc_get(specifier));
             break;
         default:
-            i = NUM2LONG(idx);
+            i = NUM2LONG(specifier);
     }
 
     if (i < 0)
