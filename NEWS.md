@@ -1,5 +1,24 @@
 # News
 
+## 3.1.8 - 2026-03-31
+
+### Improvements
+
+  * TruffleRuby: Added a new implementation for TruffleRuby.
+    * GH-194
+    * GH-195
+    * Patch by Benoit Daloze
+
+  * CRuby: Added support for GC compaction and embedded structs.
+    * GH-201
+    * Patch by Jean Boussier
+
+### Thanks
+
+  * Benoit Daloze
+
+  * Jean Boussier
+
 ## 3.1.7 - 2026-01-06
 
 ### Fixes
@@ -13,6 +32,7 @@
   * JRuby: Preserve code range in substrings to avoid recalculating.
     * GH-186
     * Patch by Karol Bucek
+
 ### Thanks
 
   * Karol Bucek
