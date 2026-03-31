@@ -1979,7 +1979,8 @@ parse_decimal_fast(const char *ptr, long len)
                         return LONG2NUM(LONG_MIN);
                     return LONG2NUM(-(long)result);
                 }
-                return LONG2NUM((long)result);
+                else
+                    return LONG2NUM((long)result);
             }
         }
     }
