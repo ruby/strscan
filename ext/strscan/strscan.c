@@ -1893,6 +1893,100 @@ strscan_values_at(int argc, VALUE *argv, VALUE self)
  *   scanner.integer_at(1, 16)   # => 8228
  *
  */
+/* Max decimal digits guaranteed to fit in long without overflow check.
+ * floor(log10(INT64_MAX)) = 18, floor(log10(INT32_MAX)) = 9 */
+#define INT64_DECIMAL_SAFE_DIGITS 18
+#define INT32_DECIMAL_SAFE_DIGITS 9
+
+/* Fast path for base-10 integer parsing without temporary String allocation.
+ * Accepts digits and optional underscores (Ruby String#to_i semantics).
+ * Returns a Fixnum/Integer VALUE on success, or Qundef to signal fall-through
+ * to the general path (non-decimal, bignum, or non-numeric input). */
+static inline VALUE
+parse_decimal_fast(const char *ptr, long len)
+{
+    long j = 0;
+    bool negative = false;
+    long digit_count = 0;
+    bool valid = true;
+
+    if (ptr[0] == '-') { negative = true; j = 1; }
+    else if (ptr[0] == '+') { j = 1; }
+
+    /* Validate: only digits and underscores (not leading/trailing/consecutive) */
+    {
+        long k;
+        bool prev_underscore = true; /* treat start as underscore to reject leading _ */
+        for (k = j; k < len; k++) {
+            if (ptr[k] >= '0' && ptr[k] <= '9') {
+                digit_count++;
+                prev_underscore = false;
+            }
+            else if (ptr[k] == '_' && !prev_underscore) {
+                prev_underscore = true;
+            }
+            else {
+                valid = false;
+                break;
+            }
+        }
+        if (prev_underscore && digit_count > 0) valid = false; /* trailing _ */
+    }
+
+    if (!valid || digit_count == 0) return Qundef;
+
+    /* Skip leading zeros to get effective digit count */
+    {
+        long first_nonzero = j;
+        long effective_digits;
+        long k;
+        while (first_nonzero < len && (ptr[first_nonzero] == '0' || ptr[first_nonzero] == '_'))
+            first_nonzero++;
+        effective_digits = 0;
+        for (k = first_nonzero; k < len; k++) {
+            if (ptr[k] != '_') effective_digits++;
+        }
+
+        if (effective_digits <= (sizeof(long) >= 8 ? INT64_DECIMAL_SAFE_DIGITS : INT32_DECIMAL_SAFE_DIGITS)) {
+            long result = 0;
+            for (; j < len; j++) {
+                if (ptr[j] != '_')
+                    result = result * 10 + (ptr[j] - '0');
+            }
+            if (negative) result = -result;
+            return LONG2NUM(result);
+        }
+        /* One more digit than safe: may still fit in long with overflow check */
+        if (effective_digits <= (sizeof(long) >= 8 ? INT64_DECIMAL_SAFE_DIGITS + 1 : INT32_DECIMAL_SAFE_DIGITS + 1)) {
+            unsigned long result = 0;
+            unsigned long limit = negative
+                ? (unsigned long)LONG_MAX + 1
+                : (unsigned long)LONG_MAX;
+            bool overflow = false;
+            for (; j < len; j++) {
+                if (ptr[j] != '_') {
+                    unsigned long d = ptr[j] - '0';
+                    if (result > (limit - d) / 10) {
+                        overflow = true;
+                        break;
+                    }
+                    result = result * 10 + d;
+                }
+            }
+            if (!overflow) {
+                if (negative) {
+                    if (result == (unsigned long)LONG_MAX + 1)
+                        return LONG2NUM(LONG_MIN);
+                    return LONG2NUM(-(long)result);
+                }
+                return LONG2NUM((long)result);
+            }
+        }
+    }
+    /* Bignum: signal fall-through to rb_str_to_inum */
+    return Qundef;
+}
+
 static VALUE
 strscan_integer_at(int argc, VALUE *argv, VALUE self)
 {
@@ -1918,94 +2012,11 @@ strscan_integer_at(int argc, VALUE *argv, VALUE self)
 
     ptr = S_PBEG(p) + beg;
 
-    /* Max decimal digits guaranteed to fit in long without overflow check.
-     * floor(log10(INT64_MAX)) = 18, floor(log10(INT32_MAX)) = 9 */
-#define INT64_DECIMAL_SAFE_DIGITS 18
-#define INT32_DECIMAL_SAFE_DIGITS 9
-
-    /* Fast path for base 10 with digits and optional underscores:
-     * parse directly from source bytes without temporary String allocation.
-     * This covers the Date._strptime use case. */
+    /* Fast path for base 10: parse directly from source bytes without
+     * temporary String allocation. This covers the Date._strptime use case. */
     if (base == 10) {
-        long j = 0;
-        bool negative = false;
-        long digit_count = 0;
-        bool valid = true;
-
-        if (ptr[0] == '-') { negative = true; j = 1; }
-        else if (ptr[0] == '+') { j = 1; }
-
-        /* Validate: only digits and underscores (not leading/trailing/consecutive) */
-        {
-            long k;
-            bool prev_underscore = true; /* treat start as underscore to reject leading _ */
-            for (k = j; k < len; k++) {
-                if (ptr[k] >= '0' && ptr[k] <= '9') {
-                    digit_count++;
-                    prev_underscore = false;
-                }
-                else if (ptr[k] == '_' && !prev_underscore) {
-                    prev_underscore = true;
-                }
-                else {
-                    valid = false;
-                    break;
-                }
-            }
-            if (prev_underscore && digit_count > 0) valid = false; /* trailing _ */
-        }
-
-        if (valid && digit_count > 0) {
-            /* Skip leading zeros to get effective digit count */
-            long first_nonzero = j;
-            long effective_digits;
-            while (first_nonzero < len && (ptr[first_nonzero] == '0' || ptr[first_nonzero] == '_'))
-                first_nonzero++;
-            effective_digits = 0;
-            {
-                long k;
-                for (k = first_nonzero; k < len; k++) {
-                    if (ptr[k] != '_') effective_digits++;
-                }
-            }
-
-            if (effective_digits <= (sizeof(long) >= 8 ? INT64_DECIMAL_SAFE_DIGITS : INT32_DECIMAL_SAFE_DIGITS)) {
-                long result = 0;
-                for (; j < len; j++) {
-                    if (ptr[j] != '_')
-                        result = result * 10 + (ptr[j] - '0');
-                }
-                if (negative) result = -result;
-                return LONG2NUM(result);
-            }
-            /* One more digit than safe: may still fit in long with overflow check */
-            if (effective_digits <= (sizeof(long) >= 8 ? INT64_DECIMAL_SAFE_DIGITS + 1 : INT32_DECIMAL_SAFE_DIGITS + 1)) {
-                unsigned long result = 0;
-                unsigned long limit = negative
-                    ? (unsigned long)LONG_MAX + 1
-                    : (unsigned long)LONG_MAX;
-                bool overflow = false;
-                for (; j < len; j++) {
-                    if (ptr[j] != '_') {
-                        unsigned long d = ptr[j] - '0';
-                        if (result > (limit - d) / 10) {
-                            overflow = true;
-                            break;
-                        }
-                        result = result * 10 + d;
-                    }
-                }
-                if (!overflow) {
-                    if (negative) {
-                        if (result == (unsigned long)LONG_MAX + 1)
-                            return LONG2NUM(LONG_MIN);
-                        return LONG2NUM(-(long)result);
-                    }
-                    return LONG2NUM((long)result);
-                }
-            }
-            /* Bignum: fall through to rb_str_to_inum */
-        }
+        VALUE result = parse_decimal_fast(ptr, len);
+        if (result != Qundef) return result;
     }
 
     /* General path: follow String#to_i(base) semantics via rb_str_to_inum.
