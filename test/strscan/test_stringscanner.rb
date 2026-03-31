@@ -1046,10 +1046,10 @@ module StringScannerTests
     s.scan(/([+\-]?\d+)/)
     assert_equal(-("9" * 18).to_i, s.integer_at(1))
 
-    # negative 19 digits min on 64-bit
-    s = create_string_scanner("-" + "1" * 19)
+    # negative 19 digits min on 64-bit ("-" + "1" + "0" * 18): smallest absolute value with overflow check
+    s = create_string_scanner("-" + "1" + "0" * 18)
     s.scan(/([+\-]?\d+)/)
-    assert_equal(-("1" * 19).to_i, s.integer_at(1))
+    assert_equal(-("1" + "0" * 18).to_i, s.integer_at(1))
 
     # LONG_MAX (19 digits, fits in long)
     long_max = 2 ** (0.size * 8 - 1) - 1
