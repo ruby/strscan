@@ -1957,7 +1957,7 @@ parse_decimal_fast(const char *ptr, long len)
             return LONG2NUM(result);
         }
         /* One more digit than safe: may still fit in long with overflow check */
-        if (effective_digits <= (sizeof(long) >= 8 ? INT64_DECIMAL_SAFE_DIGITS + 1 : INT32_DECIMAL_SAFE_DIGITS + 1)) {
+        else if (effective_digits == (sizeof(long) >= 8 ? INT64_DECIMAL_SAFE_DIGITS + 1 : INT32_DECIMAL_SAFE_DIGITS + 1)) {
             unsigned long result = 0;
             unsigned long limit = negative
                 ? (unsigned long)LONG_MAX + 1
