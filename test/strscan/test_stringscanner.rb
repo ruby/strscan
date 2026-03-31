@@ -1074,7 +1074,7 @@ module StringScannerTests
     assert_equal(long_min - 1, s.integer_at(1))
 
     # leading zeros with many digits
-    s = create_string_scanner("00000000000000000001")
+    s = create_string_scanner("0" * 19 + "1")
     s.scan(/(\d+)/)
     assert_equal(1, s.integer_at(1))
   end
