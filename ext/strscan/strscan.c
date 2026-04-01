@@ -1966,6 +1966,8 @@ parse_decimal_fast(const char *ptr, long len)
             for (; j < len; j++) {
                 if (ptr[j] != '_') {
                     unsigned long d = ptr[j] - '0';
+                    /* Pre-check before multiply to avoid unsigned long wraparound on
+                     * 32-bit platforms, where 10-digit values can exceed ULONG_MAX. */
                     if (result > (limit - d) / 10) {
                         overflow = true;
                         break;
