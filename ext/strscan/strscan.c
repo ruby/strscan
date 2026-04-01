@@ -1921,9 +1921,9 @@ parse_decimal_fast(const char *ptr, long len)
 
         if (effective_digits <= (sizeof(long) >= 8 ? INT64_DECIMAL_SAFE_DIGITS : INT32_DECIMAL_SAFE_DIGITS)) {
             long result = 0;
-            for (; j < len; j++) {
-                if (ptr[j] != '_')
-                    result = result * 10 + (ptr[j] - '0');
+            for (k = first_nonzero; k < len; k++) {
+                if (ptr[k] != '_')
+                    result = result * 10 + (ptr[k] - '0');
             }
             if (negative) result = -result;
             return LONG2NUM(result);
@@ -1935,9 +1935,9 @@ parse_decimal_fast(const char *ptr, long len)
                 ? (unsigned long)LONG_MAX + 1
                 : (unsigned long)LONG_MAX;
             bool overflow = false;
-            for (; j < len; j++) {
-                if (ptr[j] != '_') {
-                    unsigned long d = ptr[j] - '0';
+            for (k = first_nonzero; k < len; k++) {
+                if (ptr[k] != '_') {
+                    unsigned long d = ptr[k] - '0';
                     /* Pre-check before multiply to avoid unsigned long wraparound on
                      * 32-bit platforms, where 10-digit values can exceed ULONG_MAX. */
                     if (result > (limit - d) / 10) {
