@@ -1160,6 +1160,9 @@ module StringScannerTests
     assert_equal(2024, s.integer_at(1))       # default base 10
     assert_equal(1044, s.integer_at(1, 8))    # base 8
     assert_equal(8228, s.integer_at(1, 16))   # base 16
+
+    # explicit nil raises TypeError (consistent with String#to_i and MatchData#integer_at)
+    assert_raise(TypeError) { s.integer_at(1, nil) }
   end
 
   def test_integer_at_base_zero

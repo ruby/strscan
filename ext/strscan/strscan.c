@@ -1997,11 +1997,12 @@ strscan_integer_at(int argc, VALUE *argv, VALUE self)
     long i;
     long beg, end, len;
     const char *ptr;
-    VALUE specifier, vbase;
+    VALUE specifier;
     int base = 10;
 
-    rb_scan_args(argc, argv, "11", &specifier, &vbase);
-    if (!NIL_P(vbase)) base = NUM2INT(vbase);
+    rb_check_arity(argc, 1, 2);
+    specifier = argv[0];
+    if (argc > 1) base = NUM2INT(argv[1]);
 
     GET_SCANNER(self, p);
     i = resolve_capture_index(p, specifier);
