@@ -1877,19 +1877,19 @@ strscan_values_at(int argc, VALUE *argv, VALUE self)
 static inline VALUE
 parse_decimal_fast(const char *ptr, long len)
 {
-    long j = 0;
+    long digits_start = 0;
     bool negative = false;
     long digit_count = 0;
     bool valid = true;
 
-    if (ptr[0] == '-') { negative = true; j = 1; }
-    else if (ptr[0] == '+') { j = 1; }
+    if (ptr[0] == '-') { negative = true; digits_start = 1; }
+    else if (ptr[0] == '+') { digits_start = 1; }
 
     /* Validate: only digits and underscores (not leading/trailing/consecutive) */
     {
         long k;
         bool prev_underscore = true; /* treat start as underscore to reject leading _ */
-        for (k = j; k < len; k++) {
+        for (k = digits_start; k < len; k++) {
             if (ptr[k] >= '0' && ptr[k] <= '9') {
                 digit_count++;
                 prev_underscore = false;
@@ -1909,7 +1909,7 @@ parse_decimal_fast(const char *ptr, long len)
 
     /* Skip leading zeros to get effective digit count */
     {
-        long first_nonzero = j;
+        long first_nonzero = digits_start;
         long effective_digits;
         long k;
         while (first_nonzero < len && (ptr[first_nonzero] == '0' || ptr[first_nonzero] == '_'))
