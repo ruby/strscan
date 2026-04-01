@@ -1966,11 +1966,11 @@ parse_decimal_fast(const char *ptr, long len)
             for (; j < len; j++) {
                 if (ptr[j] != '_') {
                     unsigned long d = ptr[j] - '0';
-                    result = result * 10 + d;
-                    if (result > limit) {
+                    if (result > (limit - d) / 10) {
                         overflow = true;
                         break;
                     }
+                    result = result * 10 + d;
                 }
             }
             if (!overflow) {
