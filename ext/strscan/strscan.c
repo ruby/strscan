@@ -1865,34 +1865,6 @@ strscan_values_at(int argc, VALUE *argv, VALUE self)
     return new_ary;
 }
 
-/*
- * call-seq:
- *   integer_at(specifier, base = 10) -> integer or nil
- *
- * Returns the captured substring at the given +specifier+ as an Integer,
- * following the behavior of <tt>String#to_i(base)</tt>.
- *
- * +specifier+ can be an Integer (positive, negative, or zero), a Symbol,
- * or a String for named capture groups.
- *
- * Returns +nil+ if:
- * - No match has been performed or the last match failed
- * - The +specifier+ is an Integer and is out of range
- * - The group at +specifier+ did not participate in the match
- *
- * Raises IndexError if +specifier+ is a Symbol or String that does not
- * correspond to a named capture group, consistent with
- * <tt>StringScanner#[]</tt>.
- *
- * This is semantically equivalent to <tt>self[specifier].to_i(base)</tt>
- * but avoids the allocation of a temporary String when possible.
- *
- *   scanner = StringScanner.new("2024-06-15")
- *   scanner.scan(/(\d{4})-(\d{2})-(\d{2})/)
- *   scanner.integer_at(1)       # => 2024
- *   scanner.integer_at(1, 16)   # => 8228
- *
- */
 /* Max decimal digits guaranteed to fit in long without overflow check.
  * floor(log10(INT64_MAX)) = 18, floor(log10(INT32_MAX)) = 9 */
 #define INT64_DECIMAL_SAFE_DIGITS 18
@@ -1990,6 +1962,34 @@ parse_decimal_fast(const char *ptr, long len)
     return Qundef;
 }
 
+/*
+ * call-seq:
+ *   integer_at(specifier, base = 10) -> integer or nil
+ *
+ * Returns the captured substring at the given +specifier+ as an Integer,
+ * following the behavior of <tt>String#to_i(base)</tt>.
+ *
+ * +specifier+ can be an Integer (positive, negative, or zero), a Symbol,
+ * or a String for named capture groups.
+ *
+ * Returns +nil+ if:
+ * - No match has been performed or the last match failed
+ * - The +specifier+ is an Integer and is out of range
+ * - The group at +specifier+ did not participate in the match
+ *
+ * Raises IndexError if +specifier+ is a Symbol or String that does not
+ * correspond to a named capture group, consistent with
+ * <tt>StringScanner#[]</tt>.
+ *
+ * This is semantically equivalent to <tt>self[specifier].to_i(base)</tt>
+ * but avoids the allocation of a temporary String when possible.
+ *
+ *   scanner = StringScanner.new("2024-06-15")
+ *   scanner.scan(/(\d{4})-(\d{2})-(\d{2})/)
+ *   scanner.integer_at(1)       # => 2024
+ *   scanner.integer_at(1, 16)   # => 8228
+ *
+ */
 static VALUE
 strscan_integer_at(int argc, VALUE *argv, VALUE self)
 {
