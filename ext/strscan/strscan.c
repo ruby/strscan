@@ -1658,6 +1658,37 @@ name_to_backref_number(struct re_registers *regs, VALUE regexp, const char* name
                  rb_long2int(name_end - name), name);
 }
 
+/* Resolve capture group index from Integer, Symbol, or String.
+ * Returns the resolved register index, or -1 if unmatched/out of range. */
+static long
+resolve_capture_index(struct strscanner *p, VALUE specifier)
+{
+    const char *name;
+    long i;
+
+    if (! MATCHED_P(p)) return -1;
+
+    switch (TYPE(specifier)) {
+        case T_SYMBOL:
+            specifier = rb_sym2str(specifier);
+            /* fall through */
+        case T_STRING:
+            RSTRING_GETMEM(specifier, name, i);
+            i = name_to_backref_number(&(p->regs), p->regex, name, name + i, rb_enc_get(specifier));
+            break;
+        default:
+            i = NUM2LONG(specifier);
+    }
+
+    if (i < 0)
+        i += p->regs.num_regs;
+    if (i < 0)                 return -1;
+    if (i >= p->regs.num_regs) return -1;
+    if (p->regs.beg[i] == -1)  return -1;
+
+    return i;
+}
+
 /*
  *
  * :markup: markdown
@@ -1732,30 +1763,12 @@ name_to_backref_number(struct re_registers *regs, VALUE regexp, const char* name
 static VALUE
 strscan_aref(VALUE self, VALUE idx)
 {
-    const char *name;
     struct strscanner *p;
     long i;
 
     GET_SCANNER(self, p);
-    if (! MATCHED_P(p))        return Qnil;
-
-    switch (TYPE(idx)) {
-        case T_SYMBOL:
-            idx = rb_sym2str(idx);
-            /* fall through */
-        case T_STRING:
-            RSTRING_GETMEM(idx, name, i);
-            i = name_to_backref_number(&(p->regs), p->regex, name, name + i, rb_enc_get(idx));
-            break;
-        default:
-            i = NUM2LONG(idx);
-    }
-
-    if (i < 0)
-        i += p->regs.num_regs;
-    if (i < 0)                 return Qnil;
-    if (i >= p->regs.num_regs) return Qnil;
-    if (p->regs.beg[i] == -1)  return Qnil;
+    i = resolve_capture_index(p, idx);
+    if (i < 0) return Qnil;
 
     return extract_range(p,
                          adjust_register_position(p, p->regs.beg[i]),
@@ -1887,6 +1900,171 @@ strscan_values_at(int argc, VALUE *argv, VALUE self)
     }
 
     return new_ary;
+}
+
+/* Max decimal digits guaranteed to fit in long without overflow check.
+ * floor(log10(INT64_MAX)) = 18, floor(log10(INT32_MAX)) = 9 */
+#define INT64_DECIMAL_SAFE_DIGITS 18
+#define INT32_DECIMAL_SAFE_DIGITS 9
+
+/* Fast path for base-10 integer parsing without temporary String allocation.
+ * Accepts digits and optional underscores (Ruby String#to_i semantics).
+ * Returns a Fixnum/Integer VALUE on success, or Qundef to signal fall-through
+ * to the general path (non-decimal, bignum, or non-numeric input). */
+static inline VALUE
+parse_decimal_fast(const char *ptr, long len)
+{
+    long digits_start = 0;
+    bool negative = false;
+    long digit_count = 0;
+    bool valid = true;
+
+    if (ptr[0] == '-') { negative = true; digits_start = 1; }
+    else if (ptr[0] == '+') { digits_start = 1; }
+
+    /* Validate: only digits and underscores (not leading/trailing/consecutive) */
+    {
+        long i;
+        bool prev_underscore = true; /* treat start as underscore to reject leading _ */
+        for (i = digits_start; i < len; i++) {
+            if (ptr[i] >= '0' && ptr[i] <= '9') {
+                digit_count++;
+                prev_underscore = false;
+            }
+            else if (ptr[i] == '_' && !prev_underscore) {
+                prev_underscore = true;
+            }
+            else {
+                valid = false;
+                break;
+            }
+        }
+        if (prev_underscore && digit_count > 0) valid = false; /* trailing _ */
+    }
+
+    if (!valid || digit_count == 0) return Qundef;
+
+    /* Skip leading zeros to get effective digit count */
+    {
+        long first_nonzero = digits_start;
+        long effective_digits;
+        long i;
+        while (first_nonzero < len && (ptr[first_nonzero] == '0' || ptr[first_nonzero] == '_'))
+            first_nonzero++;
+        effective_digits = 0;
+        for (i = first_nonzero; i < len; i++) {
+            if (ptr[i] != '_') effective_digits++;
+        }
+
+        if (effective_digits <= (sizeof(long) >= 8 ? INT64_DECIMAL_SAFE_DIGITS : INT32_DECIMAL_SAFE_DIGITS)) {
+            long result = 0;
+            for (i = first_nonzero; i < len; i++) {
+                if (ptr[i] != '_')
+                    result = result * 10 + (ptr[i] - '0');
+            }
+            if (negative) result = -result;
+            return LONG2NUM(result);
+        }
+        /* One more digit than safe: may still fit in long with overflow check */
+        else if (effective_digits == (sizeof(long) >= 8 ? INT64_DECIMAL_SAFE_DIGITS + 1 : INT32_DECIMAL_SAFE_DIGITS + 1)) {
+            unsigned long result = 0;
+            unsigned long limit = negative
+                ? (unsigned long)LONG_MAX + 1
+                : (unsigned long)LONG_MAX;
+            bool overflow = false;
+            for (i = first_nonzero; i < len; i++) {
+                if (ptr[i] != '_') {
+                    unsigned long d = ptr[i] - '0';
+                    /* Pre-check before multiply to avoid unsigned long wraparound on
+                     * 32-bit platforms, where 10-digit values can exceed ULONG_MAX. */
+                    if (result > (limit - d) / 10) {
+                        overflow = true;
+                        break;
+                    }
+                    result = result * 10 + d;
+                }
+            }
+            if (!overflow) {
+                if (negative) {
+                    if (result == limit) {
+                        return LONG2NUM(LONG_MIN);
+                    }
+                    return LONG2NUM(-(long)result);
+                }
+                else {
+                    return LONG2NUM((long)result);
+                }
+            }
+        }
+    }
+    /* Bignum: signal fall-through to rb_str_to_inum */
+    return Qundef;
+}
+
+/*
+ * call-seq:
+ *   integer_at(specifier, base = 10) -> integer or nil
+ *
+ * Returns the captured substring at the given +specifier+ as an Integer,
+ * following the behavior of <tt>String#to_i(base)</tt>.
+ *
+ * +specifier+ can be an Integer (positive, negative, or zero), a Symbol,
+ * or a String for named capture groups.
+ *
+ * Returns +nil+ if:
+ * - No match has been performed or the last match failed
+ * - The +specifier+ is an Integer and is out of range
+ * - The group at +specifier+ did not participate in the match
+ *
+ * Raises IndexError if +specifier+ is a Symbol or String that does not
+ * correspond to a named capture group, consistent with
+ * <tt>StringScanner#[]</tt>.
+ *
+ * This is semantically equivalent to <tt>self[specifier].to_i(base)</tt>
+ * but avoids the allocation of a temporary String when possible.
+ *
+ *   scanner = StringScanner.new("2024-06-15")
+ *   scanner.scan(/(\d{4})-(\d{2})-(\d{2})/)
+ *   scanner.integer_at(1)       # => 2024
+ *   scanner.integer_at(1, 16)   # => 8228
+ *
+ */
+static VALUE
+strscan_integer_at(int argc, VALUE *argv, VALUE self)
+{
+    struct strscanner *p;
+    long i;
+    long beg, end, len;
+    const char *ptr;
+    VALUE specifier;
+    int base = 10;
+
+    rb_check_arity(argc, 1, 2);
+    specifier = argv[0];
+    if (argc > 1) base = NUM2INT(argv[1]);
+
+    GET_SCANNER(self, p);
+    i = resolve_capture_index(p, specifier);
+    if (i < 0) return Qnil;
+
+    beg = adjust_register_position(p, p->regs.beg[i]);
+    end = adjust_register_position(p, p->regs.end[i]);
+    len = end - beg;
+
+    if (len <= 0) return INT2FIX(0); /* empty capture: String#to_i("") == 0 */
+
+    ptr = S_PBEG(p) + beg;
+
+    /* Fast path for base 10: parse directly from source bytes without
+     * temporary String allocation. This covers the Date._strptime use case. */
+    if (base == 10) {
+        VALUE result = parse_decimal_fast(ptr, len);
+        if (result != Qundef) return result;
+    }
+
+    /* General path: follow String#to_i(base) semantics via rb_str_to_inum.
+     * badcheck=0 returns 0 for non-numeric input instead of raising. */
+    return rb_str_to_inum(rb_str_new(ptr, len), base, 0);
 }
 
 /*
@@ -2327,6 +2505,7 @@ Init_strscan(void)
     rb_define_method(StringScanner, "size",        strscan_size,        0);
     rb_define_method(StringScanner, "captures",    strscan_captures,    0);
     rb_define_method(StringScanner, "values_at",   strscan_values_at,  -1);
+    rb_define_method(StringScanner, "integer_at",  strscan_integer_at, -1);
 
     rb_define_method(StringScanner, "rest",        strscan_rest,        0);
     rb_define_method(StringScanner, "rest_size",   strscan_rest_size,   0);

@@ -22,4 +22,12 @@ class StringScanner
       raise ArgumentError, "Unsupported integer base: #{base.inspect}, expected 10 or 16"
     end
   end
+
+  unless method_defined?(:integer_at)
+    # Fallback implementation for platforms without C extension (e.g. JRuby).
+    # Equivalent to self[specifier].to_i(base).
+    def integer_at(specifier, base = 10)
+      self[specifier]&.to_i(base)
+    end
+  end
 end

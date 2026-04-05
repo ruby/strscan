@@ -955,6 +955,228 @@ module StringScannerTests
     assert_equal({"number" => "1"}, scan.named_captures)
   end
 
+  def test_integer_at_positive_index
+    s = create_string_scanner("2024-06-15")
+    s.scan(/(\d{4})-(\d{2})-(\d{2})/)
+    assert_equal(2024, s.integer_at(1))
+    assert_equal(6, s.integer_at(2))
+    assert_equal(15, s.integer_at(3))
+  end
+
+  def test_integer_at_index_zero
+    s = create_string_scanner("42 abc")
+    s.scan(/\d+/)
+    assert_equal(42, s.integer_at(0))
+
+    # when current position is not at the beginning
+    s = create_string_scanner("a 10")
+    s.scan(/a /)
+    s.scan(/\d+/)
+    assert_equal(10, s.integer_at(0))
+  end
+
+  def test_integer_at_negative_index
+    s = create_string_scanner("2024-06-15")
+    s.scan(/(\d{4})-(\d{2})-(\d{2})/)
+    assert_equal(15, s.integer_at(-1))
+    assert_equal(6, s.integer_at(-2))
+    assert_equal(2024, s.integer_at(-3))
+  end
+
+  def test_integer_at_no_match
+    s = create_string_scanner("abc")
+    s.scan(/\d+/)
+    assert_nil(s.integer_at(0))
+  end
+
+  def test_integer_at_before_match
+    s = create_string_scanner("abc")
+    assert_nil(s.integer_at(0))
+  end
+
+  def test_integer_at_index_out_of_range
+    s = create_string_scanner("42")
+    s.scan(/(\d+)/)
+    assert_nil(s.integer_at(2))
+    assert_nil(s.integer_at(100))
+    assert_nil(s.integer_at(-3))
+  end
+
+  def test_integer_at_optional_group_not_matched
+    s = create_string_scanner("2024-06")
+    s.scan(/(\d{4})-(\d{2})-?(\d{2})?/)
+    assert_equal(2024, s.integer_at(1))
+    assert_equal(6, s.integer_at(2))
+    assert_nil(s.integer_at(3))
+  end
+
+  def test_integer_at_large_number
+    large = '9' * 100
+    s = create_string_scanner(large)
+    s.scan(/(\d+)/)
+    assert_equal(large.to_i, s.integer_at(1))
+  end
+
+  def test_integer_at_digit_count_boundary
+    # 18 digits max on 64-bit ("9" * 18): largest value without overflow check
+    s = create_string_scanner("9" * 18)
+    s.scan(/(\d+)/)
+    assert_equal(("9" * 18).to_i, s.integer_at(1))
+
+    # 19 digits min on 64-bit ("1" + "0" * 18): smallest value with overflow check
+    s = create_string_scanner("1" + "0" * 18)
+    s.scan(/(\d+)/)
+    assert_equal(("1" + "0" * 18).to_i, s.integer_at(1))
+
+    # negative 18 digits max on 64-bit
+    s = create_string_scanner("-" + "9" * 18)
+    s.scan(/([+\-]?\d+)/)
+    assert_equal(-("9" * 18).to_i, s.integer_at(1))
+
+    # negative 19 digits min on 64-bit ("-" + "1" + "0" * 18): smallest absolute value with overflow check
+    s = create_string_scanner("-" + "1" + "0" * 18)
+    s.scan(/([+\-]?\d+)/)
+    assert_equal(-("1" + "0" * 18).to_i, s.integer_at(1))
+  end
+
+  def test_integer_at_long_boundary
+    long_max = 2 ** (0.size * 8 - 1) - 1
+    long_min = -(2 ** (0.size * 8 - 1))
+
+    # LONG_MAX (19 digits, fits in long)
+    s = create_string_scanner(long_max.to_s)
+    s.scan(/(\d+)/)
+    assert_equal(long_max, s.integer_at(1))
+
+    # LONG_MIN (19 digits + sign, fits in long)
+    s = create_string_scanner(long_min.to_s)
+    s.scan(/([+\-]?\d+)/)
+    assert_equal(long_min, s.integer_at(1))
+
+    # LONG_MAX + 1 (bignum)
+    s = create_string_scanner((long_max + 1).to_s)
+    s.scan(/(\d+)/)
+    assert_equal(long_max + 1, s.integer_at(1))
+
+    # LONG_MIN - 1 (negative bignum)
+    s = create_string_scanner((long_min - 1).to_s)
+    s.scan(/([+\-]?\d+)/)
+    assert_equal(long_min - 1, s.integer_at(1))
+  end
+
+  def test_integer_at_non_digit
+    # follows String#to_i: stops at non-digit, returns parsed portion
+    s = create_string_scanner("1.5")
+    s.scan(/([\d.]+)/)
+    assert_equal(1, s.integer_at(1))
+  end
+
+  def test_integer_at_non_digit_alpha
+    # follows String#to_i: no leading digits, returns 0
+    s = create_string_scanner("foo bar")
+    s.scan(/(\w+)/)
+    assert_equal(0, s.integer_at(1))
+  end
+
+  def test_integer_at_empty_capture
+    # follows String#to_i: empty string returns 0
+    s = create_string_scanner("abc")
+    s.scan(/()abc/)
+    assert_equal(0, s.integer_at(1))
+  end
+
+  def test_integer_at_sign_only
+    # follows String#to_i: sign only returns 0
+    s = create_string_scanner("+")
+    s.scan(/([+\-])/)
+    assert_equal(0, s.integer_at(1))
+
+    s = create_string_scanner("-")
+    s.scan(/([+\-])/)
+    assert_equal(0, s.integer_at(1))
+  end
+
+  def test_integer_at_signed_number
+    s = create_string_scanner("-42")
+    s.scan(/([+\-]?\d+)/)
+    assert_equal(-42, s.integer_at(1))
+
+    s = create_string_scanner("+42")
+    s.scan(/([+\-]?\d+)/)
+    assert_equal(42, s.integer_at(1))
+  end
+
+  def test_integer_at_leading_zeros
+    # "010" is 8 in octal (Integer("010")), but 10 in base 10
+    s = create_string_scanner("010")
+    s.scan(/(\d+)/)
+    assert_equal(10, s.integer_at(1))
+
+    # leading zeros with many digits: effective digit count is 1, goes through safe path
+    s = create_string_scanner("0" * 19 + "1")
+    s.scan(/(\d+)/)
+    assert_equal(1, s.integer_at(1))
+  end
+
+  def test_integer_at_named_capture_symbol
+    s = create_string_scanner("2024-06-15")
+    s.scan(/(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/)
+    assert_equal(2024, s.integer_at(:year))
+    assert_equal(6, s.integer_at(:month))
+    assert_equal(15, s.integer_at(:day))
+  end
+
+  def test_integer_at_named_capture_string
+    s = create_string_scanner("2024-06-15")
+    s.scan(/(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/)
+    assert_equal(2024, s.integer_at("year"))
+    assert_equal(6, s.integer_at("month"))
+    assert_equal(15, s.integer_at("day"))
+  end
+
+  def test_integer_at_named_capture_unknown
+    s = create_string_scanner("2024-06-15")
+    s.scan(/(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/)
+    assert_raise(IndexError) { s.integer_at(:unknown) }
+    assert_raise(IndexError) { s.integer_at("unknown") }
+  end
+
+  def test_integer_at_base
+    s = create_string_scanner("2024")
+    s.scan(/(\d+)/)
+    assert_equal(2024, s.integer_at(1))       # default base 10
+    assert_equal(1044, s.integer_at(1, 8))    # base 8
+    assert_equal(8228, s.integer_at(1, 16))   # base 16
+
+    # explicit nil raises TypeError (consistent with String#to_i and MatchData#integer_at)
+    assert_raise(TypeError) { s.integer_at(1, nil) }
+  end
+
+  def test_integer_at_base_zero
+    # base 0 respects prefixes like 0x
+    s = create_string_scanner("0xF")
+    s.scan(/(...)/)
+    assert_equal(0, s.integer_at(1))       # base 10: "0xF".to_i => 0
+    assert_equal(15, s.integer_at(1, 0))   # base 0: "0xF".to_i(0) => 15
+  end
+
+  def test_integer_at_underscore
+    # follows String#to_i: underscores are accepted
+    s = create_string_scanner("1_0_0")
+    s.scan(/(\d+(?:_\d+)*)/)
+    assert_equal(100, s.integer_at(1))
+
+    # large number with underscores
+    s = create_string_scanner("1_000_000_000")
+    s.scan(/(\d+(?:_\d+)*)/)
+    assert_equal(1_000_000_000, s.integer_at(1))
+
+    # signed with underscores
+    s = create_string_scanner("-1_000")
+    s.scan(/([+\-]?\d+(?:_\d+)*)/)
+    assert_equal(-1000, s.integer_at(1))
+  end
+
   def test_scan_integer
     s = create_string_scanner('abc')
     assert_equal(3, s.match?(/(?<a>abc)/)) # set named_captures
