@@ -1949,12 +1949,14 @@ parse_decimal_fast(const char *ptr, long len)
             }
             if (!overflow) {
                 if (negative) {
-                    if (result == limit)
+                    if (result == limit) {
                         return LONG2NUM(LONG_MIN);
+                    }
                     return LONG2NUM(-(long)result);
                 }
-                else
+                else {
                     return LONG2NUM((long)result);
+                }
             }
         }
     }
@@ -2012,7 +2014,7 @@ strscan_integer_at(int argc, VALUE *argv, VALUE self)
     end = adjust_register_position(p, p->regs.end[i]);
     len = end - beg;
 
-    if (len <= 0) return INT2FIX(0);
+    if (len <= 0) return INT2FIX(0); /* empty capture: String#to_i("") == 0 */
 
     ptr = S_PBEG(p) + beg;
 
