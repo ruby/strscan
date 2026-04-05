@@ -1887,14 +1887,14 @@ parse_decimal_fast(const char *ptr, long len)
 
     /* Validate: only digits and underscores (not leading/trailing/consecutive) */
     {
-        long k;
+        long i;
         bool prev_underscore = true; /* treat start as underscore to reject leading _ */
-        for (k = digits_start; k < len; k++) {
-            if (ptr[k] >= '0' && ptr[k] <= '9') {
+        for (i = digits_start; i < len; i++) {
+            if (ptr[i] >= '0' && ptr[i] <= '9') {
                 digit_count++;
                 prev_underscore = false;
             }
-            else if (ptr[k] == '_' && !prev_underscore) {
+            else if (ptr[i] == '_' && !prev_underscore) {
                 prev_underscore = true;
             }
             else {
@@ -1911,19 +1911,19 @@ parse_decimal_fast(const char *ptr, long len)
     {
         long first_nonzero = digits_start;
         long effective_digits;
-        long k;
+        long i;
         while (first_nonzero < len && (ptr[first_nonzero] == '0' || ptr[first_nonzero] == '_'))
             first_nonzero++;
         effective_digits = 0;
-        for (k = first_nonzero; k < len; k++) {
-            if (ptr[k] != '_') effective_digits++;
+        for (i = first_nonzero; i < len; i++) {
+            if (ptr[i] != '_') effective_digits++;
         }
 
         if (effective_digits <= (sizeof(long) >= 8 ? INT64_DECIMAL_SAFE_DIGITS : INT32_DECIMAL_SAFE_DIGITS)) {
             long result = 0;
-            for (k = first_nonzero; k < len; k++) {
-                if (ptr[k] != '_')
-                    result = result * 10 + (ptr[k] - '0');
+            for (i = first_nonzero; i < len; i++) {
+                if (ptr[i] != '_')
+                    result = result * 10 + (ptr[i] - '0');
             }
             if (negative) result = -result;
             return LONG2NUM(result);
@@ -1935,9 +1935,9 @@ parse_decimal_fast(const char *ptr, long len)
                 ? (unsigned long)LONG_MAX + 1
                 : (unsigned long)LONG_MAX;
             bool overflow = false;
-            for (k = first_nonzero; k < len; k++) {
-                if (ptr[k] != '_') {
-                    unsigned long d = ptr[k] - '0';
+            for (i = first_nonzero; i < len; i++) {
+                if (ptr[i] != '_') {
+                    unsigned long d = ptr[i] - '0';
                     /* Pre-check before multiply to avoid unsigned long wraparound on
                      * 32-bit platforms, where 10-digit values can exceed ULONG_MAX. */
                     if (result > (limit - d) / 10) {
