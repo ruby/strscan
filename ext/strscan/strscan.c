@@ -1949,7 +1949,7 @@ parse_decimal_fast(const char *ptr, long len)
             }
             if (!overflow) {
                 if (negative) {
-                    if (result == (unsigned long)LONG_MAX + 1)
+                    if (result == limit)
                         return LONG2NUM(LONG_MIN);
                     return LONG2NUM(-(long)result);
                 }
