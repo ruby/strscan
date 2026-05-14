@@ -1,0 +1,10 @@
+prelude: |
+  $LOAD_PATH.unshift(File.expand_path("lib"))
+  require "strscan"
+  scanner = StringScanner.new("2026")
+  scanner.scan(/(2026)/)
+benchmark:
+  "[].to_i": |
+    scanner[1].to_i
+  integer_at: |
+    scanner.integer_at(1)

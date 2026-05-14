@@ -58,12 +58,23 @@ task :test do
   ruby("run-test.rb", *ENV["TESTOPTS"]&.shellsplit)
 end
 
-desc "Run benchmark"
-task :benchmark do
-  ruby("-S",
-       "benchmark-driver",
-       "benchmark/scan.yaml")
+benchmark_tasks = []
+namespace :benchmark do
+  Dir.glob("benchmark/*.yaml").sort.each do |yaml|
+    name = File.basename(yaml, ".*")
+    desc "Run #{name} benchmark"
+    task name do
+      puts("```console")
+      print("$ ")
+      sh(RbConfig.ruby, "-v", "-S", "benchmark-driver", yaml)
+      puts("```")
+    end
+    benchmark_tasks << "benchmark:#{name}"
+  end
 end
+
+desc "Run all benchmarks"
+task :benchmark => benchmark_tasks
 
 RDoc::Task.new
 
