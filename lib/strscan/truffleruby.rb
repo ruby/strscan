@@ -133,6 +133,8 @@ class StringScanner
     end
   end
 
+  def integer_at(group, *to_i_args) = self[group]&.to_i(*to_i_args)
+
   def values_at(*groups) = @last_match&.values_at(*groups)
 
   def captures = @last_match&.captures
