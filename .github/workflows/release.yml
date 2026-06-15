@@ -47,7 +47,7 @@ jobs:
       - name: Build
         run: |
           bundle exec rake compile
-      - uses: rubygems/configure-rubygems-credentials@v2.0.0
+      - uses: rubygems/configure-rubygems-credentials@v2.1.0
       - name: Push gems
         run: |
           bundle exec rake release:rubygem_push
