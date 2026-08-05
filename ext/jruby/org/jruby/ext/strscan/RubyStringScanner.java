@@ -236,8 +236,12 @@ public class RubyStringScanner extends RubyObject {
 
         ByteList strBL = str.getByteList();
         int strBeg = strBL.begin();
+        int strSize = strBL.getRealSize();
+        int pos = curr;
 
-        return runtime.newFixnum(StringSupport.strLength(strBL.getEncoding(), strBL.unsafeBytes(), strBeg, strBeg + curr));
+        if (pos > strSize) pos = strSize;
+
+        return runtime.newFixnum(StringSupport.strLength(strBL.getEncoding(), strBL.unsafeBytes(), strBeg, strBeg + pos));
     }
 
     private IRubyObject extractRange(Ruby runtime, int beg, int end) {

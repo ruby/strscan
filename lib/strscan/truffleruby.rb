@@ -59,7 +59,7 @@ class StringScanner
   end
   alias_method :pointer=, :pos=
 
-  def charpos = Primitive.string_byte_index_to_character_index(@string, @pos)
+  def charpos = (eos? ? @string.size : Primitive.string_byte_index_to_character_index(@string, @pos))
 
   def rest = @string.byteslice(@pos, @string.bytesize)
 
