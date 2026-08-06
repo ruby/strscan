@@ -133,7 +133,15 @@ class StringScanner
     end
   end
 
-  def integer_at(group, *to_i_args) = self[group]&.to_i(*to_i_args)
+  def integer_at(group, *to_i_args)
+    return if self[group].nil?
+
+    group += @last_match.size if Primitive.is_a?(group, Integer) && group < 0
+    from = @last_match.bytebegin(group)
+    to = [@last_match.byteend(group), @string.bytesize].min
+    value = @string.byteslice(from, to - from)
+    value.to_i(*to_i_args) unless value.nil? || value.empty?
+  end
 
   def values_at(*groups) = @last_match&.values_at(*groups)
 
