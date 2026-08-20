@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 gemspec
 
 group :development do
-  gem "benchmark-driver"
+  gem "benchmark_driver"
   gem "rake-compiler"
   if Gem::Version.new(RUBY_VERSION) < Gem::Version.new("3.2")
     # rdoc 8 depends on rbs 4, which requires Ruby 3.2 or later.
