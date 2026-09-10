@@ -688,7 +688,15 @@ public class RubyStringScanner extends RubyObject {
     public IRubyObject matched_size(ThreadContext context) {
         check(context);
         if (!isMatched()) return context.nil;
-        return RubyFixnum.newFixnum(context.runtime, regs.getEnd(0) - regs.getBeg(0));
+
+        int size = str.size();
+        int beg = adjustRegisterPosition(regs.getBeg(0));
+        int end = adjustRegisterPosition(regs.getEnd(0));
+
+        if (beg > size) return context.nil;
+        if (end > size) end = size;
+
+        return RubyFixnum.newFixnum(context.runtime, end - beg);
     }
 
     @JRubyMethod(name = "[]")
