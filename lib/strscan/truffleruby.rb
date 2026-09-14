@@ -115,7 +115,15 @@ class StringScanner
 
   def matched? = !Primitive.nil?(@last_match)
 
-  def matched = @last_match&.to_s
+  def matched
+    return unless @last_match
+
+    beg = Primitive.match_data_byte_begin(@last_match, 0)
+    return if beg > @string.bytesize
+
+    fin = [Primitive.match_data_byte_end(@last_match, 0), @string.bytesize].min
+    @string.byteslice(beg, fin - beg)
+  end
 
   def [](group)
     raise TypeError, 'no implicit conversion of Range into Integer' if Primitive.is_a?(group, Range)
@@ -151,7 +159,9 @@ class StringScanner
 
   def matched_size
     if @last_match
-      Primitive.match_data_byte_end(@last_match, 0) - Primitive.match_data_byte_begin(@last_match, 0)
+      beg = Primitive.match_data_byte_begin(@last_match, 0)
+      return if beg > @string.bytesize
+      [Primitive.match_data_byte_end(@last_match, 0), @string.bytesize].min - beg
     end
   end
 
