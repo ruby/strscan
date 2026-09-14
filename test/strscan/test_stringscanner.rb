@@ -754,7 +754,7 @@ module StringScannerTests
     assert_equal("", s.matched)
     assert_equal(0, s.matched_size)
 
-    s.string.replace("bef")
+    s.string.replace("before")
     assert_nil(s.matched)
     assert_nil(s.matched_size)
   end
