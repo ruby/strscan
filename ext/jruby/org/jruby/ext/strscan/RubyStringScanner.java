@@ -267,6 +267,10 @@ public class RubyStringScanner extends RubyObject {
             return context.nil;
         }
 
+        if (!currCharHead()) {
+            return context.nil;
+        }
+
         ByteList strBL = str.getByteList();
         int currPtr = strBL.getBegin() + curr;
 
@@ -357,6 +361,16 @@ public class RubyStringScanner extends RubyObject {
         } else {
             return str.getByteList().getBegin() + curr;
         }
+    }
+
+    private boolean currCharHead() {
+        ByteList strBL = str.getByteList();
+        int begin = strBL.getBegin();
+        int currPtr = begin + curr;
+        int end = begin + strBL.getRealSize();
+
+        if (currPtr == begin || currPtr == end) return true;
+        return strBL.getEncoding().leftAdjustCharHead(strBL.getUnsafeBytes(), begin, currPtr, end) == currPtr;
     }
 
     private int restLen() {
