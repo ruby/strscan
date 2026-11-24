@@ -1,4 +1,5 @@
 ---
+page_dir: doc
 rdoc_include:
 - doc
 main_page: README.md
