@@ -73,7 +73,7 @@ scanner.scan(/foo/)
 match_values_cleared?(scanner) # => false
 ```
 
-# The Code
+## The Code
 
 ```rb
 def put_situation(scanner)
