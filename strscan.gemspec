@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
   else
     files << "ext/strscan/extconf.rb"
     files << "ext/strscan/strscan.c"
-    s.rdoc_options << "-idoc"
+    s.rdoc_options << "-idoc" << "--page-dir=doc"
     s.extra_rdoc_files = [
       ".rdoc_options",
       *Dir.glob("doc/strscan/**/*")

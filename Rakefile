@@ -76,7 +76,11 @@ end
 desc "Run all benchmarks"
 task :benchmark => benchmark_tasks
 
-RDoc::Task.new
+RDoc::Task.new do |rdoc|
+  # "page_dir" in .rdoc_options adds "doc" to the targets. If we don't
+  # specify targets explicitly, only "doc" is processed.
+  rdoc.rdoc_files.include(".")
+end
 
 release_task = Rake.application["release"]
 release_task.prerequisites.delete("build")
