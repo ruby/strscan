@@ -2763,7 +2763,7 @@ strscan_named_captures(VALUE self)
  * - `match_values_cleared?(scanner)`:
  *   Returns whether the scanner's [match values][9] are cleared.
  *
- * See examples at [helper methods](doc/strscan/helper_methods.md).
+ * See examples at [helper methods](https://docs.ruby-lang.org/en/master/strscan/helper_methods_md.html).
  *
  * ## The `StringScanner` \Object
  *
